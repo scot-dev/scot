@@ -9,13 +9,15 @@ from . import config
 # default backend
 from .backend import builtin
 
-from . import matfiles
-from . import datatools
-from . import xvschema
+from .ooapi import SCoT
 
-from . import var
+#from . import matfiles
+#from . import datatools
+#from . import xvschema
 
-from .varica import mvarica
+#from . import var
+
+#from .varica import mvarica
 
 #from .connectivity import Connectivity
 
