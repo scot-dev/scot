@@ -9,7 +9,7 @@ from . import var
 
 import numpy as np
 
-def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0):
+def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0, backend=None):
     '''
     mvarica( X, P )
     mvarica( X, P, retain_variance, delta )
@@ -40,6 +40,9 @@ def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0):
                                     rest.
     delta          : 0    :       : regularization parameter for VAR fitting
                                     set to 'auto' to determine optimal setting
+    backend        : None :       : backend to use for processing (see backend
+                                    module for details). If backend==None, the
+                                    backend set in config will be used.
     
     Output
     --------------------------------------------------------------------------
@@ -63,13 +66,16 @@ def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0):
     X = np.atleast_3d(X)
     L, M, T = np.shape(X)
     
+    if backend == None:
+        backend = config.backend
+    
     # pre-transform the data with PCA
     if retain_variance == 'no pca':
         C = np.eye(M)
         D = np.eye(M)
         Xpca = X
     else:
-        C, D, Xpca = config.backend['pca'](X, retain_variance, numcomp)
+        C, D, Xpca = backend['pca'](X, retain_variance, numcomp)
         M = C.shape[1]
     
     if delta == 'auto':
@@ -82,7 +88,7 @@ def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0):
     r = Xpca - var.predict( Xpca, A )
 
     # run on residuals ICA to estimate volume conduction    
-    Mx, Ux = config.backend['ica'](cat_trials(r))
+    Mx, Ux = backend['ica'](cat_trials(r))
     
     # driving process
     e = dot_special(r, Ux)
