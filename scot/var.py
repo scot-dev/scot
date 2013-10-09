@@ -4,16 +4,18 @@
 
 """ vector autoregressive (VAR) model implementation"""
 
+import numbers
 import numpy as np
 import scipy as sp
 import scipy.linalg
 from functools import partial
+from . import datatools
 from . import xvschema
 
 class defaults:
     xvschema = xvschema.multitrial
 
-def fit( data, P, delta=None ):
+def fit( data, P, delta=None, return_residuals=False, return_covariance=False ):
     '''
     fit( data, P )
     fit( data, P, delta )
@@ -24,16 +26,21 @@ def fit( data, P, delta=None ):
     If sqrtdelta is provited and nonzero, the least squares estimation is
     regularized with ridge regression.
     
-    Parameters     Default  Shape   Description
+    Parameters       Default  Shape   Description
     --------------------------------------------------------------------------
-    data           :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                          : N,M   : 2d data matrix (N samples, M signals)
-    P              :      :       : Model order
-    delta          : None :       : regularization parameter
+    data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
+                            : N,M   : 2d data matrix (N samples, M signals)
+    P                :      :       : Model order
+    delta            : None :       : regularization parameter
+    return_residuals : False :      : if True, also return model residuals
+    return_covariance: False :      : if True, also return covariance
     
     Output
     --------------------------------------------------------------------------
     B   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size M*M
+    res (optional) Model residuals: (same shape as data), note that
+        the first P residuals are invalid.
+    C   (optional) Covariance of residuals
     
     Note on the arrangement of model coefficients:
         B is of shape M, M*P, with sub matrices arranged as follows:
@@ -55,8 +62,99 @@ def fit( data, P, delta=None ):
         (X,y) = __construct_eqns_RLS( data, P, delta )
     
     (B, res, rank, s) = np.linalg.lstsq( X, y )
+    B = B.transpose()
     
-    return B.transpose()
+    if return_residuals or return_covariance:
+        result = [B]
+        res = data - predict( data, B )
+    else:
+        return B
+        
+    if return_residuals:
+        result.append(res)
+        
+    if return_covariance:
+        C = np.cov(datatools.cat_trials(res), rowvar=False)
+        result.append(C)
+        
+    return tuple(result)
+   
+   
+    
+def fit_multiclass( data, cl, P, delta=None, return_residuals=False, return_covariance=False ):
+    '''
+    fit_multiclass( data, cl, P )
+    fit_multiclass( data, cl, P, delta )
+    
+    Fits a separate autoregressive model for each class.
+    
+    If sqrtdelta is provited and nonzero, the least squares estimation is
+    regularized with ridge regression.
+    
+    Parameters     Default  Shape   Description
+    --------------------------------------------------------------------------
+    data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
+    cl               :      : T     : class label for each trial
+    P                :      :       : Model order can be scalar (same model order for each class)
+                                      or a dictionary that contains a key for each unique class label
+                                      to specify the model order for each class individually.
+    delta            : None :       : regularization parameter
+    return_residuals : False :      : if True, also return model residuals
+    return_covariance: False :      : if True, also return dictionary of covariances
+    
+    Output
+    --------------------------------------------------------------------------
+    Bcl   dictionary of model coefficients for each class
+    res   (optional) Model residuals: (same shape as data), note that
+          the first P (depending on the class) residuals are invalid.
+    Ccl   (optional) dictionary of residual covariances for each class
+    '''
+    
+    data = np.atleast_3d(data)
+    cl = np.asarray(cl)
+    
+    labels = np.unique(cl)
+    
+    if cl.size != data.shape[2]:
+        raise AttributeError('cl must contain a class label for each trial (expected size %d, but got %d).'%(data.shape[2], cl.size))
+    
+    if isinstance(P, numbers.Number):
+        P = dict.fromkeys(labels, P)
+    else:
+        try:
+            assert(set(labels)==set(P.keys()))
+        except:
+            raise AttributeError('Model order P must be either a scalar number, or a dictionary containing a key for each unique label in cl.')
+    
+    Bcl, Ccl = {}, {}
+    res = np.zeros(data.shape)
+    for c in labels:
+        X = data[:,:,cl==c]
+        B = fit( X, P[c], delta )            
+        Bcl[c] = B
+    
+        if return_residuals or return_covariance:
+            r = X - predict( X, B )
+            
+        if return_residuals:
+             res[:,:,cl==c] = r
+            
+        if return_covariance:
+            Ccl[c] = np.cov(datatools.cat_trials(r), rowvar=False)    
+    
+    if return_residuals or return_covariance:
+        result = [Bcl]
+    else:
+        return Bcl
+        
+    if return_residuals:
+        result.append(res)
+        
+    if return_covariance:
+        C = np.cov(datatools.cat_trials(res), rowvar=False)
+        result.append(C)
+        
+    return tuple(result)
     
     
     
