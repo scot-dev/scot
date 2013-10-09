@@ -30,8 +30,12 @@ def wrapper_pca(X, retain_variance, numcomp):
     Y = datatools.dot_special(X,C)
     return C, D, Y
     
+backend = {
+    'ica': wrapper_fastica,
+    'pca': wrapper_pca
+    }
+    
 def activate( ):
-    config.backend['ica'] = wrapper_fastica
-    config.backend['pca'] = wrapper_pca
+    config.backend = backend
     
 activate()
