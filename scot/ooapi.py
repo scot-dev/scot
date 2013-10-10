@@ -12,7 +12,7 @@ from . import var
 
 class SCoT:
     
-    def __init__(self, var_order, backend=None):
+    def __init__(self, var_order, var_delta=None, reducedim=0.99, nfft=512, backend=None):
         self.data_ = None
         self.cl_ = None
         self.unmixing_ = None
@@ -21,13 +21,11 @@ class SCoT:
         self.var_model_ = None
         self.var_cov_ = None
         self.var_order_ = var_order
-        self.var_delta_ = None
-        self.connectivity_ = None
-        
-        self.backend_ = backend
-        
-        self.reducedim_ = 0.99
-        self.nfft_ = 512
+        self.var_delta_ = var_delta
+        self.connectivity_ = None      
+        self.reducedim_ = reducedim
+        self.nfft_ = nfft   
+        self.backend_ = backend       
     
     def setData(self, data, cl=None):
         self.data_ = np.atleast_3d(data)
@@ -60,10 +58,10 @@ class SCoT:
         if self.activations_ == None:
             raise RuntimeError("VAR fitting requires activations (call setData after doMVARICA)")
         if self.cl_ == None:
-            self.var_model_, self.var_cov_ = var.fit(data=self.data_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
+            self.var_model_, self.var_cov_ = var.fit(data=self.activations_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
             self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
         else:
-            self.var_model_, self.var_cov_ = var.fit_multiclass(data=self.data_, cl=self.cl_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
+            self.var_model_, self.var_cov_ = var.fit_multiclass(data=self.activations_, cl=self.cl_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
             self.connectivity_ = {}
             for c in np.unique(self.cl_):
                 self.connectivity_[c] = Connectivity(self.var_model_[c], self.var_cov_[c], self.nfft_)
@@ -74,10 +72,10 @@ class SCoT:
         if isinstance(self.connectivity_, dict):
             result = {}
             for c in np.unique(self.cl_):
-                result[c] = getattr(self.connectivity_[c], measure)
+                result[c] = getattr(self.connectivity_[c], measure)()
             return result
         else:
-            return getattr(self.connectivity_, measure)
+            return getattr(self.connectivity_, measure)()
     
     def getTFConnectivity(self, measure, winlen, winstep):
         if self.activations_ == None:

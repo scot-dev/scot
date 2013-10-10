@@ -151,8 +151,7 @@ def fit_multiclass( data, cl, P, delta=None, return_residuals=False, return_cova
         result.append(res)
         
     if return_covariance:
-        C = np.cov(datatools.cat_trials(res), rowvar=False)
-        result.append(C)
+        result.append(Ccl)
         
     return tuple(result)
     

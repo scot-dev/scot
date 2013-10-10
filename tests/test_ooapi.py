@@ -109,28 +109,29 @@ class TestMVARICA(unittest.TestCase):
         
         for bm in backend_modules:
             
-            api = scot.SCoT(var_order=2, backend=bm.backend)
+            api = scot.SCoT(var_order=2, reducedim=3, backend=bm.backend)
             
             api.setData(data)
             
             api.doMVARICA()
             
-            api.getConnectivity('S')
+            self.assertEqual(api.getConnectivity('S').shape, (3,3,512))
             
             api.setData(data)
             
             api.fitVAR()
             
-            api.getConnectivity('S')
+            self.assertEqual(api.getConnectivity('S').shape, (3,3,512))
             self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (3,3,18,512))
             
             api.setData(data, cl)
             
             api.fitVAR()
-            
-            api.getConnectivity('S')
+                        
+            fc = api.getConnectivity('S')
             tfc = api.getTFConnectivity('S', 100, 50)
             for c in tfc:
+                self.assertEqual(fc[c].shape, (3,3,512))
                 self.assertEqual(tfc[c].shape, (3,3,18,512))
             
             
