@@ -9,10 +9,17 @@ from .varica import mvarica
 from .datatools import dot_special
 from .connectivity import Connectivity
 from . import var
+from eegtopo.topoplot import Topoplot
+
+try:
+    import matplotlib.pyplot as plt
+    _have_pyplot = True
+except ImportError:
+    _have_pyplot = False
 
 class SCoT:
     
-    def __init__(self, var_order, var_delta=None, reducedim=0.99, nfft=512, backend=None):
+    def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, backend=None):
         self.data_ = None
         self.cl_ = None
         self.unmixing_ = None
@@ -22,10 +29,15 @@ class SCoT:
         self.var_cov_ = None
         self.var_order_ = var_order
         self.var_delta_ = var_delta
-        self.connectivity_ = None      
+        self.connectivity_ = None
+        self.locations_ = locations
         self.reducedim_ = reducedim
-        self.nfft_ = nfft   
-        self.backend_ = backend       
+        self.nfft_ = nfft
+        self.backend_ = backend
+        
+        self.topo_ = None
+        self.mixmaps_ = []
+        self.unmixmaps_ = []
     
     def setData(self, data, cl=None):
         self.data_ = np.atleast_3d(data)
@@ -109,10 +121,85 @@ class SCoT:
                     result[c][:,:,i,:] = getattr(con, measure)()
                 i += 1
         return result
+        
+    def preparePlots(self, mixing=False, unmixing=False):
+        if self.locations_ == None:
+            raise RuntimeError("Need sensor locations for plotting")
+            
+        if self.topo_ == None:
+            self.topo_ = Topoplot( )
+            self.topo_.set_locations(self.locations_)
+        
+        if mixing and not self.mixmaps_:
+            for i in range(self.mixing_.shape[0]):
+                self.topo_.set_values(self.mixing_[i,:])
+                self.topo_.create_map()
+                self.mixmaps_.append(self.topo_.get_map())
+        
+        if unmixing and not self.unmixmaps_:
+            for i in range(self.unmixing_.shape[1]):
+                self.topo_.set_values(self.unmixing_[:,i])
+                self.topo_.create_map()
+                self.unmixmaps_.append(self.topo_.get_map())
+                
+    def showPlots(self):
+        plt.show()
     
-    def plotComponents(self):
+    def plotComponents(self, global_scale=None):
+        """ global_scale:
+               None - scales each topo individually
+               1-99 - percentile of maximum of all plots
+        """
+        if not _have_pyplot:
+            raise ImportError("matplotlib.pyplot is required for plotting")
         if self.unmixing_ == None and self.mixing_ == None:
             raise RuntimeError("No components available (run doMVARICA first)")
+        self.preparePlots(True, True)
+        
+        M = self.mixing_.shape[0]
+        
+        if global_scale:        
+            tmp = np.asarray(self.unmixmaps_)
+            tmp = tmp[np.logical_not(np.isnan(tmp))]     
+            umax = np.percentile(np.abs(tmp), global_scale)
+            umin = -umax
+            
+            tmp = np.asarray(self.mixmaps_)
+            tmp = tmp[np.logical_not(np.isnan(tmp))]   
+            mmax = np.percentile(np.abs(tmp), global_scale)
+            mmin = -mmax
+        
+        axes = []
+        for m in range(M):
+            axes.append(plt.subplot(2, M, m+1))
+            self.topo_.set_map(self.unmixmaps_[m])
+            if global_scale:
+                h1 = self.topo_.plot_map(crange=[umin,umax])
+            else:
+                h1 = self.topo_.plot_map()
+            self.topo_.plot_locations()
+            self.topo_.plot_head()
+            
+            axes.append(plt.subplot(2, M, M+m+1))
+            self.topo_.set_map(self.mixmaps_[m])
+            if global_scale:
+                h2 = self.topo_.plot_map(crange=[mmin,mmax])
+            else:
+                h2 = self.topo_.plot_map()
+            self.topo_.plot_locations()
+            self.topo_.plot_head()
+            
+        for a in axes:            
+            a.set_yticks([])
+            a.set_xticks([])
+            a.set_frame_on(False)
+            
+        axes[0].set_ylabel('Unmixing weights')
+        axes[1].set_ylabel('Scalp projections')
+        
+        #plt.colorbar(h1, plt.subplot(2, M+1, M+1))
+        #plt.colorbar(h2, plt.subplot(2, M+1, 0))
     
     def plotConnectivity(self, measure):
-        pass
+        if not __have_pyplot:
+            raise ImportError("matplotlib.pyplot is required for plotting")
