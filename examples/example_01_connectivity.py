@@ -49,7 +49,7 @@ We simply choose a VAR model order of 30, and reduction to 4 components (that's 
 api = scot.SCoT(30, reducedim=4, locations=locs)
 
 """
-Perform MVARICA
+Perform MVARICA and plot the components
 """
 
 api.setData(data)
@@ -60,11 +60,8 @@ api.plotComponents()
 """
 Connectivity Analysis
 
-We will extract the full frequency directed transfer function (ffDTF) from the
+Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
-
-We define a function "topo" that multiplot2 calls to draws scalp projections
-of the components.
 """
 
 api.setData(data, classes)
