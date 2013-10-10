@@ -19,9 +19,10 @@ except ImportError:
 
 class SCoT:
     
-    def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, backend=None):
+    def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
         self.data_ = None
         self.cl_ = None
+        self.fs_ = fs
         self.unmixing_ = None
         self.mixing_ = None
         self.activations_ = None
@@ -158,38 +159,35 @@ class SCoT:
         
         M = self.mixing_.shape[0]
         
+        urange, mrange = None, None
+        
         if global_scale:        
             tmp = np.asarray(self.unmixmaps_)
             tmp = tmp[np.logical_not(np.isnan(tmp))]     
             umax = np.percentile(np.abs(tmp), global_scale)
             umin = -umax
+            urange = [umin,umax]
             
             tmp = np.asarray(self.mixmaps_)
             tmp = tmp[np.logical_not(np.isnan(tmp))]   
             mmax = np.percentile(np.abs(tmp), global_scale)
             mmin = -mmax
+            mrange = [umin,umax]
+            
+        Y = np.floor(np.sqrt(M*3/4))
+        X = np.ceil(M/Y)
+        
+        fig = plt.figure()
         
         axes = []
         for m in range(M):
-            axes.append(plt.subplot(2, M, m+1))
-            self.topo_.set_map(self.unmixmaps_[m])
-            if global_scale:
-                h1 = self.topo_.plot_map(crange=[umin,umax])
-            else:
-                h1 = self.topo_.plot_map()
-            self.topo_.plot_locations()
-            self.topo_.plot_head()
+            axes.append(fig.add_subplot(2*Y, X, m+1))
+            h1 = self._plotUnmixing(axes[-1], m, crange=urange)
             
-            axes.append(plt.subplot(2, M, M+m+1))
-            self.topo_.set_map(self.mixmaps_[m])
-            if global_scale:
-                h2 = self.topo_.plot_map(crange=[mmin,mmax])
-            else:
-                h2 = self.topo_.plot_map()
-            self.topo_.plot_locations()
-            self.topo_.plot_head()
+            axes.append(fig.add_subplot(2*Y, X, M+m+1))
+            h1 = self._plotMixing(axes[-1], m, crange=mrange)
             
-        for a in axes:            
+        for a in axes:
             a.set_yticks([])
             a.set_xticks([])
             a.set_frame_on(False)
@@ -201,5 +199,73 @@ class SCoT:
         #plt.colorbar(h2, plt.subplot(2, M+1, 0))
     
     def plotConnectivity(self, measure):
-        if not __have_pyplot:
+        if not _have_pyplot:
             raise ImportError("matplotlib.pyplot is required for plotting")
+        self.preparePlots(True, False)
+        fig = plt.figure()
+        if isinstance(self.connectivity_, dict):
+            for c in np.unique(self.cl_):
+                cm = getattr(self.connectivity_[c], measure)()
+                self._plotSpectral(fig, cm)
+        else:
+            cm = getattr(self.connectivity_, measure)()
+            self._plotSpectral(fig, cm)
+            
+    def _plotSpectral(self, fig, A):
+        [N,M,F] = A.shape
+        freq = np.linspace(0, self.fs_/2, F)
+
+        lowest, highest = np.inf, -np.inf
+        
+        axes = []
+        for n in range(N):
+            arow = []
+            for m in range(M):
+                ax = fig.add_subplot(N, M, m+n*M+1)
+                arow.append(ax)
+                
+                if n == m:
+                    self._plotMixing(ax, m)
+                    ax.set_yticks([])
+                    ax.set_xticks([])
+                    ax.set_frame_on(False)
+                else:                
+                    ax.plot(freq, A[n,m,:])
+                    lowest = min(lowest, np.min(A[n,m,:]))
+                    highest = max(highest, np.max(A[n,m,:]))
+                    ax.set_xlim(0, self.fs_/2)
+            axes.append(arow)
+            
+        for n in range(N):
+            for m in range(M):
+                if n == m:
+                    pass
+                else:
+                    axes[n][m].set_ylim(lowest, highest)
+                    if 0 < n < N-1:
+                        axes[n][m].set_xticks([])
+                    if 0 < m < M-1:
+                        axes[n][m].set_yticks([])                    
+            axes[n][0].yaxis.tick_left()
+            axes[n][-1].yaxis.tick_right()
+            
+        for m in range(M):
+            axes[0][m].xaxis.tick_top()
+            axes[-1][m].xaxis.tick_bottom()
+            
+        fig.text(0.5, 0.05, 'frequency', horizontalalignment='center')
+        fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
+        
+    def _plotMixing(self, axis, idx, crange=None):
+        self.topo_.set_map(self.mixmaps_[idx])
+        h = self.topo_.plot_map(axis, crange=crange)
+        self.topo_.plot_locations(axis)
+        self.topo_.plot_head(axis)
+        return h
+        
+    def _plotUnmixing(self, axis, idx, crange=None):
+        self.topo_.set_map(self.unmixmaps_[idx])
+        h = self.topo_.plot_map(axis, crange=crange)
+        self.topo_.plot_locations(axis)
+        self.topo_.plot_head(axis)
+        return h

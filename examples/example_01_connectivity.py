@@ -70,4 +70,6 @@ of the components.
 api.setData(data, classes)
 api.fitVAR()
 
+api.plotConnectivity('ffDTF')
+
 api.showPlots()
