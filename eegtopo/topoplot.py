@@ -65,6 +65,12 @@ class Topoplot:
         self.Z = Z
         self.C = np.linalg.solve(self.G, np.concatenate((Z,[0])))
         
+    def get_map(self):
+        return self.image
+        
+    def set_map(self, img):
+        self.image = img
+        
     def create_map(self, pixels=32):
         self.image = np.zeros((pixels,pixels)) * np.nan        
         
