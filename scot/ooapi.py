@@ -39,6 +39,35 @@ class SCoT:
         self.topo_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        
+    def __str__(self):
+        
+        if self.data_ is not None:
+            data = '%d samples, %d channels, %d trials'%self.data_.shape
+        else:
+            data = 'None'
+            
+        cl = str(np.unique(self.cl_))
+
+        if self.unmixing_ is not None:
+            sources = str(self.unmixing_.shape[1])
+        else:
+            sources = 'None'
+            
+        if self.var_model_ is None:
+            var = 'None'
+        elif isinstance(self.var_model_, dict):
+            var = str(len(self.var_model_))
+        else:
+            var = '1'
+        
+        s = 'SCoT(var_order = %d):\n'%self.var_order_
+        s += '  Data      : ' + data + '\n'
+        s += '  Classes   : ' + cl + '\n'
+        s += '  Sources   : ' + sources + '\n'
+        s += '  VAR models: ' + var + '\n'
+        
+        return s
     
     def setData(self, data, cl=None):
         self.data_ = np.atleast_3d(data)
@@ -69,7 +98,7 @@ class SCoT:
     
     def fitVAR(self):
         if self.activations_ == None:
-            raise RuntimeError("VAR fitting requires activations (call setData after doMVARICA)")
+            raise RuntimeError("VAR fitting requires source activations (run doMVARICA first)")
         if self.cl_ == None:
             self.var_model_, self.var_cov_ = var.fit(data=self.activations_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
             self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
