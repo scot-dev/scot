@@ -9,7 +9,7 @@ from . import config
 # default backend
 from .backend import builtin
 
-from .ooapi import SCoT
+from .ooapi import Workspace
 
 #from . import matfiles
 #from . import datatools

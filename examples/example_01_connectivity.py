@@ -46,17 +46,17 @@ Set up the analysis object
 We simply choose a VAR model order of 30, and reduction to 4 components (that's not a lot!).
 """
 
-api = scot.SCoT(30, reducedim=4, locations=locs)
+ws = scot.Workspace(30, reducedim=4, locations=locs)
 
 """
 Perform MVARICA and plot the components
 """
 
-api.setData(data, classes)
+ws.setData(data, classes)
 
-api.doMVARICA()
+ws.doMVARICA()
 
-api.plotSourceTopos()
+ws.plotSourceTopos()
 
 """
 Connectivity Analysis
@@ -65,8 +65,8 @@ Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
 """
 
-api.fitVAR()
+ws.fitVAR()
 
-api.plotConnectivity('ffDTF')
+ws.plotConnectivity('ffDTF')
 
-api.showPlots()
+ws.showPlots()

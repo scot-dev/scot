@@ -18,7 +18,7 @@ try:
 except ImportError:
     _have_pyplot = False
 
-class SCoT:
+class Workspace:
     
     def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
         self.data_ = None
