@@ -23,6 +23,7 @@ class TestMVARICA(unittest.TestCase):
         self.assertRaises(TypeError, scot.Workspace)
         api = scot.Workspace(var_order=50)
         self.assertRaises(RuntimeError, api.doMVARICA)
+        self.assertRaises(RuntimeError, api.doCSPVARICA)
         self.assertRaises(RuntimeError, api.fitVAR)
         self.assertRaises(TypeError, api.getConnectivity)
         self.assertRaises(RuntimeError, api.getConnectivity, 'S')
@@ -130,6 +131,10 @@ class TestMVARICA(unittest.TestCase):
             self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (3,3,512,18))
             
             api.setData(data, cl)
+            
+            api.doCSPVARICA()
+            
+            self.assertEqual(api.getConnectivity('S').shape, (3,3,512))
             
             api.fitVAR()
                         
