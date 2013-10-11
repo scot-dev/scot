@@ -175,7 +175,7 @@ class SCoT:
     def showPlots(self):
         plt.show()
     
-    def plotComponents(self, global_scale=None):
+    def plotSourceTopos(self, global_scale=None):
         """ global_scale:
                None - scales each topo individually
                1-99 - percentile of maximum of all plots
@@ -212,9 +212,11 @@ class SCoT:
         for m in range(M):
             axes.append(fig.add_subplot(2*Y, X, m+1))
             h1 = self._plotUnmixing(axes[-1], m, crange=urange)
+            axes[-1].set_title(str(m))
             
             axes.append(fig.add_subplot(2*Y, X, M+m+1))
             h1 = self._plotMixing(axes[-1], m, crange=mrange)
+            axes[-1].set_title(str(m))
             
         for a in axes:
             a.set_yticks([])
