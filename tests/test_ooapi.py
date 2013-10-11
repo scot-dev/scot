@@ -127,7 +127,7 @@ class TestMVARICA(unittest.TestCase):
             api.fitVAR()
             
             self.assertEqual(api.getConnectivity('S').shape, (3,3,512))
-            self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (3,3,18,512))
+            self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (3,3,512,18))
             
             api.setData(data, cl)
             
@@ -137,13 +137,13 @@ class TestMVARICA(unittest.TestCase):
             tfc = api.getTFConnectivity('S', 100, 50)
             for c in tfc:
                 self.assertEqual(fc[c].shape, (3,3,512))
-                self.assertEqual(tfc[c].shape, (3,3,18,512))
+                self.assertEqual(tfc[c].shape, (3,3,512,18))
                             
             api.setData(data)
             api.removeSources([0,2])
             api.fitVAR()            
             self.assertEqual(api.getConnectivity('S').shape, (1,1,512))
-            self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (1,1,18,512))
+            self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (1,1,512,18))
             
             
                 

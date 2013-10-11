@@ -24,6 +24,7 @@ class SCoT:
         self.data_ = None
         self.cl_ = None
         self.fs_ = fs
+        self.time_offset_ = 0
         self.unmixing_ = None
         self.mixing_ = None
         self.activations_ = None
@@ -48,7 +49,11 @@ class SCoT:
         else:
             data = 'None'
             
-        cl = str(np.unique(self.cl_))
+            
+        if self.data_ is not None:
+            cl = str(np.unique(self.cl_))
+        else:
+            cl = 'None'
 
         if self.unmixing_ is not None:
             sources = str(self.unmixing_.shape[1])
@@ -70,9 +75,10 @@ class SCoT:
         
         return s
     
-    def setData(self, data, cl=None):
+    def setData(self, data, cl=None, time_offset=0):
         self.data_ = np.atleast_3d(data)
         self.cl_ = cl
+        self.time_offset_ = time_offset
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
@@ -151,20 +157,20 @@ class SCoT:
         Nstep = (N-winlen)//winstep
         
         if self.cl_ == None:
-            result = np.zeros((M, M, Nstep, self.nfft_), np.complex64)
+            result = np.zeros((M, M, self.nfft_, Nstep), np.complex64)
             i = 0
             for n in range(0, N-winlen, winstep):
                 win = np.arange(winlen) + n
                 data = self.activations_[win,:,:]                
                 B, C = var.fit(data, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
                 con = Connectivity(B, C, self.nfft_)
-                result[:,:,i,:] = getattr(con, measure)()
+                result[:,:,:,i] = getattr(con, measure)()
                 i += 1
         
         else:
             result = {}
             for c in np.unique(self.cl_):
-                result[c] = np.zeros((M, M, Nstep, self.nfft_), np.complex64)
+                result[c] = np.zeros((M, M, self.nfft_, Nstep), np.complex128)
             i = 0
             for n in range(0, N-winlen, winstep):
                 win = np.arange(winlen) + n
@@ -172,7 +178,7 @@ class SCoT:
                 B, C = var.fit_multiclass(data, cl=self.cl_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
                 for c in np.unique(self.cl_):
                     con = Connectivity(B[c], C[c], self.nfft_)
-                    result[c][:,:,i,:] = getattr(con, measure)()
+                    result[c][:,:,:,i] = getattr(con, measure)()
                 i += 1
         return result
         
@@ -265,6 +271,36 @@ class SCoT:
         else:
             cm = getattr(self.connectivity_, measure)()
             self._plotSpectral(fig, cm)
+    
+    def plotTFConnectivity(self, measure, winlen, winstep):
+        if not _have_pyplot:
+            raise ImportError("matplotlib.pyplot is required for plotting")
+        self.preparePlots(True, False)
+        tfc = self.getTFConnectivity(measure, winlen, winstep)
+        if isinstance(tfc, dict):
+            ncl = np.unique(self.cl_).size
+            Y = np.floor(np.sqrt(ncl))
+            X = np.ceil(ncl/Y)
+            lowest, highest = np.inf, -np.inf
+            for c in np.unique(self.cl_):
+                tfc[c] = self._cleanMeasure(measure, tfc[c])
+                highest = max(highest, np.max(tfc[c]))
+                lowest = min(lowest, np.min(tfc[c]))
+                
+            for c in np.unique(self.cl_):
+                fig = plt.figure()
+                self._plotTimeFrequency(fig, tfc[c], [lowest, highest], winlen, winstep)
+        else:
+            fig = plt.figure()
+            self._plotTimeFrequency(fig, self._cleanMeasure(measure, tfc, [np.min(tfc), np.max(tfc)]), winlen, winstep)
+            
+    def _cleanMeasure(self, measure, A):
+        if measure in ['A', 'H', 'COH', 'pCOH']:
+            return np.abs(A)
+        elif measure in ['S', 'G']:
+            return np.log(np.abs(A))
+        else:
+            return np.real(A)
             
     def _plotSpectral(self, fig, A):
         [N,M,F] = A.shape
@@ -310,6 +346,51 @@ class SCoT:
             
         fig.text(0.5, 0.05, 'frequency', horizontalalignment='center')
         fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
+            
+    def _plotTimeFrequency(self, fig, A, crange, winlen, winstep):
+        [N,M,F,T] = A.shape
+        fs = self.fs_
+        
+        f0, f1 = fs/2, 0
+        t0 = 0.5*winlen/fs + self.time_offset_
+        t1 = self.data_.shape[0]/fs - 0.5*winlen/fs + self.time_offset_        
+        extent = [t0, t1, f0, f1]
+        
+        axes = []
+        for n in range(N):
+            arow = []
+            for m in range(M):
+                ax = fig.add_subplot(N, M, m+n*M+1)
+                arow.append(ax)
+                
+                if n == m:
+                    self._plotMixing(ax, m)
+                    ax.set_yticks([])
+                    ax.set_xticks([])
+                    ax.set_frame_on(False)
+                else:
+                    ax.imshow(A[n,m,:,:], vmin=crange[0], vmax=crange[1], aspect='auto', extent=extent)
+                    ax.invert_yaxis()
+            axes.append(arow)
+            
+        for n in range(N):
+            for m in range(M):
+                if n == m:
+                    pass
+                else:
+                    if 0 < n < N-1:
+                        axes[n][m].set_xticks([])
+                    if 0 < m < M-1:
+                        axes[n][m].set_yticks([])                    
+            axes[n][0].yaxis.tick_left()
+            axes[n][-1].yaxis.tick_right()
+            
+        for m in range(M):
+            axes[0][m].xaxis.tick_top()
+            axes[-1][m].xaxis.tick_bottom()
+            
+        fig.text(0.5, 0.05, 'time', horizontalalignment='center')
+        fig.text(0.05, 0.5, 'frequency', horizontalalignment='center', rotation='vertical')
         
     def _plotMixing(self, axis, idx, crange=None):
         self.topo_.set_map(self.mixmaps_[idx])
