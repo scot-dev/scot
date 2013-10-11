@@ -95,6 +95,19 @@ class SCoT:
         self.var_cov_ = result.C
         self.var_delta_ = result.delta
         self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
+        self.activations_ = dot_special(self.data_, self.unmixing_)
+        
+    def removeSources(self, sources):
+        if self.unmixing_ == None or self.mixing_ == None:
+            raise RuntimeError("No sources available (run doMVARICA first)")
+        self.mixing_ = np.delete(self.mixing_, sources, 0)
+        self.unmixing_ = np.delete(self.unmixing_, sources, 1)
+        if self.activations_ != None:
+            self.activations_ = np.delete(self.activations_, sources, 1)
+        self.var_model_ = None
+        self.var_cov_ = None
+        self.connectivity_ = None
+        
     
     def fitVAR(self):
         if self.activations_ == None:
@@ -183,7 +196,7 @@ class SCoT:
         if not _have_pyplot:
             raise ImportError("matplotlib.pyplot is required for plotting")
         if self.unmixing_ == None and self.mixing_ == None:
-            raise RuntimeError("No components available (run doMVARICA first)")
+            raise RuntimeError("No sources available (run doMVARICA first)")
         self.preparePlots(True, True)
         
         M = self.mixing_.shape[0]
