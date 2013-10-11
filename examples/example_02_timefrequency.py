@@ -68,6 +68,6 @@ Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
 """
 ws.setData(data, classes, time_offset=-1)
-ws.plotTFConnectivity('ffDTF', 1*fs, int(0.2*fs))
+ws.plotTFConnectivity('ffDTF', 1*fs, int(0.2*fs), freq_range=[0,30])
 
 ws.showPlots()

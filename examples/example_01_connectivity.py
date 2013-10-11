@@ -46,7 +46,7 @@ Set up the analysis object
 We simply choose a VAR model order of 30, and reduction to 4 components (that's not a lot!).
 """
 
-ws = scot.Workspace(30, reducedim=4, locations=locs)
+ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
 
 """
 Perform MVARICA and plot the components
@@ -67,6 +67,6 @@ activations of each class and plot them with matplotlib.
 
 ws.fitVAR()
 
-ws.plotConnectivity('ffDTF')
+ws.plotConnectivity('ffDTF', freq_range=[0,30])
 
 ws.showPlots()

@@ -14,6 +14,7 @@ from eegtopo.topoplot import Topoplot
 
 try:
     import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
     _have_pyplot = True
 except ImportError:
     _have_pyplot = False
@@ -259,7 +260,7 @@ class Workspace:
         #plt.colorbar(h1, plt.subplot(2, M+1, M+1))
         #plt.colorbar(h2, plt.subplot(2, M+1, 0))
     
-    def plotConnectivity(self, measure):
+    def plotConnectivity(self, measure, freq_range=[-np.inf, np.inf]):
         if not _have_pyplot:
             raise ImportError("matplotlib.pyplot is required for plotting")
         self.preparePlots(True, False)
@@ -267,12 +268,12 @@ class Workspace:
         if isinstance(self.connectivity_, dict):
             for c in np.unique(self.cl_):
                 cm = getattr(self.connectivity_[c], measure)()
-                self._plotSpectral(fig, cm)
+                self._plotSpectral(fig, cm, freq_range)
         else:
             cm = getattr(self.connectivity_, measure)()
-            self._plotSpectral(fig, cm)
+            self._plotSpectral(fig, cm, freq_range)
     
-    def plotTFConnectivity(self, measure, winlen, winstep):
+    def plotTFConnectivity(self, measure, winlen, winstep, freq_range=[-np.inf, np.inf]):
         if not _have_pyplot:
             raise ImportError("matplotlib.pyplot is required for plotting")
         self.preparePlots(True, False)
@@ -289,10 +290,10 @@ class Workspace:
                 
             for c in np.unique(self.cl_):
                 fig = plt.figure()
-                self._plotTimeFrequency(fig, tfc[c], [lowest, highest], winlen, winstep)
+                self._plotTimeFrequency(fig, tfc[c], [lowest, highest], winlen, winstep, freq_range)
         else:
             fig = plt.figure()
-            self._plotTimeFrequency(fig, self._cleanMeasure(measure, tfc, [np.min(tfc), np.max(tfc)]), winlen, winstep)
+            self._plotTimeFrequency(fig, self._cleanMeasure(measure, tfc, [np.min(tfc), np.max(tfc)]), winlen, winstep, freq_range)
             
     def _cleanMeasure(self, measure, A):
         if measure in ['A', 'H', 'COH', 'pCOH']:
@@ -302,11 +303,13 @@ class Workspace:
         else:
             return np.real(A)
             
-    def _plotSpectral(self, fig, A):
+    def _plotSpectral(self, fig, A, freq_range):
         [N,M,F] = A.shape
         freq = np.linspace(0, self.fs_/2, F)
 
         lowest, highest = np.inf, -np.inf
+        left = max(freq_range[0], freq[0])
+        right = min(freq_range[1], freq[-1])
         
         axes = []
         for n in range(N):
@@ -332,7 +335,10 @@ class Workspace:
                 if n == m:
                     pass
                 else:
+                    axes[n][m].xaxis.set_major_locator(MaxNLocator(max(1,7-N)))
+                    axes[n][m].yaxis.set_major_locator(MaxNLocator(max(1,7-M)))
                     axes[n][m].set_ylim(lowest, highest)
+                    axes[n][m].set_xlim(left, right)
                     if 0 < n < N-1:
                         axes[n][m].set_xticks([])
                     if 0 < m < M-1:
@@ -347,7 +353,7 @@ class Workspace:
         fig.text(0.5, 0.05, 'frequency', horizontalalignment='center')
         fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
             
-    def _plotTimeFrequency(self, fig, A, crange, winlen, winstep):
+    def _plotTimeFrequency(self, fig, A, crange, winlen, winstep, freq_range):
         [N,M,F,T] = A.shape
         fs = self.fs_
         
@@ -355,6 +361,9 @@ class Workspace:
         t0 = 0.5*winlen/fs + self.time_offset_
         t1 = self.data_.shape[0]/fs - 0.5*winlen/fs + self.time_offset_        
         extent = [t0, t1, f0, f1]
+        
+        ymin = max(freq_range[0], f1)
+        ymax = min(freq_range[1], f0)
         
         axes = []
         for n in range(N):
@@ -378,6 +387,9 @@ class Workspace:
                 if n == m:
                     pass
                 else:
+                    axes[n][m].xaxis.set_major_locator(MaxNLocator(max(1,9-N)))
+                    axes[n][m].yaxis.set_major_locator(MaxNLocator(max(1,7-M)))
+                    axes[n][m].set_ylim(ymin, ymax)
                     if 0 < n < N-1:
                         axes[n][m].set_xticks([])
                     if 0 < m < M-1:
