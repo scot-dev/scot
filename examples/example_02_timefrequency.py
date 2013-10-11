@@ -47,10 +47,10 @@ is right in the middle of the motor imagery period.
 data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
 
 """
-Perform MVARICA
+Perform CSPVARICA
 """
-ws.setData(data, time_offset=3)
-ws.doMVARICA()
+ws.setData(data, classes)
+ws.doCSPVARICA()
 
 
 """
@@ -59,7 +59,7 @@ Prepare the data
 Here we cut segments from -1s to 7s around each trigger out of the EEG. This
 covers the whole trial
 """
-data = scot.datatools.cut_segments(raweeg, triggers, -1*fs, 7*fs)
+data = scot.datatools.cut_segments(raweeg, triggers, -2*fs, 8*fs)
 
 """
 Connectivity Analysis
@@ -67,7 +67,7 @@ Connectivity Analysis
 Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
 """
-ws.setData(data, classes, time_offset=-1)
+ws.setData(data, classes, time_offset=-2)
 ws.plotTFConnectivity('ffDTF', 1*fs, int(0.2*fs), freq_range=[0,30])
 
 ws.showPlots()
