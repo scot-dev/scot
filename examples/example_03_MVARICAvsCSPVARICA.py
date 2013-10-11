@@ -51,7 +51,8 @@ Perform MVARICA
 ws.setData(data, classes)
 ws.doMVARICA()
 ws.fitVAR()
-ws.plotConnectivity('ffDTF', freq_range=[0,30])
+fig1 = ws.plotConnectivity('ffDTF', freq_range=[0,30])
+fig1.suptitle('MVARICA')
 
 """
 Perform CSPVARICA
@@ -59,6 +60,7 @@ Perform CSPVARICA
 ws.setData(data, classes)
 ws.doCSPVARICA()
 ws.fitVAR()
-ws.plotConnectivity('ffDTF', freq_range=[0,30])
+fig2 = ws.plotConnectivity('ffDTF', freq_range=[0,30])
+fig2.suptitle('CSPVARICA')
 
 ws.showPlots()

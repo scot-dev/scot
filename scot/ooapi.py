@@ -5,7 +5,7 @@
 """ Object oriented API to SCoT """
 
 import numpy as np
-from .varica import mvarica
+from .varica import mvarica, cspvarica
 from .plainica import plainica
 from .datatools import dot_special
 from .connectivity import Connectivity
@@ -51,7 +51,7 @@ class Workspace:
             data = 'None'
             
             
-        if self.data_ is not None:
+        if self.cl_ is not None:
             cl = str(np.unique(self.cl_))
         else:
             cl = 'None'
@@ -87,6 +87,20 @@ class Workspace:
         if self.unmixing_ != None:
             self.activations_ = dot_special(self.data_, self.unmixing_)
     
+    def doICA(self):
+        if self.data_ == None:
+            raise RuntimeError("ICA requires data to be set")
+        result = plainica(X=self.data_, reducedim=self.reducedim_, backend=self.backend_)
+        self.mixing_ = result.mixing
+        self.unmixing_ = result.unmixing
+        self.activations_ = dot_special(self.data_, self.unmixing_)
+        self.var_model_ = None
+        self.var_cov_ = None
+        self.connectivity_ = None
+        self.var_delta_ = None
+        self.mixmaps_ = []
+        self.unmixmaps_ = []
+    
     def doMVARICA(self):
         if self.data_ == None:
             raise RuntimeError("MVARICA requires data to be set")
@@ -101,17 +115,19 @@ class Workspace:
         self.mixmaps_ = []
         self.unmixmaps_ = []
     
-    def doICA(self):
+    def doCSPVARICA(self):
         if self.data_ == None:
-            raise RuntimeError("ICA requires data to be set")
-        result = plainica(X=self.data_, reducedim=self.reducedim_, backend=self.backend_)
+            raise RuntimeError("CSPVARICA requires data to be set")
+        if self.cl_ is None:
+            raise RuntimeError("CSPVARICA requires class labels")
+        result = cspvarica(X=self.data_, cl=self.cl_, P=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
+        self.var_model_ = result.B
+        self.var_cov_ = result.C
+        self.var_delta_ = result.delta
+        self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
         self.activations_ = dot_special(self.data_, self.unmixing_)
-        self.var_model_ = None
-        self.var_cov_ = None
-        self.connectivity_ = None
-        self.var_delta_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
         
