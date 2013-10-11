@@ -6,6 +6,7 @@
 
 import numpy as np
 from .varica import mvarica
+from .plainica import plainica
 from .datatools import dot_special
 from .connectivity import Connectivity
 from . import var
@@ -90,6 +91,22 @@ class SCoT:
         self.var_delta_ = result.delta
         self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
         self.activations_ = dot_special(self.data_, self.unmixing_)
+        self.mixmaps_ = []
+        self.unmixmaps_ = []
+    
+    def doICA(self):
+        if self.data_ == None:
+            raise RuntimeError("ICA requires data to be set")
+        result = plainica(X=self.data_, reducedim=self.reducedim_, backend=self.backend_)
+        self.mixing_ = result.mixing
+        self.unmixing_ = result.unmixing
+        self.activations_ = dot_special(self.data_, self.unmixing_)
+        self.var_model_ = None
+        self.var_cov_ = None
+        self.connectivity_ = None
+        self.var_delta_ = None
+        self.mixmaps_ = []
+        self.unmixmaps_ = []
         
     def removeSources(self, sources):
         if self.unmixing_ == None or self.mixing_ == None:
