@@ -272,6 +272,7 @@ class Workspace:
         else:
             cm = getattr(self.connectivity_, measure)()
             self._plotSpectral(fig, cm, freq_range)
+        return fig
     
     def plotTFConnectivity(self, measure, winlen, winstep, freq_range=[-np.inf, np.inf]):
         if not _have_pyplot:
@@ -288,12 +289,15 @@ class Workspace:
                 highest = max(highest, np.max(tfc[c]))
                 lowest = min(lowest, np.min(tfc[c]))
                 
+            fig = []
             for c in np.unique(self.cl_):
-                fig = plt.figure()
-                self._plotTimeFrequency(fig, tfc[c], [lowest, highest], winlen, winstep, freq_range)
+                fig.append(plt.figure())
+                self._plotTimeFrequency(fig[-1], tfc[c], [lowest, highest], winlen, winstep, freq_range)
+                
         else:
             fig = plt.figure()
             self._plotTimeFrequency(fig, self._cleanMeasure(measure, tfc, [np.min(tfc), np.max(tfc)]), winlen, winstep, freq_range)
+        return fig
             
     def _cleanMeasure(self, measure, A):
         if measure in ['A', 'H', 'COH', 'pCOH']:
