@@ -16,9 +16,9 @@ def wrapper_binica(data):
     M = np.linalg.inv(U)
     return M, U  
 
-def wrapper_pca(X, retain_variance, numcomp):
-    C, D = pca.pca( datatools.cat_trials(X), subtract_mean=False, retain_variance=retain_variance, numcomp=numcomp )
-    Y = datatools.dot_special(X,C)
+def wrapper_pca(X, reducedim):
+    C, D = pca.pca(datatools.cat_trials(X), subtract_mean=False, reducedim=reducedim)
+    Y = datatools.dot_special(X, C)
     return C, D, Y
     
 backend = {

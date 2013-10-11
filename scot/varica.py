@@ -9,7 +9,7 @@ from . import var
 
 import numpy as np
 
-def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0, backend=None):
+def mvarica(X, P, reducedim=0.99, delta=0, backend=None):
     '''
     mvarica( X, P )
     mvarica( X, P, retain_variance, delta )
@@ -26,18 +26,15 @@ def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0, backend=None):
     X              :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
                           : N,M   : 2d data matrix (N samples, M signals)
     P              :      :       : VAR model order
-    retain_variance:      : 0.99  : If specified as a number it is interpreted
-                                    as the fraction of variance that should
-                                    remain in the data. All components that
-                                    describe in total less than 1-retain_variance
-                                    of the variance in the data are removed by
-                                    the PCA.
+    reducedim      :      : 0.99  : A number less than 1 is interpreted as the
+                                    fraction of variance that should remain in
+                                    the data. All components that describe in
+                                    total less than 1-retain_variance of the
+                                    variance in the data are removed by the PCA.
+                                    An integer number of 1 or greater is
+                                    interpreted as the number of components to
+                                    keep after applying the PCA.
                                     If set to 'no_pca' the PCA step is skipped.
-    numcomp        : None :       : Can be provided instead of retain_variance
-                                    to specify the exact number of components
-                                    to keep. The PCA keeps numcomp components
-                                    with the highest variance and discards the
-                                    rest.
     delta          : 0    :       : regularization parameter for VAR fitting
                                     set to 'auto' to determine optimal setting
     backend        : None :       : backend to use for processing (see backend
@@ -70,12 +67,12 @@ def mvarica(X, P, retain_variance=0.99, numcomp=None, delta=0, backend=None):
         backend = config.backend
     
     # pre-transform the data with PCA
-    if retain_variance == 'no pca':
+    if reducedim == 'no pca':
         C = np.eye(M)
         D = np.eye(M)
         Xpca = X
     else:
-        C, D, Xpca = backend['pca'](X, retain_variance, numcomp)
+        C, D, Xpca = backend['pca'](X, reducedim)
         M = C.shape[1]
     
     if delta == 'auto':

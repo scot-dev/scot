@@ -23,7 +23,7 @@ def pcaEIG( X ):
     return V, W
     
 
-def pca( X, subtract_mean=False, normalize=False, sort_components=True, retain_variance=None, numcomp=None, algorithm=pcaEIG ):    
+def pca( X, subtract_mean=False, normalize=False, sort_components=True, reducedim=None, algorithm=pcaEIG ):    
     '''
     pca( X, subtract_mean=False, 
             normalize=False, 
@@ -40,7 +40,16 @@ def pca( X, subtract_mean=False, normalize=False, sort_components=True, retain_v
     subtract_mean  : False:       : If True, the sample mean is subtracted from X
     normalize      : False:       : If True, the data is normalized to unit variance
     sort_components: True :       : If True, components are sorted by decreasing variance
-    retain_variance: None :       : Select components that explain a fraction of the variance
+    reducedim      : None :       : A number less than 1 is interpreted as the
+                                    fraction of variance that should remain in
+                                    the data. All components that describe in
+                                    total less than 1-retain_variance of the
+                                    variance in the data are removed by the PCA.
+                                    An integer number of 1 or greater is
+                                    interpreted as the number of components to
+                                    keep after applying the PCA.
+                                    None or a number greater than M does not
+                                    remove components.
     numcomp        : None :       : Select numcomp components wtih highest variance
     algorithm      : pcaEIG :     : which function to call for eigenvector estimation
     
@@ -52,10 +61,7 @@ def pca( X, subtract_mean=False, normalize=False, sort_components=True, retain_v
     
     X = cat_trials(np.atleast_3d(X))
     
-    if retain_variance != None and numcomp != None:
-        raise AttributeError('Conflicting parameters: retain_variance and numcomp. At least one must be None.')
-    
-    if retain_variance != None or numcomp != None:
+    if reducedim:
         sort_components = True
     
     if subtract_mean:
@@ -86,8 +92,8 @@ def pca( X, subtract_mean=False, normalize=False, sort_components=True, retain_v
         V = V[order,:]
         latent = latent[:,order]
     
-    if retain_variance:
-        selected = np.nonzero(np.cumsum(latent)<retain_variance)[0]
+    if reducedim and reducedim < 1:
+        selected = np.nonzero(np.cumsum(latent)<reducedim)[0]
         try:
             selected = np.concatenate( [selected, [selected[-1]+1]] )
         except IndexError:
@@ -98,8 +104,8 @@ def pca( X, subtract_mean=False, normalize=False, sort_components=True, retain_v
         V = V[selected,:]
         
         
-    if numcomp:
-        W = W[:,np.arange(numcomp)]
-        V = V[np.arange(numcomp),:]
+    if reducedim and reducedim >= 1:
+        W = W[:,np.arange(reducedim)]
+        V = V[np.arange(reducedim),:]
         
     return W, V

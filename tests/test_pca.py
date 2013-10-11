@@ -38,10 +38,10 @@ class TestFunctionality(unittest.TestCase):
         """components should be sorted by decreasing variance
         """
         X = generate_covsig(np.diag([1,9,2,6,3,8,4,5,7]), 500)
-        W, V = pca(X)
+        W, V = pca(X, sort_components=True)
         C = np.cov(X.dot(W).T)
         self.assertTrue(np.allclose(C, np.diag([9,8,7,6,5,4,3,2,1]), rtol=1e-1, atol=1e-2))
-        W, V = pca(X)
+        W, V = pca(X, sort_components=True)
         C = np.cov(X.dot(W).T)
         self.assertTrue(np.allclose(C, np.diag([9,8,7,6,5,4,3,2,1]), rtol=1e-1, atol=1e-2))
     
@@ -92,8 +92,8 @@ class TestDimensionalityReduction(unittest.TestCase):
         self.X = np.random.rand(100,10)
         self.Y = self.X.copy()
         self.N, self.M = self.X.shape
-        self.W1, self.V1 = pca(self.X, retain_variance=0.9)
-        self.W2, self.V2 = pca(self.X, numcomp=5)
+        self.W1, self.V1 = pca(self.X, reducedim=0.9)
+        self.W2, self.V2 = pca(self.X, reducedim=5)
 
     def tearDown(self):
         pass
@@ -119,7 +119,7 @@ class TestDimensionalityReduction(unittest.TestCase):
         """components should be sorted by decreasing variance
         """
         X = generate_covsig(np.diag([1,9,2,6,3,8,4,5,7]), 500)
-        W, V = pca(X, numcomp=5)
+        W, V = pca(X, reducedim=5)
         C = np.cov(X.dot(W).T)
         self.assertTrue(np.allclose(C, np.diag([9,8,7,6,5]), rtol=1e-1, atol=1e-2))
         

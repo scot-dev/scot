@@ -52,10 +52,11 @@ api = scot.SCoT(30, reducedim=4, locations=locs)
 Perform MVARICA and plot the components
 """
 
-api.setData(data)
+api.setData(data, classes)
+
 api.doMVARICA()
 
-api.plotComponents()
+api.plotSourceTopos()
 
 """
 Connectivity Analysis
@@ -64,7 +65,6 @@ Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
 """
 
-api.setData(data, classes)
 api.fitVAR()
 
 api.plotConnectivity('ffDTF')

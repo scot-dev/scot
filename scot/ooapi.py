@@ -82,13 +82,7 @@ class SCoT:
     def doMVARICA(self):
         if self.data_ == None:
             raise RuntimeError("MVARICA requires data to be set")
-        if self.reducedim_ < 1:
-            rv = self.reducedim_
-            nc = None
-        else:
-            rv = None
-            nc = self.reducedim_
-        result = mvarica(X=self.data_, P=self.var_order_, retain_variance=rv, numcomp=nc, delta=self.var_delta_, backend=self.backend_)
+        result = mvarica(X=self.data_, P=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_model_ = result.B
