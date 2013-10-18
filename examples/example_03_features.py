@@ -1,7 +1,6 @@
 
 """
-This example shows how to decompose motor imagery EEG into sources using
-SCPVARICA and visualize a connectivity measure.
+This example shows how to decompose EEG signals into source activations with MVARICA, and subsequently extract single-trial connectivity as features for LDA.
 """
 import numpy as np
 
@@ -56,7 +55,7 @@ ws.doMVARICA()
 """
 Find optimal regularization parameter for single-trial fitting
 """
-#ws.optimizeRegularization(scot.xvschema.singletrial, 30)
+ws.optimizeRegularization(scot.xvschema.singletrial, 30)
 
 freq = np.linspace(0,fs,ws.nfft_)
 
