@@ -51,7 +51,7 @@ class Workspace:
             data = 'None'
             
             
-        if self.data_ is not None:
+        if self.cl_ is not None:
             cl = str(np.unique(self.cl_))
         else:
             cl = 'None'
@@ -138,6 +138,13 @@ class Workspace:
             self.connectivity_ = {}
             for c in np.unique(self.cl_):
                 self.connectivity_[c] = Connectivity(self.var_model_[c], self.var_cov_[c], self.nfft_)
+
+    def optimizeRegularization(self, xvschema, skipstep=1):
+        if self.activations_ == None:
+            raise RuntimeError("VAR fitting requires source activations (run doMVARICA first)")
+            
+        self.var_delta_ = var.optimize_delta_bisection(data=self.activations_, P=self.var_order_, xvschema=xvschema, skipstep=skipstep)
+                
     
     def getConnectivity(self, measure):
         if self.connectivity_ == None:
