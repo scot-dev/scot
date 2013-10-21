@@ -49,8 +49,8 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
 """
 Perform MVARICA
 """
-ws.setData(data)
-ws.doMVARICA()
+ws.setData(data, classes)
+ws.doCSPVARICA()
 
 """
 Find optimal regularization parameter for single-trial fitting
