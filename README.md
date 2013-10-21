@@ -3,7 +3,16 @@ SCoT
 
 Source Connectivity Toolbox for Python 3
 
--
+
+Dependencies
+---
+Required: numpy, scipy
+
+Optional: matplotlib, scikit-learn
+
+
+Examples
+---
 
 To run the examples on Linux invoke the following commands inside the SCoT main directory:
 

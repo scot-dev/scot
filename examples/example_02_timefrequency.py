@@ -1,7 +1,6 @@
 
 """
-This example shows how to decompose motor imagery EEG into sources using
-SCPVARICA and visualize a connectivity measure.
+This example shows how to decompose EEG signals into source activations with MVARICA, and visualize time varying connectivity.
 """
 import numpy as np
 
