@@ -153,7 +153,7 @@ def plot_connectivity_spectrum(A, fs=2, freq_range=[-np.inf, np.inf], topo=None,
         axes[0][m].xaxis.tick_top()
         axes[-1][m].xaxis.tick_bottom()
         
-    fig.text(0.5, 0.05, 'frequency', horizontalalignment='center')
+    fig.text(0.5, 0.025, 'frequency', horizontalalignment='center')
     fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
     
     return fig
@@ -217,7 +217,7 @@ def plot_connectivity_timespectrum(A, fs=2, crange=None, freq_range=[-np.inf, np
         axes[0][m].xaxis.tick_top()
         axes[-1][m].xaxis.tick_bottom()
         
-    fig.text(0.5, 0.05, 'time', horizontalalignment='center')
+    fig.text(0.5, 0.025, 'time', horizontalalignment='center')
     fig.text(0.05, 0.5, 'frequency', horizontalalignment='center', rotation='vertical')
     
     return fig
