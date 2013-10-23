@@ -2,6 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+from __future__ import absolute_import
+
 from .. import config
 
 from .. import datatools

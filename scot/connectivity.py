@@ -94,8 +94,8 @@ class Connectivity:
 
     A summary of these measures can be found in [1]
     
-    [1] Billinger et al 2013,  “Single-trial connectivity estimation for
-        classification of motor imagery data”, J. Neural Eng. 10, 2013
+    [1] Billinger et al 2013,  "Single-trial connectivity estimation for
+        classification of motor imagery data", J. Neural Eng. 10, 2013
     
     """
     def __init__(self, B, C=None, Nfft=512):

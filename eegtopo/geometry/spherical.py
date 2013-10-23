@@ -4,6 +4,8 @@
 
 '''Spherical geometry support module'''
 
+from __future__ import division
+
 import math
 from .euclidean import Vector
 

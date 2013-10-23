@@ -2,6 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+from __future__ import print_function
+
 from uuid import uuid4
 import numpy as np
 import os, sys
