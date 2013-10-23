@@ -34,8 +34,9 @@ locs = midata.locations
 Set up the analysis object
 
 We simply choose a VAR model order of 30, and reduction to 4 components.
+Setting the regularization parameter to 0.2 gives good results in this example.
 """
-ws = scot.Workspace(30, reducedim=4, fs=fs)
+ws = scot.Workspace(30, reducedim=4, fs=fs, var_delta=0.2)
 
 
 """
@@ -50,18 +51,20 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
 Perform MVARICA
 """
 ws.setData(data, classes)
+print('Running CSPVARICA...')
 ws.doCSPVARICA()
 
 """
 Find optimal regularization parameter for single-trial fitting
 """
-ws.optimizeRegularization(scot.xvschema.singletrial, 30)
+#ws.optimizeRegularization(scot.xvschema.singletrial, 60)
 
 freq = np.linspace(0,fs,ws.nfft_)
 
 """
 Single-Trial Fitting and feature extraction
 """
+print('Extracting Features...')
 features = np.zeros((len(triggers), 32))
 for t in range(len(triggers)):
     print('Trial: %d   '%t, end='\r')
