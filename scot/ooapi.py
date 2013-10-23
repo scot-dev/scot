@@ -9,15 +9,10 @@ from .varica import mvarica
 from .plainica import plainica
 from .datatools import dot_special
 from .connectivity import Connectivity
+from . import plotting
 from . import var
 from eegtopo.topoplot import Topoplot
 
-try:
-    import matplotlib.pyplot as plt
-    from matplotlib.ticker import MaxNLocator
-    _have_pyplot = True
-except ImportError:
-    _have_pyplot = False
 
 class Workspace:
     
@@ -199,93 +194,47 @@ class Workspace:
             self.topo_.set_locations(self.locations_)
         
         if mixing and not self.mixmaps_:
-            for i in range(self.mixing_.shape[0]):
-                self.topo_.set_values(self.mixing_[i,:])
-                self.topo_.create_map()
-                self.mixmaps_.append(self.topo_.get_map())
+            self.mixmaps_ = plotting.prepare_topoplots(self.topo_, self.mixing_)
         
         if unmixing and not self.unmixmaps_:
-            for i in range(self.unmixing_.shape[1]):
-                self.topo_.set_values(self.unmixing_[:,i])
-                self.topo_.create_map()
-                self.unmixmaps_.append(self.topo_.get_map())
+            self.unmixmaps_ = plotting.prepare_topoplots(self.topo_, self.unmixing_.transpose())
                 
     def showPlots(self):
-        plt.show()
+        plotting.show_plots( )
     
     def plotSourceTopos(self, global_scale=None):
         """ global_scale:
                None - scales each topo individually
                1-99 - percentile of maximum of all plots
         """
-        if not _have_pyplot:
-            raise ImportError("matplotlib.pyplot is required for plotting")
         if self.unmixing_ == None and self.mixing_ == None:
             raise RuntimeError("No sources available (run doMVARICA first)")
+            
         self.preparePlots(True, True)
-        
-        M = self.mixing_.shape[0]
-        
-        urange, mrange = None, None
-        
-        if global_scale:        
-            tmp = np.asarray(self.unmixmaps_)
-            tmp = tmp[np.logical_not(np.isnan(tmp))]     
-            umax = np.percentile(np.abs(tmp), global_scale)
-            umin = -umax
-            urange = [umin,umax]
-            
-            tmp = np.asarray(self.mixmaps_)
-            tmp = tmp[np.logical_not(np.isnan(tmp))]   
-            mmax = np.percentile(np.abs(tmp), global_scale)
-            mmin = -mmax
-            mrange = [umin,umax]
-            
-        Y = np.floor(np.sqrt(M*3/4))
-        X = np.ceil(M/Y)
-        
-        fig = plt.figure()
-        
-        axes = []
-        for m in range(M):
-            axes.append(fig.add_subplot(2*Y, X, m+1))
-            h1 = self._plotUnmixing(axes[-1], m, crange=urange)
-            axes[-1].set_title(str(m))
-            
-            axes.append(fig.add_subplot(2*Y, X, M+m+1))
-            h1 = self._plotMixing(axes[-1], m, crange=mrange)
-            axes[-1].set_title(str(m))
-            
-        for a in axes:
-            a.set_yticks([])
-            a.set_xticks([])
-            a.set_frame_on(False)
-            
-        axes[0].set_ylabel('Unmixing weights')
-        axes[1].set_ylabel('Scalp projections')
-        
-        #plt.colorbar(h1, plt.subplot(2, M+1, M+1))
-        #plt.colorbar(h2, plt.subplot(2, M+1, 0))
+
+        plotting.plot_sources(self.topo_, self.mixmaps_, self.unmixmaps_, global_scale)
     
     def plotConnectivity(self, measure, freq_range=[-np.inf, np.inf]):
-        if not _have_pyplot:
-            raise ImportError("matplotlib.pyplot is required for plotting")
-        self.preparePlots(True, False)
-        fig = plt.figure()
-        if isinstance(self.connectivity_, dict):
+        fig = None        
+        self.preparePlots(True, False)        
+        if isinstance(self.connectivity_, dict):            
             for c in np.unique(self.cl_):
                 cm = getattr(self.connectivity_[c], measure)()
-                self._plotSpectral(fig, cm, freq_range)
+                fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_, topomaps=self.mixmaps_, fig=fig)
         else:
             cm = getattr(self.connectivity_, measure)()
-            self._plotSpectral(fig, cm, freq_range)
+            fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_, topomaps=self.mixmaps_)
         return fig
     
-    def plotTFConnectivity(self, measure, winlen, winstep, freq_range=[-np.inf, np.inf]):
-        if not _have_pyplot:
-            raise ImportError("matplotlib.pyplot is required for plotting")
+    def plotTFConnectivity(self, measure, winlen, winstep, freq_range=[-np.inf, np.inf], ignore_diagonal=True):
+        fig = None        
+        
+        t0 = 0.5*winlen/self.fs_ + self.time_offset_
+        t1 = self.data_.shape[0]/self.fs_ - 0.5*winlen/self.fs_ + self.time_offset_
+        
         self.preparePlots(True, False)
         tfc = self.getTFConnectivity(measure, winlen, winstep)
+        
         if isinstance(tfc, dict):
             ncl = np.unique(self.cl_).size
             Y = np.floor(np.sqrt(ncl))
@@ -293,17 +242,22 @@ class Workspace:
             lowest, highest = np.inf, -np.inf
             for c in np.unique(self.cl_):
                 tfc[c] = self._cleanMeasure(measure, tfc[c])
+                if ignore_diagonal:
+                    for m in range(tfc[c].shape[0]):
+                        tfc[c][m,m,:,:] = 0;
                 highest = max(highest, np.max(tfc[c]))
                 lowest = min(lowest, np.min(tfc[c]))
                 
-            fig = []
+            fig = {}
             for c in np.unique(self.cl_):
-                fig.append(plt.figure())
-                self._plotTimeFrequency(fig[-1], tfc[c], [lowest, highest], winlen, winstep, freq_range)
+                fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=[lowest, highest], freq_range=freq_range, time_range=[t0, t1], topo=self.topo_, topomaps=self.mixmaps_)
                 
         else:
-            fig = plt.figure()
-            self._plotTimeFrequency(fig, self._cleanMeasure(measure, tfc, [np.min(tfc), np.max(tfc)]), winlen, winstep, freq_range)
+            tfc = self._cleanMeasure(measure, tfc)
+            if ignore_diagonal:
+                for m in range(tfc.shape[0]):
+                    tfc[m,m,:,:] = 0;
+            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)], freq_range=freq_range, time_range=[t0, t1], topo=self.topo_, topomaps=self.mixmaps_)
         return fig
             
     def _cleanMeasure(self, measure, A):
@@ -313,118 +267,3 @@ class Workspace:
             return np.log(np.abs(A))
         else:
             return np.real(A)
-            
-    def _plotSpectral(self, fig, A, freq_range):
-        [N,M,F] = A.shape
-        freq = np.linspace(0, self.fs_/2, F)
-
-        lowest, highest = np.inf, -np.inf
-        left = max(freq_range[0], freq[0])
-        right = min(freq_range[1], freq[-1])
-        
-        axes = []
-        for n in range(N):
-            arow = []
-            for m in range(M):
-                ax = fig.add_subplot(N, M, m+n*M+1)
-                arow.append(ax)
-                
-                if n == m:
-                    self._plotMixing(ax, m)
-                    ax.set_yticks([])
-                    ax.set_xticks([])
-                    ax.set_frame_on(False)
-                else:                
-                    ax.plot(freq, A[n,m,:])
-                    lowest = min(lowest, np.min(A[n,m,:]))
-                    highest = max(highest, np.max(A[n,m,:]))
-                    ax.set_xlim(0, self.fs_/2)
-            axes.append(arow)
-            
-        for n in range(N):
-            for m in range(M):
-                if n == m:
-                    pass
-                else:
-                    axes[n][m].xaxis.set_major_locator(MaxNLocator(max(1,7-N)))
-                    axes[n][m].yaxis.set_major_locator(MaxNLocator(max(1,7-M)))
-                    axes[n][m].set_ylim(lowest, highest)
-                    axes[n][m].set_xlim(left, right)
-                    if 0 < n < N-1:
-                        axes[n][m].set_xticks([])
-                    if 0 < m < M-1:
-                        axes[n][m].set_yticks([])                    
-            axes[n][0].yaxis.tick_left()
-            axes[n][-1].yaxis.tick_right()
-            
-        for m in range(M):
-            axes[0][m].xaxis.tick_top()
-            axes[-1][m].xaxis.tick_bottom()
-            
-        fig.text(0.5, 0.05, 'frequency', horizontalalignment='center')
-        fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
-            
-    def _plotTimeFrequency(self, fig, A, crange, winlen, winstep, freq_range):
-        [N,M,F,T] = A.shape
-        fs = self.fs_
-        
-        f0, f1 = fs/2, 0
-        t0 = 0.5*winlen/fs + self.time_offset_
-        t1 = self.data_.shape[0]/fs - 0.5*winlen/fs + self.time_offset_        
-        extent = [t0, t1, f0, f1]
-        
-        ymin = max(freq_range[0], f1)
-        ymax = min(freq_range[1], f0)
-        
-        axes = []
-        for n in range(N):
-            arow = []
-            for m in range(M):
-                ax = fig.add_subplot(N, M, m+n*M+1)
-                arow.append(ax)
-                
-                if n == m:
-                    self._plotMixing(ax, m)
-                    ax.set_yticks([])
-                    ax.set_xticks([])
-                    ax.set_frame_on(False)
-                else:
-                    ax.imshow(A[n,m,:,:], vmin=crange[0], vmax=crange[1], aspect='auto', extent=extent)
-                    ax.invert_yaxis()
-            axes.append(arow)
-            
-        for n in range(N):
-            for m in range(M):
-                if n == m:
-                    pass
-                else:
-                    axes[n][m].xaxis.set_major_locator(MaxNLocator(max(1,9-N)))
-                    axes[n][m].yaxis.set_major_locator(MaxNLocator(max(1,7-M)))
-                    axes[n][m].set_ylim(ymin, ymax)
-                    if 0 < n < N-1:
-                        axes[n][m].set_xticks([])
-                    if 0 < m < M-1:
-                        axes[n][m].set_yticks([])                    
-            axes[n][0].yaxis.tick_left()
-            axes[n][-1].yaxis.tick_right()
-            
-        for m in range(M):
-            axes[0][m].xaxis.tick_top()
-            axes[-1][m].xaxis.tick_bottom()
-            
-        fig.text(0.5, 0.05, 'time', horizontalalignment='center')
-        fig.text(0.05, 0.5, 'frequency', horizontalalignment='center', rotation='vertical')
-        
-    def _plotMixing(self, axis, idx, crange=None):
-        self.topo_.set_map(self.mixmaps_[idx])
-        h = self.topo_.plot_map(axis, crange=crange)
-        self.topo_.plot_locations(axis)
-        self.topo_.plot_head(axis)
-        return h
-        
-    def _plotUnmixing(self, axis, idx, crange=None):
-        self.topo_.set_map(self.unmixmaps_[idx])
-        h = self.topo_.plot_map(axis, crange=crange)
-        self.topo_.plot_locations(axis)
-        self.topo_.plot_head(axis)
-        return h
