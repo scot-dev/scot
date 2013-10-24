@@ -37,3 +37,7 @@ nosetests.xml
 
 # SCoT Specific
 scot/builtin/binica
+bias_after_adjust
+temp.wgt
+*.wts
+*.sph
