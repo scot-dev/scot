@@ -26,7 +26,7 @@ def mvarica(X, P, reducedim=0.99, delta=0, backend=None):
     X              :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
                           : N,M   : 2d data matrix (N samples, M signals)
     P              :      :       : VAR model order
-    reducedim      :      : 0.99  : A number less than 1 is interpreted as the
+    reducedim      : 0.99 :       : A number less than 1 is interpreted as the
                                     fraction of variance that should remain in
                                     the data. All components that describe in
                                     total less than 1-retain_variance of the

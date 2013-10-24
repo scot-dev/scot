@@ -11,6 +11,8 @@ from .backend import builtin
 
 from .ooapi import Workspace
 
+from .connectivity import Connectivity
+
 #from . import matfiles
 #from . import datatools
 #from . import xvschema
@@ -18,7 +20,5 @@ from .ooapi import Workspace
 #from . import var
 
 #from .varica import mvarica
-
-#from .connectivity import Connectivity
 
 #from . import plotting
