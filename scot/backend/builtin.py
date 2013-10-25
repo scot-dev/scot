@@ -10,6 +10,7 @@ from .. import datatools
 
 from ..builtin import binica, pca, csp
 
+
 def wrapper_binica(data):
     w, s = binica.binica(datatools.cat_trials(data))
     u = s.dot(w)
@@ -21,19 +22,21 @@ def wrapper_pca(x, reducedim):
     y = datatools.dot_special(x, c)
     return c, d, y
     
-def wrapper_csp(X, cl, reducedim):
-    C, D = csp.csp( X, cl, numcomp=reducedim )
-    Y = datatools.dot_special(X,C)
-    return C, D, Y
+def wrapper_csp(x, cl, reducedim):
+    c, d = csp.csp(x, cl, numcomp=reducedim)
+    y = datatools.dot_special(x,c)
+    return c, d, y
 
-    
+
 backend = {
     'ica': wrapper_binica,
     'pca': wrapper_pca,
     'csp': wrapper_csp
-    }
-    
-def activate( ):
+}
+
+
+def activate():
     config.backend = backend
-    
+
+
 activate()

@@ -2,12 +2,13 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+import numpy as np
+
 from . import config
 from .datatools import cat_trials, dot_special
 from . import xvschema
 from . import var
 
-import numpy as np
 
 def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     """
@@ -59,13 +60,13 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
         Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
     """
-    
+
     x = np.atleast_3d(x)
     l, m, t = np.shape(x)
-    
+
     if backend is None:
         backend = config.backend
-    
+
     # pre-transform the data with PCA
     if reducedim == 'no pca':
         c = np.eye(m)
@@ -73,36 +74,37 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
         xpca = x
     else:
         c, d, xpca = backend['pca'](x, reducedim)
-    
+
     if delta == 'auto':
-        delta = var.optimize_delta_bisection( xpca[:,:,:], p, xvschema=xvschema.multitrial )
-    
+        delta = var.optimize_delta_bisection(xpca[:, :, :], p, xvschema=xvschema.multitrial)
+
     # fit MVAR model
-    a = var.fit( xpca, p, delta )
-    
+    a = var.fit(xpca, p, delta)
+
     # residuals
-    r = xpca - var.predict( xpca, a )
+    r = xpca - var.predict(xpca, a)
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(r))
-    
+
     # driving process
     e = dot_special(r, ux)
 
     # correct AR coefficients
     b = np.zeros(a.shape)
-    for k in range(0,p):
-        b[:,k::p] = mx.dot(a[:,k::p].transpose()).dot(ux).transpose()
-    
+    for k in range(0, p):
+        b[:, k::p] = mx.dot(a[:, k::p].transpose()).dot(ux).transpose()
+
     # correct (un)mixing matrix estimatees
     mx = mx.dot(d)
     ux = c.dot(ux)
-    
+
     class Result:
         unmixing = ux
         mixing = mx
         residuals = e
         c = np.cov(cat_trials(e), rowvar=False)
+
     Result.delta = delta
     Result.b = b
         

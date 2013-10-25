@@ -1,16 +1,13 @@
-
 """
 This example shows how to decompose EEG signals into source activations with MVARICA, and subsequently extract single-trial connectivity as features for LDA.
 """
 import numpy as np
+from sklearn.lda import LDA
+import matplotlib.pyplot as plt
 
 import scot
 import scot.backend.sklearn     # use scikit-learn backend
 import scot.xvschema
-
-from sklearn.lda import LDA
-
-import matplotlib.pyplot as plt
 
 
 # The example data set contains a continuous 45 channel EEG recording of a motor
@@ -39,7 +36,7 @@ ws = scot.Workspace(30, reducedim=4, fs=fs, var_delta=0.2)
 #
 # Here we cut segments from 3s to 4s following each trigger out of the EEG. This
 # is right in the middle of the motor imagery period.
-data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
+data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 
 # Perform CSPVARICA
@@ -49,27 +46,27 @@ ws.do_cspvarica()
 # Find optimal regularization parameter for single-trial fitting
 ws.optimize_regularization(scot.xvschema.singletrial, 60)
 
-freq = np.linspace(0,fs,ws.nfft_)
+freq = np.linspace(0, fs, ws.nfft_)
 
 # Single-Trial Fitting and feature extraction
 features = np.zeros((len(triggers), 32))
 for t in range(len(triggers)):
-    print('Trial: %d   '%t, end='\r')
-    ws.set_data(data[:,:,t])
+    print('Trial: %d   ' % t, end='\r')
+    ws.set_data(data[:, :, t])
     ws.fit_var()
 
     con = ws.get_connectivity('ffPDC')
-    
-    alpha = np.mean(con[:,:,np.logical_and(7<freq, freq<13)], axis=2)
-    beta = np.mean(con[:,:,np.logical_and(15<freq, freq<25)], axis=2)
-    
-    features[t,:] = np.array([alpha, beta]).flatten()
+
+    alpha = np.mean(con[:, :, np.logical_and(7 < freq, freq < 13)], axis=2)
+    beta = np.mean(con[:, :, np.logical_and(15 < freq, freq < 25)], axis=2)
+
+    features[t, :] = np.array([alpha, beta]).flatten()
 print('')
-    
-lda = LDA( )
+
+lda = LDA()
 lda.fit(features, classes)
 
 llh = lda.transform(features)
-    
-plt.hist([llh[classes==-1,:], llh[classes==1,:]])
+
+plt.hist([llh[classes == -1, :], llh[classes == 1, :]])
 plt.show()

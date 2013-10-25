@@ -1,4 +1,3 @@
-
 """
 This example shows how to decompose EEG signals into source activations with MVARICA, and visualize time varying connectivity.
 """
@@ -32,7 +31,7 @@ ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
 #
 # Here we cut segments from 3s to 4s following each trigger out of the EEG. This
 # is right in the middle of the motor imagery period.
-data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
+data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 
 # Perform CSPVARICA
@@ -44,7 +43,7 @@ ws.do_cspvarica()
 #
 # Here we cut segments from -2s to 8s around each trigger out of the EEG. This
 # covers the whole trial
-data = scot.datatools.cut_segments(raweeg, triggers, -2*fs, 8*fs)
+data = scot.datatools.cut_segments(raweeg, triggers, -2 * fs, 8 * fs)
 
 
 # Connectivity Analysis
@@ -52,6 +51,6 @@ data = scot.datatools.cut_segments(raweeg, triggers, -2*fs, 8*fs)
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and plot them with matplotlib.
 ws.set_data(data, classes, time_offset=-1)
-ws.plot_tf_connectivity('ffDTF', 1*fs, int(0.2*fs), freq_range=[0,30])
+ws.plot_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), freq_range=[0, 30])
 
 ws.show_plots()

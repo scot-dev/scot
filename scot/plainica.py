@@ -2,10 +2,10 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+import numpy as np
+
 from . import config
 from .datatools import cat_trials
-
-import numpy as np
 
 
 def plainica(x, reducedim=0.99, backend=None):

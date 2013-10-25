@@ -15,7 +15,6 @@ from eegtopo.topoplot import Topoplot
 
 
 class Workspace:
-    
     def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
         """
         Workspace(var_order, **args)
@@ -64,20 +63,19 @@ class Workspace:
         self.reducedim_ = reducedim
         self.nfft_ = nfft
         self.backend_ = backend
-        
+
         self.topo_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
-        
+
     def __str__(self):
         """Information about the Workspace."""
-        
+
         if self.data_ is not None:
-            datastr = '%d samples, %d channels, %d trials'%self.data_.shape
+            datastr = '%d samples, %d channels, %d trials' % self.data_.shape
         else:
             datastr = 'None'
-            
-            
+
         if self.cl_ is not None:
             clstr = str(np.unique(self.cl_))
         else:
@@ -87,22 +85,22 @@ class Workspace:
             sourcestr = str(self.unmixing_.shape[1])
         else:
             sourcestr = 'None'
-            
+
         if self.var_model_ is None:
             varstr = 'None'
         elif isinstance(self.var_model_, dict):
             varstr = str(len(self.var_model_))
         else:
             varstr = '1'
-        
-        s = 'SCoT(var_order = %d):\n'%self.var_order_
+
+        s = 'SCoT(var_order = %d):\n' % self.var_order_
         s += '  Data      : ' + datastr + '\n'
         s += '  Classes   : ' + clstr + '\n'
         s += '  Sources   : ' + sourcestr + '\n'
         s += '  VAR models: ' + varstr + '\n'
-        
+
         return s
-    
+
     def set_data(self, data, cl=None, time_offset=0):
         """
         Workspace.set_data(data, cl=None, time_offset=0)
@@ -131,10 +129,10 @@ class Workspace:
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
-        
+
         if self.unmixing_ != None:
             self.activations_ = dot_special(self.data_, self.unmixing_)
-    
+
     def do_mvarica(self):
         """
         Workspace.do_mvarica()
@@ -152,9 +150,10 @@ class Workspace:
             backend_
 
         """
-        if self.data_ == None:
+        if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_, p=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_, backend=self.backend_)
+        result = mvarica(x=self.data_, p=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_,
+                         backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_model_ = result.b
@@ -195,7 +194,7 @@ class Workspace:
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
-    
+        
     def do_ica(self):
         """
         Workspace.do_ica()
@@ -213,7 +212,7 @@ class Workspace:
             backend_
 
         """
-        if self.data_ == None:
+        if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
         result = plainica(x=self.data_, reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
@@ -225,7 +224,7 @@ class Workspace:
         self.var_delta_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
-        
+
     def remove_sources(self, sources):
         """
         Workspace.remove_sources(sources)
@@ -242,7 +241,7 @@ class Workspace:
         Invalidates: var model
 
         """
-        if self.unmixing_ == None or self.mixing_ == None:
+        if self.unmixing_ is None or self.mixing_ is None:
             raise RuntimeError("No sources available (run do_mvarica first)")
         self.mixing_ = np.delete(self.mixing_, sources, 0)
         self.unmixing_ = np.delete(self.unmixing_, sources, 1)
@@ -251,8 +250,8 @@ class Workspace:
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
-        
-    
+
+
     def fit_var(self):
         """
         Workspace.fit_var()
@@ -269,13 +268,15 @@ class Workspace:
             cl_
 
         """
-        if self.activations_ == None:
+        if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
         if self.cl_ is None:
-            self.var_model_, self.var_cov_ = var.fit(data=self.activations_, p=self.var_order_, delta=self.var_delta_, return_covariance=True)
+            self.var_model_, self.var_cov_ = var.fit(data=self.activations_, p=self.var_order_, delta=self.var_delta_,
+                                                     return_covariance=True)
             self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
         else:
-            self.var_model_, self.var_cov_ = var.fit_multiclass(data=self.activations_, cl=self.cl_, p=self.var_order_, delta=self.var_delta_, return_covariance=True)
+            self.var_model_, self.var_cov_ = var.fit_multiclass(data=self.activations_, cl=self.cl_, p=self.var_order_,
+                                                                delta=self.var_delta_, return_covariance=True)
             self.connectivity_ = {}
             for c in np.unique(self.cl_):
                 self.connectivity_[c] = Connectivity(self.var_model_[c], self.var_cov_[c], self.nfft_)
@@ -301,12 +302,13 @@ class Workspace:
             var_order_
 
         """
-        if self.activations_ == None:
+        if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
-            
-        self.var_delta_ = var.optimize_delta_bisection(data=self.activations_, p=self.var_order_, xvschema=xvschema, skipstep=skipstep)
-                
-    
+
+        self.var_delta_ = var.optimize_delta_bisection(data=self.activations_, p=self.var_order_, xvschema=xvschema,
+                                                       skipstep=skipstep)
+
+
     def get_connectivity(self, measure):
         """
         Workspace.get_connectivity(measure)
@@ -333,7 +335,7 @@ class Workspace:
             return result
         else:
             return getattr(self.connectivity_, measure)()
-    
+
     def get_tf_connectivity(self, measure, winlen, winstep):
         """
         Workspace.get_tf_connectivity(measure, winlen, winstep)
@@ -356,43 +358,44 @@ class Workspace:
             nfft_
             cl_
         """
-        if self.activations_ == None:
+        if self.activations_ is None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
-        [n,m,_] = self.activations_.shape
-        
-        nstep = (n-winlen)//winstep
-        
+        [n, m, _] = self.activations_.shape
+
+        nstep = (n - winlen) // winstep
+
         if self.cl_ is None:
             result = np.zeros((m, m, self.nfft_, nstep), np.complex64)
             i = 0
-            for j in range(0, n-winlen, winstep):
+            for j in range(0, n - winlen, winstep):
                 win = np.arange(winlen) + j
-                data = self.activations_[win,:,:]                
+                data = self.activations_[win, :, :]
                 b, c = var.fit(data, p=self.var_order_, delta=self.var_delta_, return_covariance=True)
                 con = Connectivity(b, c, self.nfft_)
-                result[:,:,:,i] = getattr(con, measure)()
+                result[:, :, :, i] = getattr(con, measure)()
                 i += 1
-        
+
         else:
             result = {}
             for ci in np.unique(self.cl_):
                 result[ci] = np.zeros((m, m, self.nfft_, nstep), np.complex128)
             i = 0
-            for j in range(0, n-winlen, winstep):
+            for j in range(0, n - winlen, winstep):
                 win = np.arange(winlen) + j
-                data = self.activations_[win,:,:]                
-                b, c = var.fit_multiclass(data, cl=self.cl_, p=self.var_order_, delta=self.var_delta_, return_covariance=True)
+                data = self.activations_[win, :, :]
+                b, c = var.fit_multiclass(data, cl=self.cl_, p=self.var_order_, delta=self.var_delta_,
+                                          return_covariance=True)
                 for ci in result.keys():
                     con = Connectivity(b[ci], c[ci], self.nfft_)
-                    result[ci][:,:,:,i] = getattr(con, measure)()
+                    result[ci][:, :, :, i] = getattr(con, measure)()
                 i += 1
         return result
-                
+
     @staticmethod
     def show_plots():
         """Show current plots."""
-        plotting.show_plots( )
-    
+        plotting.show_plots()
+
     def plot_source_topos(self, common_scale=None):
         """
         Workspace.plot_source_topos(common_scale=None)
@@ -409,13 +412,13 @@ class Workspace:
 
         Requires: decomposition
         """
-        if self.unmixing_ == None and self.mixing_ == None:
+        if self.unmixing_ is None and self.mixing_ is None:
             raise RuntimeError("No sources available (run do_mvarica first)")
-            
+
         self._prepare_plots(True, True)
 
         plotting.plot_sources(self.topo_, self.mixmaps_, self.unmixmaps_, common_scale)
-    
+
     def plot_connectivity(self, measure, freq_range=(-np.inf, np.inf)):
         """
         Workspace.plot_connectivity(measure, freq_range)
@@ -430,17 +433,19 @@ class Workspace:
 
         Requires: var model
         """
-        fig = None        
+        fig = None
         self._prepare_plots(True, False)
-        if isinstance(self.connectivity_, dict):            
+        if isinstance(self.connectivity_, dict):
             for c in np.unique(self.cl_):
                 cm = getattr(self.connectivity_[c], measure)()
-                fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_, topomaps=self.mixmaps_, fig=fig)
+                fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_,
+                                                          topomaps=self.mixmaps_, fig=fig)
         else:
             cm = getattr(self.connectivity_, measure)()
-            fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_, topomaps=self.mixmaps_)
+            fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_,
+                                                      topomaps=self.mixmaps_)
         return fig
-    
+
     def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), ignore_diagonal=True):
         """
         Workspace.plot_tf_connectivity(measure, winlen, winstep, freq_range)
@@ -460,49 +465,53 @@ class Workspace:
 
         Requires: var model
         """
-        t0 = 0.5*winlen/self.fs_ + self.time_offset_
-        t1 = self.data_.shape[0]/self.fs_ - 0.5*winlen/self.fs_ + self.time_offset_
-        
+        t0 = 0.5 * winlen / self.fs_ + self.time_offset_
+        t1 = self.data_.shape[0] / self.fs_ - 0.5 * winlen / self.fs_ + self.time_offset_
+
         self._prepare_plots(True, False)
         tfc = self.get_tf_connectivity(measure, winlen, winstep)
-        
+
         if isinstance(tfc, dict):
-            ncl = np.unique(self.cl_).size
+            ncl = np.unique(self.cl_)
             lowest, highest = np.inf, -np.inf
             for c in ncl:
                 tfc[c] = self._clean_measure(measure, tfc[c])
                 if ignore_diagonal:
                     for m in range(tfc[c].shape[0]):
-                        tfc[c][m,m,:,:] = 0
+                        tfc[c][m, m, :, :] = 0
                 highest = max(highest, np.max(tfc[c]))
                 lowest = min(lowest, np.min(tfc[c]))
-                
+
             fig = {}
             for c in ncl:
-                fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=[lowest, highest], freq_range=freq_range, time_range=[t0, t1], topo=self.topo_, topomaps=self.mixmaps_)
-                
+                fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=[lowest, highest],
+                                                                 freq_range=freq_range, time_range=[t0, t1],
+                                                                 topo=self.topo_, topomaps=self.mixmaps_)
+
         else:
             tfc = self._clean_measure(measure, tfc)
             if ignore_diagonal:
                 for m in range(tfc.shape[0]):
-                    tfc[m,m,:,:] = 0
-            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)], freq_range=freq_range, time_range=[t0, t1], topo=self.topo_, topomaps=self.mixmaps_)
+                    tfc[m, m, :, :] = 0
+            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)],
+                                                          freq_range=freq_range, time_range=[t0, t1], topo=self.topo_,
+                                                          topomaps=self.mixmaps_)
         return fig
-        
+
     def _prepare_plots(self, mixing=False, unmixing=False):
         if self.locations_ is None:
             raise RuntimeError("Need sensor locations for plotting")
-            
+
         if self.topo_ is None:
-            self.topo_ = Topoplot( )
+            self.topo_ = Topoplot()
             self.topo_.set_locations(self.locations_)
-        
+
         if mixing and not self.mixmaps_:
             self.mixmaps_ = plotting.prepare_topoplots(self.topo_, self.mixing_)
-        
+
         if unmixing and not self.unmixmaps_:
             self.unmixmaps_ = plotting.prepare_topoplots(self.topo_, self.unmixing_.transpose())
-            
+
     @staticmethod
     def _clean_measure(measure, a):
         if measure in ['a', 'H', 'COH', 'pCOH']:
