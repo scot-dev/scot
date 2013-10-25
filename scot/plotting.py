@@ -101,7 +101,7 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
     return fig
     
     
-def plot_connectivity_spectrum(A, fs=2, freq_range=[-np.inf, np.inf], topo=None, topomaps=None, fig=None):
+def plot_connectivity_spectrum(A, fs=2, freq_range=(-np.inf, np.inf), topo=None, topomaps=None, fig=None):
     A = np.atleast_3d(A)
     [N,M,F] = A.shape
     freq = np.linspace(0, fs/2, F)
@@ -158,7 +158,7 @@ def plot_connectivity_spectrum(A, fs=2, freq_range=[-np.inf, np.inf], topo=None,
     
     return fig
     
-def plot_connectivity_timespectrum(A, fs=2, crange=None, freq_range=[-np.inf, np.inf], time_range=None, topo=None, topomaps=None, fig=None):
+def plot_connectivity_timespectrum(A, fs=2, crange=None, freq_range=(-np.inf, np.inf), time_range=None, topo=None, topomaps=None, fig=None):
     A = np.asarray(A)
     [N,M,F,T] = A.shape
     

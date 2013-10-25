@@ -383,7 +383,7 @@ class Workspace:
 
         plotting.plot_sources(self.topo_, self.mixmaps_, self.unmixmaps_, common_scale)
     
-    def plotConnectivity(self, measure, freq_range=[-np.inf, np.inf]):
+    def plotConnectivity(self, measure, freq_range=(-np.inf, np.inf)):
         '''
         Workspace.plotConnectivity(measure, freq_range)
         
@@ -408,7 +408,7 @@ class Workspace:
             fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_, topomaps=self.mixmaps_)
         return fig
     
-    def plotTFConnectivity(self, measure, winlen, winstep, freq_range=[-np.inf, np.inf], ignore_diagonal=True):
+    def plotTFConnectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), ignore_diagonal=True):
         '''
         Workspace.plotTFConnectivity(measure, winlen, winstep, freq_range)
         

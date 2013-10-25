@@ -49,15 +49,14 @@ def binica( data, binary_location = binica_binary_location ):
     weightstmpfile = 'binicatmp-%s.wts'%uid
     spherefile = 'binica-%s.sph'%uid
     
-    config = {}
-    config['DataFile'] = datafile
-    config['WeightsOutFile'] = weightsfile
-#    config['WeightsTempFile'] = weightstmpfile
-    config['SphereFile'] = spherefile
-    config['chans'] = nchans
-    config['frames'] = nframes
-    config['extended'] = 1
-    
+    config = {'DataFile': datafile,
+              'WeightsOutFile': weightsfile,
+              'SphereFile': spherefile,
+              'chans': nchans,
+              'frames': nframes,
+              'extended': 1}
+    #    config['WeightsTempFile'] = weightstmpfile
+
     # create data file
     f = open( datafile, 'wb' )
     data.tofile(f)
