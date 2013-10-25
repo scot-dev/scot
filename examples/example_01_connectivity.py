@@ -1,10 +1,8 @@
-
 """
 This example shows how to decompose EEG signals into source activations with
 MVARICA, and visualize a connectivity.
 """
 
-import scot.backend.sklearn     # use scikit-learn backend
 #import scot.backend.builtin     # use builtin (default) backend
 import scot
 
@@ -28,7 +26,7 @@ locs = midata.locations
 #
 # Here we cut segments from 3s to 4s following each trigger out of the EEG. This
 # is right in the middle of the motor imagery period.
-data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
+data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 
 # Set up the analysis object
@@ -48,5 +46,5 @@ ws.plot_source_topos()
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and plot them with matplotlib.
 ws.fit_var()
-ws.plot_connectivity('ffDTF', freq_range=[0,30])
+ws.plot_connectivity('ffDTF', freq_range=[0, 30])
 ws.show_plots()

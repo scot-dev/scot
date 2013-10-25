@@ -1,7 +1,7 @@
 SCoT
 ====
 
-Source Connectivity Toolbox for Python 3
+Source Connectivity Toolbox for Python
 
 
 Dependencies

@@ -4,8 +4,10 @@
 
 """ Connectivity Analysis """
 
-import numpy as np
 from functools import partial
+
+import numpy as np
+
 
 #noinspection PyPep8Naming
 class memoize(object):
@@ -25,6 +27,7 @@ class memoize(object):
     Obj.add_to(1) # not enough arguments
     Obj.add_to(1, 2) # returns 3, result is not cached
     """
+
     def __init__(self, func):
         self.func = func
 
@@ -103,19 +106,20 @@ class Connectivity:
         classification of motor imagery data", J. Neural Eng. 10, 2013
     
     """
+
     def __init__(self, b, c=None, nfft=512):
         b = np.asarray(b)
-        (m,mp) = b.shape
+        (m, mp) = b.shape
         p = mp // m
         if m * p != mp:
             raise AttributeError('Second dimension of b must be an integer multiple of the first dimension.')
-            
+
         if c is None:
             self.c = None
         else:
             self.c = np.asarray(c)
-            
-        self.b = np.reshape(b, (m,m,p), 'c')
+
+        self.b = np.reshape(b, (m, m, p), 'c')
         self.m = m
         self.p = p
         self.nfft = nfft
@@ -132,7 +136,7 @@ class Connectivity:
     @memoize
     def A(self):
         """Spectral VAR coefficients"""
-        return np.fft.rfft(np.dstack([np.eye(self.m),-self.b]), self.nfft*2-1)
+        return np.fft.rfft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)
 
     @memoize
     def H(self):
@@ -145,8 +149,8 @@ class Connectivity:
         if self.c == None:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
         H = self.H()
-        return np.dstack([H[:,:,k].dot(self.c).dot(H[:,:,k].transpose().conj()) for k in range(self.nfft)])
-        
+        return np.dstack([H[:, :, k].dot(self.c).dot(H[:, :, k].transpose().conj()) for k in range(self.nfft)])
+
     @memoize
     def logS(self):
         """Logarithmic cross spectral density"""
@@ -158,8 +162,8 @@ class Connectivity:
         if self.c == None:
             raise RuntimeError('Inverse cross spectral density requires invertible noise covariance matrix c.')
         A = self.A()
-        return np.dstack([A[:,:,k].transpose().conj().dot(self.Cinv()).dot(A[:,:,k]) for k in range(self.nfft)])
-        
+        return np.dstack([A[:, :, k].transpose().conj().dot(self.Cinv()).dot(A[:, :, k]) for k in range(self.nfft)])
+
     @memoize
     def logG(self):
         """Logarithmic inverse cross spectral density"""
@@ -171,8 +175,8 @@ class Connectivity:
         S = self.S()
         COH = np.zeros(S.shape, np.complex)
         for k in range(self.nfft):
-            DS = S[:,:,k].diagonal()[np.newaxis]
-            COH[:,:,k] = S[:,:,k] / np.sqrt( DS.transpose().dot(DS) )
+            DS = S[:, :, k].diagonal()[np.newaxis]
+            COH[:, :, k] = S[:, :, k] / np.sqrt(DS.transpose().dot(DS))
         return COH
 
     @memoize
@@ -186,8 +190,8 @@ class Connectivity:
         G = self.G()
         pCOH = np.zeros(G.shape, np.complex)
         for k in range(self.nfft):
-            DG = G[:,:,k].diagonal()[np.newaxis]
-            pCOH[:,:,k] = G[:,:,k] / np.sqrt( DG.transpose().dot(DG) )
+            DG = G[:, :, k].diagonal()[np.newaxis]
+            pCOH[:, :, k] = G[:, :, k] / np.sqrt(DG.transpose().dot(DG))
         return pCOH
 
     @memoize
@@ -197,8 +201,8 @@ class Connectivity:
         PDC = np.zeros(A.shape, np.complex)
         for k in range(self.nfft):
             for j in range(self.m):
-                den = np.sqrt(A[:,j,k].transpose().conj().dot(A[:,j,k]))
-                PDC[:,j,k] = A[:,j,k] / den
+                den = np.sqrt(A[:, j, k].transpose().conj().dot(A[:, j, k]))
+                PDC[:, j, k] = A[:, j, k] / den
         return np.abs(PDC)
 
     @memoize
@@ -209,8 +213,8 @@ class Connectivity:
         for j in range(self.m):
             den = 0
             for k in range(self.nfft):
-                den += A[:,j,k].transpose().conj().dot(A[:,j,k])
-            PDC[:,j,:] = A[:,j,:] * self.nfft / np.sqrt(den)
+                den += A[:, j, k].transpose().conj().dot(A[:, j, k])
+            PDC[:, j, :] = A[:, j, :] * self.nfft / np.sqrt(den)
         return np.abs(PDC)
 
     @memoize
@@ -220,21 +224,21 @@ class Connectivity:
         PDCF = np.zeros(A.shape, np.complex)
         for k in range(self.nfft):
             for j in range(self.m):
-                den = np.sqrt(A[:,j,k].transpose().conj().dot(self.Cinv()).dot(A[:,j,k]))
-                PDCF[:,j,k] = A[:,j,k] / den
+                den = np.sqrt(A[:, j, k].transpose().conj().dot(self.Cinv()).dot(A[:, j, k]))
+                PDCF[:, j, k] = A[:, j, k] / den
         return np.abs(PDCF)
 
     @memoize
     def GPDC(self):
         """Generalized partial directed coherence"""
         A = self.A()
-        DC = np.diag(1/np.diag(self.c))
-        DS = np.sqrt(1/np.diag(self.c))
+        DC = np.diag(1 / np.diag(self.c))
+        DS = np.sqrt(1 / np.diag(self.c))
         PDC = np.zeros(A.shape, np.complex)
         for k in range(self.nfft):
             for j in range(self.m):
-                den = np.sqrt(A[:,j,k].transpose().conj().dot(DC).dot(A[:,j,k]))
-                PDC[:,j,k] = A[:,j,k] * DS / den
+                den = np.sqrt(A[:, j, k].transpose().conj().dot(DC).dot(A[:, j, k]))
+                PDC[:, j, k] = A[:, j, k] * DS / den
         return np.abs(PDC)
 
     @memoize
@@ -244,8 +248,8 @@ class Connectivity:
         DTF = np.zeros(H.shape, np.complex)
         for k in range(self.nfft):
             for i in range(self.m):
-                den = np.sqrt(H[i,:,k].transpose().conj().dot(H[i,:,k]))
-                DTF[i,:,k] = H[i,:,k] / den
+                den = np.sqrt(H[i, :, k].transpose().conj().dot(H[i, :, k]))
+                DTF[i, :, k] = H[i, :, k] / den
         return np.abs(DTF)
 
     @memoize
@@ -256,8 +260,8 @@ class Connectivity:
         for i in range(self.m):
             den = 0
             for k in range(self.nfft):
-                den += H[i,:,k].transpose().conj().dot(H[i,:,k])
-            DTF[i,:,:] = H[i,:,:] * self.nfft / np.sqrt(den)
+                den += H[i, :, k].transpose().conj().dot(H[i, :, k])
+            DTF[i, :, :] = H[i, :, :] * self.nfft / np.sqrt(den)
         return np.abs(DTF)
 
     @memoize
@@ -274,17 +278,14 @@ class Connectivity:
         DTF = np.zeros(H.shape, np.complex)
         for k in range(self.nfft):
             for i in range(self.m):
-                den = np.sqrt(H[i,:,k].transpose().conj().dot(DC).dot(H[i,:,k]))
-                DTF[i,:,k] = H[i,:,k] * DS / den
+                den = np.sqrt(H[i, :, k].transpose().conj().dot(DC).dot(H[i, :, k]))
+                DTF[i, :, k] = H[i, :, k] * DS / den
         return np.abs(DTF)
-
-
-
 
 
 def _inv3(x):
     y = np.zeros(x.shape, np.complex)
     for k in range(x.shape[2]):
-        y[:,:,k] = np.linalg.inv(x[:,:,k])
+        y[:, :, k] = np.linalg.inv(x[:, :, k])
     return y
     

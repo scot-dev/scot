@@ -5,8 +5,11 @@
 from __future__ import print_function
 
 from uuid import uuid4
+import os
+import sys
+
 import numpy as np
-import os, sys
+
 
 binica_binary = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
 
@@ -117,9 +120,9 @@ def check_binary(binary):
     import zipfile
     import stat
 
-    urllib.request.urlretrieve(url, path+'/binica.zip')
-    
-    with zipfile.ZipFile(path+'/binica.zip') as tgz:
-        tgz.extractall(path+'/..')
-    
+    urllib.request.urlretrieve(url, path + '/binica.zip')
+
+    with zipfile.ZipFile(path + '/binica.zip') as tgz:
+        tgz.extractall(path + '/..')
+
     os.chmod(binary, stat.S_IXUSR)

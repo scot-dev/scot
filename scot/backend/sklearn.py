@@ -4,11 +4,10 @@
 
 from __future__ import absolute_import
 
-from .. import config
-
-from .. import datatools
-
 from sklearn.decomposition import FastICA, PCA
+
+from .. import config
+from .. import datatools
 
 
 def wrapper_fastica(data):

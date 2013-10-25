@@ -1,4 +1,3 @@
-
 """
 Load Motor Imagery example data
 """
@@ -7,11 +6,12 @@ from os.path import abspath, dirname, join
 from scot.matfiles import loadmat
 from eegtopo.eegpos3d import positions as eeg_locations
 
-def __load( ):
+
+def __load():
     matfile = loadmat(join(abspath(dirname(__file__)), 'motorimagery.mat'))['s0']
 
     class Data: pass
-    
+
     Data.description = """
                        The Data set contains a continuous 45 channel EEG recording of a motor imagery
                        experiment. The Data was preprocessed to reduce eye movement artifacts and
@@ -41,7 +41,8 @@ def __load( ):
 
     # Obtain default electrode locations corresponding to the channels
     Data.locations = [[v for v in eeg_locations[l].vector] for l in Data.labels]
-    
+
     return Data
-    
+
+
 data = __load()

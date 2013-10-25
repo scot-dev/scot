@@ -1,7 +1,7 @@
-
 from scipy.io import loadmat as sploadmat
 from scipy.io import savemat as spsavemat
 from scipy.io import matlab
+
 
 def loadmat(filename):
     """
@@ -12,8 +12,10 @@ def loadmat(filename):
     """
     data = sploadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
-    
+
+
 savemat = spsavemat
+
 
 def _check_keys(dictionary):
     """
@@ -24,6 +26,7 @@ def _check_keys(dictionary):
         if isinstance(dictionary[key], matlab.mio5_params.mat_struct):
             dictionary[key] = _todict(dictionary[key])
     return dictionary
+
 
 def _todict(matobj):
     """
