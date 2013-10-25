@@ -152,7 +152,7 @@ class Workspace:
             backend_
 
         """
-        if self.data_ == None:
+        if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
         result = mvarica(x=self.data_, p=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_, backend=self.backend_)
         self.mixing_ = result.mixing
@@ -182,7 +182,7 @@ class Workspace:
             backend_
 
         """
-        if self.data_ == None:
+        if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
         result = plainica(x=self.data_, reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
@@ -210,7 +210,7 @@ class Workspace:
         Invalidates: var model
 
         """
-        if self.unmixing_ == None or self.mixing_ == None:
+        if self.unmixing_ is None or self.mixing_ is None:
             raise RuntimeError("No sources available (run do_mvarica first)")
         self.mixing_ = np.delete(self.mixing_, sources, 0)
         self.unmixing_ = np.delete(self.unmixing_, sources, 1)
@@ -237,7 +237,7 @@ class Workspace:
             cl_
 
         """
-        if self.activations_ == None:
+        if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
         if self.cl_ is None:
             self.var_model_, self.var_cov_ = var.fit(data=self.activations_, p=self.var_order_, delta=self.var_delta_, return_covariance=True)
@@ -269,7 +269,7 @@ class Workspace:
             var_order_
 
         """
-        if self.activations_ == None:
+        if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
 
         self.var_delta_ = var.optimize_delta_bisection(data=self.activations_, p=self.var_order_, xvschema=xvschema, skipstep=skipstep)
@@ -324,7 +324,7 @@ class Workspace:
             nfft_
             cl_
         """
-        if self.activations_ == None:
+        if self.activations_ is None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
         [n,m,_] = self.activations_.shape
 
@@ -377,7 +377,7 @@ class Workspace:
 
         Requires: decomposition
         """
-        if self.unmixing_ == None and self.mixing_ == None:
+        if self.unmixing_ is None and self.mixing_ is None:
             raise RuntimeError("No sources available (run do_mvarica first)")
 
         self._prepare_plots(True, True)
