@@ -11,29 +11,29 @@ binica_binary_path = os.path.dirname(os.path.relpath(__file__)) + '/binica'
 
 #noinspection PyNoneFunctionAssignment
 def binica( data, binary_location = binica_binary_location ):
-    '''
+    """
     binica( data )
-    
+
     Simple wrapper for the binica program.
-    
+
     BINICA is bundled with EEGLAB, or can be downloaded from here:
         http://sccn.ucsd.edu/eeglab/binica/
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     data                  : n,m   : 2d data matrix (n samples, m signals)
     binary_location: *    :       : path to the binica binary
-    
+
     Output
     --------------------------------------------------------------------------
     w   weights matrix
     S   sphering matrix
-    
+
     The unmixing matrix is obtained by multiplying U = np.dot(S,w)
-    
+
     * by default the binary is expected to be "binica/ica_linux" relative
       to the directory where this module lies (typically scot/binica/ica_linux)
-    '''
+    """
     
     check_binary( )
     

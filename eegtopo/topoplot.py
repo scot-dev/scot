@@ -14,7 +14,7 @@ from .projections import project_radial_to3d, project_radial_to2d
 from .geometry.euclidean import Vector
 
 class Topoplot:
-    ''' Creates 2D scalp maps. '''
+    """ Creates 2D scalp maps. """
     def __init__(self, m=4, num_lterms=20):
         self.interprange = np.pi * 3/4        
         head_radius = self.interprange

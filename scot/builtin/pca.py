@@ -8,7 +8,7 @@ import numpy as np
 from ..datatools import cat_trials
 
 def pca_svd( data ):
-    '''calculate PCA from SVD (observations in rows)'''    
+    """calculate PCA from SVD (observations in rows)"""
     
     (w,s,v) = np.linalg.svd( data.transpose() )
     
@@ -16,7 +16,7 @@ def pca_svd( data ):
     
 
 def pca_eig( x ):
-    '''calculate PCA as eigenvalues of the covariance (observations in rows)'''
+    """calculate PCA as eigenvalues of the covariance (observations in rows)"""
             
     [w,v] = np.linalg.eigh( x.transpose().dot(x) )
     
@@ -24,15 +24,15 @@ def pca_eig( x ):
     
 
 def pca( x, subtract_mean=False, normalize=False, sort_components=True, reducedim=None, algorithm=pca_eig ):
-    '''
+    """
     pca( x, subtract_mean=False,
-            normalize=False, 
-            sort_components=True, 
-            retain_variance=None, 
+            normalize=False,
+            sort_components=True,
+            retain_variance=None,
             algorithm=pcaEIG ):
-        
+
     calculate principal component analysis (PCA).
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     x              :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
@@ -52,12 +52,12 @@ def pca( x, subtract_mean=False, normalize=False, sort_components=True, reducedi
                                     remove components.
     numcomp        : None :       : Select numcomp components wtih highest variance
     algorithm      : pcaEIG :     : which function to call for eigenvector estimation
-    
+
     Output
     --------------------------------------------------------------------------
     w   PCA weights      y = x * w
     v   inverse weights  x = y * v
-    '''
+    """
     
     x = cat_trials(np.atleast_3d(x))
     

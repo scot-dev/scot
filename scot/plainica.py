@@ -11,12 +11,12 @@ import numpy as np
 
 
 def plainica(x, reducedim=0.99, backend=None):
-    '''
+    """
     plainica( x )
     plainica( x, reducedim, backend )
-    
+
     Apply ICA to the data x, with optional PCA dimensionality reduction.
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
@@ -33,12 +33,12 @@ def plainica(x, reducedim=0.99, backend=None):
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
-    
+
     Output
     --------------------------------------------------------------------------
     U   Unmixing matrix
     m   Mixing matrix
-    '''
+    """
 
     x = np.atleast_3d(x)
     l, m, t = np.shape(x)

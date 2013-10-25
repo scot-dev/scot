@@ -17,15 +17,15 @@ from eegtopo.topoplot import Topoplot
 class Workspace:
     
     def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
-        '''
+        """
         Workspace(var_order, **args)
-        
+
         Create a new Workspace instance.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         var_order      :      :       : Autoregressive model order
-        
+
         Opt. Parameters Default  Shape   Description
         --------------------------------------------------------------------------
         fs             : 2    :       : Sampling rate in 1/s. Defaults to 2 so 1
@@ -47,7 +47,7 @@ class Workspace:
         backend        : None :       : Specify backend to use. When set to None
                                         SCoT's default backend (see config.py)
                                         is used.
-        '''
+        """
         self.data_ = None
         self.cl_ = None
         self.fs_ = fs
@@ -70,7 +70,7 @@ class Workspace:
         self.unmixmaps_ = []
         
     def __str__(self):
-        '''Information about the Workspace.'''
+        """Information about the Workspace."""
         
         if self.data_ is not None:
             datastr = '%d samples, %d channels, %d trials'%self.data_.shape
@@ -104,11 +104,11 @@ class Workspace:
         return s
     
     def set_data(self, data, cl=None, time_offset=0):
-        '''
+        """
         Workspace.set_data(data, cl=None, time_offset=0)
-        
+
         Create a new Workspace instance.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         data           :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
@@ -117,14 +117,14 @@ class Workspace:
                                         each trial. a class label can be any
                                         python type (string, number, ...) that
                                         can be used as a key in map.
-        time_offset    : 0    :       : Time offset of the trials. Used for 
+        time_offset    : 0    :       : Time offset of the trials. Used for
                                         labelling the x-axis of time/frequency
                                         plots.
 
         Provides: data set, class labels
-        
+
         Invalidates: var model
-        '''
+        """
         self.data_ = np.atleast_3d(data)
         self.cl_ = cl
         self.time_offset_ = time_offset
@@ -136,22 +136,22 @@ class Workspace:
             self.activations_ = dot_special(self.data_, self.unmixing_)
     
     def do_mvarica(self):
-        '''
+        """
         Workspace.do_mvarica()
-        
+
         Perform MVARICA source decomposition and VAR model fitting.
-        
+
         Requires: data set
 
         Provides: decomposition, activations, var model
-        
+
         Behaviour of this function is modified by the following attributes:
             var_order_
             var_delta_
             reducedim_
             backend_
-        
-        '''
+
+        """
         if self.data_ == None:
             raise RuntimeError("MVARICA requires data to be set")
         result = mvarica(x=self.data_, p=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_, backend=self.backend_)
@@ -166,22 +166,22 @@ class Workspace:
         self.unmixmaps_ = []
     
     def do_ica(self):
-        '''
+        """
         Workspace.do_ica()
-        
+
         Perform plain ICA source decomposition.
-        
+
         Requires: data set
 
         Provides: decomposition, activations
-        
+
         Invalidates: var model
-        
+
         Behaviour of this function is modified by the following attributes:
             reducedim_
             backend_
-        
-        '''
+
+        """
         if self.data_ == None:
             raise RuntimeError("ICA requires data to be set")
         result = plainica(x=self.data_, reducedim=self.reducedim_, backend=self.backend_)
@@ -195,21 +195,21 @@ class Workspace:
         self.unmixmaps_ = []
         
     def remove_sources(self, sources):
-        '''
+        """
         Workspace.remove_sources(sources)
-        
+
         Manually remove sources from the decomposition.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         sources        :      :      : Indicate which components to remove
                                        (slice, int or array of ints)
-        
+
         Requires: decomposition
-        
+
         Invalidates: var model
-        
-        '''
+
+        """
         if self.unmixing_ == None or self.mixing_ == None:
             raise RuntimeError("No sources available (run do_mvarica first)")
         self.mixing_ = np.delete(self.mixing_, sources, 0)
@@ -222,21 +222,21 @@ class Workspace:
         
     
     def fit_var(self):
-        '''
+        """
         Workspace.fit_var()
-        
+
         Fit new VAR model(s).
-        
+
         Requires: data set
 
         Provides: var model
-        
+
         Behaviour of this function is modified by the following attributes:
             var_order_
             var_delta_
             cl_
-        
-        '''
+
+        """
         if self.activations_ == None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
         if self.cl_ is None:
@@ -249,12 +249,12 @@ class Workspace:
                 self.connectivity_[c] = Connectivity(self.var_model_[c], self.var_cov_[c], self.nfft_)
 
     def optimize_regularization(self, xvschema, skipstep=1):
-        '''
+        """
         Workspace.optimize_regularization(xvschema, skipstep=1)
-        
+
         Attempt to find a close-to-optimal regularization Parameter for the
         current data set.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         xvschema       :      : func  : Function to generate training and testing set.
@@ -262,13 +262,13 @@ class Workspace:
         skipstep       : 1    : 1     : Higher values speed up the calculation but
                                         cause higher variance in cost function which
                                         will result in less accurate results.
-        
+
         Requires: activations
-        
+
         Behaviour of this function is modified by the following attributes:
             var_order_
-        
-        '''
+
+        """
         if self.activations_ == None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
             
@@ -276,22 +276,22 @@ class Workspace:
                 
     
     def get_connectivity(self, measure):
-        '''
+        """
         Workspace.get_connectivity(measure)
-        
+
         Calculate and return spectral connectivity measure.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         measure        :      : str   : Refer to scot.Connectivity for supported
                                         measures.
-        
+
         Requires: var model
-        
+
         Behaviour of this function is modified by the following attributes:
             nfft_
-            cl_        
-        '''
+            cl_
+        """
         if self.connectivity_ is None:
             raise RuntimeError("Connectivity requires a VAR model (run do_mvarica or fit_var first)")
         if isinstance(self.connectivity_, dict):
@@ -303,27 +303,27 @@ class Workspace:
             return getattr(self.connectivity_, measure)()
     
     def get_tf_connectivity(self, measure, winlen, winstep):
-        '''
+        """
         Workspace.get_tf_connectivity(measure, winlen, winstep)
-        
+
         Calculate and return time-varying spectral connectivity measure.
-        
+
         Connectivity is estimated in a sliding window approach on the current
         data set.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         measure        :      : str   : Refer to scot.Connectivity for supported
                                         measures.
         winlen         :      :       : Length of the sliding window (in samples).
         winstep        :      :       : Step size for sliding window (in sapmles).
-        
+
         Requires: var model
-        
+
         Behaviour of this function is modified by the following attributes:
             nfft_
-            cl_        
-        '''
+            cl_
+        """
         if self.activations_ == None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
         [n,m,t] = self.activations_.shape
@@ -362,11 +362,11 @@ class Workspace:
         plotting.show_plots( )
     
     def plot_source_topos(self, common_scale=None):
-        '''
+        """
         Workspace.plot_source_topos(common_scale=None)
-        
+
         Plot topography of the Source decomposition.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         common_scale   : None :       : If set to None, each topoplot's color
@@ -374,9 +374,9 @@ class Workspace:
                                         Otherwise specifies the percentile
                                         (1-99) of values in all plot. This value
                                         is taken as the maximum color scale.
-        
+
         Requires: decomposition
-        '''
+        """
         if self.unmixing_ == None and self.mixing_ == None:
             raise RuntimeError("No sources available (run do_mvarica first)")
             
@@ -385,19 +385,19 @@ class Workspace:
         plotting.plot_sources(self.topo_, self.mixmaps_, self.unmixmaps_, common_scale)
     
     def plot_connectivity(self, measure, freq_range=(-np.inf, np.inf)):
-        '''
+        """
         Workspace.plot_connectivity(measure, freq_range)
-        
+
         Plot spectral connectivity.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         measure        :      : str   : Refer to scot.Connectivity for supported
                                         measures.
         freq_range     :      : 2     : Restrict plotted frequency range.
-        
+
         Requires: var model
-        '''
+        """
         fig = None        
         self._prepare_plots(True, False)
         if isinstance(self.connectivity_, dict):            
@@ -410,14 +410,14 @@ class Workspace:
         return fig
     
     def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), ignore_diagonal=True):
-        '''
+        """
         Workspace.plot_tf_connectivity(measure, winlen, winstep, freq_range)
-        
+
         Calculate and plot time-varying spectral connectivity measure.
-        
+
         Connectivity is estimated in a sliding window approach on the current
         data set.
-        
+
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
         measure        :      : str   : Refer to scot.Connectivity for supported
@@ -425,9 +425,9 @@ class Workspace:
         winlen         :      :       : Length of the sliding window (in samples).
         winstep        :      :       : Step size for sliding window (in sapmles).
         freq_range     :      : 2     : Restrict plotted frequency range.
-        
+
         Requires: var model
-        '''
+        """
         fig = None        
         
         t0 = 0.5*winlen/self.fs_ + self.time_offset_

@@ -14,16 +14,16 @@ class Defaults:
     xvschema = xv.multitrial
 
 def fit( data, p, delta=None, return_residuals=False, return_covariance=False ):
-    '''
+    """
     fit( data, p )
     fit( data, p, delta )
-        
+
     Fit least squares estimate of vector autoregressive (VAR) model with
     order p to the data.
-    
+
     If sqrtdelta is provited and nonzero, the least squares estimation is
     regularized with ridge regression.
-    
+
     Parameters       Default  Shape   Description
     --------------------------------------------------------------------------
     data             :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
@@ -32,14 +32,14 @@ def fit( data, p, delta=None, return_residuals=False, return_covariance=False ):
     delta            : None :       : regularization parameter
     return_residuals : False :      : if True, also return model residuals
     return_covariance: False :      : if True, also return covariance
-    
+
     Output
     --------------------------------------------------------------------------
     b   Model coefficients: [b_0, b_1, ... b_p], each sub matrix b_k is of size m*m
     res (optional) Model residuals: (same shape as data), note that
         the first p residuals are invalid.
     c   (optional) Covariance of residuals
-    
+
     Note on the arrangement of model coefficients:
         b is of shape m, m*p, with sub matrices arranged as follows:
             b_00 b_01 ... b_0m
@@ -48,7 +48,7 @@ def fit( data, p, delta=None, return_residuals=False, return_covariance=False ):
             b_m0 b_m1 ... b_mm
         Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
-    '''
+    """
     data = np.atleast_3d(data)
     
     if delta == 0 or delta is None:
@@ -79,15 +79,15 @@ def fit( data, p, delta=None, return_residuals=False, return_covariance=False ):
    
     
 def fit_multiclass( data, cl, p, delta=None, return_residuals=False, return_covariance=False ):
-    '''
+    """
     fit_multiclass( data, cl, p )
     fit_multiclass( data, cl, p, delta )
-    
+
     Fits a separate autoregressive model for each class.
-    
+
     If sqrtdelta is provited and nonzero, the least squares estimation is
     regularized with ridge regression.
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     data             :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
@@ -98,14 +98,14 @@ def fit_multiclass( data, cl, p, delta=None, return_residuals=False, return_cova
     delta            : None :       : regularization parameter
     return_residuals : False :      : if True, also return model residuals
     return_covariance: False :      : if True, also return dictionary of covariances
-    
+
     Output
     --------------------------------------------------------------------------
     bcl   dictionary of model coefficients for each class
     res   (optional) Model residuals: (same shape as data), note that
           the first p (depending on the class) residuals are invalid.
     ccl   (optional) dictionary of residual covariances for each class
-    '''
+    """
     
     data = np.atleast_3d(data)
     cl = np.asarray(cl)
@@ -155,12 +155,12 @@ def fit_multiclass( data, cl, p, delta=None, return_residuals=False, return_cova
     
     
 def simulate( l, b, noisefunc=None ):
-    '''
+    """
     simulate( l, b )
     simulate( l, b, noisefunc )
-    
+
     Simulate vector autoregressive (VAR) model with optional noise generating function.
-    
+
     Note on the arrangement of model coefficients:
         b is of shape m, m*p, with sub matrices arranged as follows:
             b_00 b_01 ... b_0m
@@ -169,18 +169,18 @@ def simulate( l, b, noisefunc=None ):
             b_m0 b_m1 ... b_mm
         Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     l              :      : 1     : Number of samples to generate
                    :      : 2     : l[0]: number of samples, l[1]: number of trials
     b              :      : m,m*p : Model coefficients
     noisefunc      : None :       : callback function that takes no parameter and returns m values
-    
+
     Output           Shape   Description
     --------------------------------------------------------------------------
     data           : l,m,t : 3D data matrix
-    '''
+    """
     b = np.atleast_2d(b)
     (m,n) = np.shape( b )
     p = int(n / m)
@@ -210,14 +210,14 @@ def simulate( l, b, noisefunc=None ):
     
     
 def predict( data, b ):
-    '''
+    """
     predict( data, b )
-    
+
     Predict samples from actual data using VAR model coefficients b.
-    
+
     Note that the model requires p past samples for prediction. Thus, the first
     p samples are invalid and set to 0.
-    
+
     Note on the arrangement of model coefficients:
         b is of shape m, m*p, with sub matrices arranged as follows:
             b_00 b_01 ... b_0m
@@ -226,17 +226,17 @@ def predict( data, b ):
             b_m0 b_m1 ... b_mm
         Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
                           : n,m   : 2d data matrix (n samples, m signals)
     b              :      : m,m*p : Model coefficients
-    
+
     Output           Shape   Description
     --------------------------------------------------------------------------
     predicted      : l,m,t : 3D data matrix
-    '''
+    """
     data = np.atleast_3d(data)
     (l,m,t) = data.shape
     
@@ -252,13 +252,13 @@ def predict( data, b ):
 
     
 def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t,nt), skipstep=1 ):
-    '''
+    """
     optimize_delta_bisection( data, p )
     optimize_delta_bisection( data, p, xvschema )
     optimize_delta_bisection( data, p, xvschema, skipstep )
-    
+
     Use the bisection method to find optimal regularization parameter delta.
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
@@ -269,11 +269,11 @@ def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t
     skipstep       : 1    : 1     : Higher values speed up the calculation but
                                     cause higher variance in cost function which
                                     will result in less accurate results.
-    
+
     Output           Shape   Description
     --------------------------------------------------------------------------
     delta         : 1     : Optimal regularization parameter
-    '''
+    """
     data = np.atleast_3d(data)
     (l,m,t) = data.shape
     
@@ -332,14 +332,14 @@ def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t
 
 
 def optimize_delta_gradientdescent( data, p, skipstep=1, xvschema=lambda t,nt: Defaults.xvschema(t,nt) ):
-    '''
+    """
     optimize_delta_bisection( data, p )
     optimize_delta_bisection( data, p, xvschema )
     optimize_delta_bisection( data, p, xvschema, skipstep )
-    
+
     Use gradient descent to find optimal regularization parameter delta.
     Stable but slow. Use optimize_delta_bisection instead.
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
@@ -350,11 +350,11 @@ def optimize_delta_gradientdescent( data, p, skipstep=1, xvschema=lambda t,nt: D
     skipstep       : 1    : 1     : Higher values speed up the calculation but
                                     cause higher variance in cost function which
                                     will result in less accurate results.
-    
+
     Output           Shape   Description
     --------------------------------------------------------------------------
     delta         : 1     : Optimal regularization parameter
-    '''
+    """
     data = np.atleast_3d(data)
     (l,m,t) = data.shape
     
@@ -385,7 +385,7 @@ def optimize_delta_gradientdescent( data, p, skipstep=1, xvschema=lambda t,nt: D
     
     
 def _msge_crossvalidated( data, p, delta, xvschema, skipstep):
-    '''leave-one-trial-out cross validation of VAR prediction error'''
+    """leave-one-trial-out cross validation of VAR prediction error"""
     data = np.atleast_3d(data)
     (l,m,t) = np.shape( data )
     assert(t>1)
@@ -478,7 +478,7 @@ def _msge_with_gradient( data, p, delta, underdetermined, xvschema, skipstep ):
     
     
 def __construct_eqns( data, p ):
-    '''Construct VAR equation system'''
+    """Construct VAR equation system"""
     (l,m,t) = np.shape( data )
     n = (l-p)*t     # number of linear relations
     # Construct matrix x (predictor variables)
@@ -495,7 +495,7 @@ def __construct_eqns( data, p ):
     return x, y
     
 def __construct_eqns_rls( data, p, sqrtdelta ):
-    '''Construct VAR equation system with RLS constraint'''
+    """Construct VAR equation system with RLS constraint"""
     (l,m,t) = np.shape( data )
     n = (l-p)*t     # number of linear relations
     # Construct matrix x (predictor variables)

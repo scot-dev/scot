@@ -10,17 +10,17 @@ from . import var
 import numpy as np
 
 def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
-    '''
+    """
     mvarica( x, p )
     mvarica( x, p, retain_variance, delta )
     mvarica( x, p, numcomp, delta )
-    
+
     Apply MVARICA to the data x. MVARICA performs the following steps:
         1. Optional dimensionality reduction with PCA
         2. Fitting a VAR model tho the data
         3. Decomposing the VAR model residuals with ICA
         4. Correcting the VAR coefficients
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
     x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
@@ -40,7 +40,7 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
-    
+
     Output
     --------------------------------------------------------------------------
     b   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size m*m
@@ -49,7 +49,7 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     e   Residual process
     c   Residual covariance matrix
     delta   Regularization parameter
-    
+
     Note on the arrangement of model coefficients:
         b is of shape m, m*p, with sub matrices arranged as follows:
             b_00 b_01 ... b_0m
@@ -58,7 +58,7 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
             b_m0 b_m1 ... b_mm
         Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
-    '''
+    """
     
     x = np.atleast_3d(x)
     l, m, t = np.shape(x)

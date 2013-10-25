@@ -2,7 +2,7 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 Martin Billinger
 
-'''Spherical geometry support module'''
+"""Spherical geometry support module"""
 
 import math
 from .euclidean import Vector
@@ -14,7 +14,7 @@ eps = 1e-15
 ################################################################################
 
 class Point:
-    '''Point on the surface of a sphere'''
+    """Point on the surface of a sphere"""
     
     def __init__(self, x=None, y=None, z=None):
         if x is None and y is None and z is None:
@@ -28,13 +28,13 @@ class Point:
             
     @classmethod
     def fromvector(cls, v):
-        '''Initialize from euclidean vector'''
+        """Initialize from euclidean vector"""
         w = v.normalized()
         return cls(w.x, w.y, w.z)
     
     @property
     def vector(self):
-        '''position in 3d space'''
+        """position in 3d space"""
         return self._pos3d
         
     @vector.setter
@@ -57,7 +57,7 @@ class Point:
 ################################################################################
         
 class Line:
-    '''Line on the spherical surface (also known as grand circle)'''
+    """Line on the spherical surface (also known as grand circle)"""
     
     def __init__(self, a, b ):
         self.a = Point.fromvector(a.vector)
@@ -77,7 +77,7 @@ class Line:
 ################################################################################
         
 class Circle:
-    '''Arbitrary circle on the spherical surface'''
+    """Arbitrary circle on the spherical surface"""
     
     def __init__(self, a, b, c=None ):
         if c is None:
@@ -108,11 +108,11 @@ class Circle:
 ################################################################################
         
 class Construct:
-    '''Collection of methods for geometric construction on a sphere'''
+    """Collection of methods for geometric construction on a sphere"""
     
     @staticmethod
     def midpoint( a, b ):
-        '''Point exactly between a and b'''
+        """Point exactly between a and b"""
         return Point.fromvector( (a.vector + b.vector) / 2 )
         
     @staticmethod

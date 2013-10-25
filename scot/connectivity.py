@@ -119,7 +119,7 @@ class Connectivity:
 
     @memoize
     def Cinv(self):
-        '''Inverse of the noise covariance'''
+        """Inverse of the noise covariance"""
         try:
             return np.linalg.inv(self.c)
         except np.linalg.linalg.LinAlgError:
@@ -128,17 +128,17 @@ class Connectivity:
 
     @memoize
     def A(self):
-        '''Spectral VAR coefficients'''
+        """Spectral VAR coefficients"""
         return np.fft.rfft(np.dstack([np.eye(self.m),-self.b]), self.nfft*2-1)
 
     @memoize
     def H(self):
-        '''VAR transfer function'''
+        """VAR transfer function"""
         return _inv3(self.A())
 
     @memoize
     def S(self):
-        '''Cross spectral density'''
+        """Cross spectral density"""
         if self.c == None:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
         H = self.H()
@@ -146,12 +146,12 @@ class Connectivity:
         
     @memoize
     def logS(self):
-        '''Logarithmic cross spectral density'''
+        """Logarithmic cross spectral density"""
         return np.log10(np.abs(self.S()))
 
     @memoize
     def G(self):
-        '''Inverse cross spectral density'''
+        """Inverse cross spectral density"""
         if self.c == None:
             raise RuntimeError('Inverse cross spectral density requires invertible noise covariance matrix c.')
         A = self.A()
@@ -159,12 +159,12 @@ class Connectivity:
         
     @memoize
     def logG(self):
-        '''Logarithmic inverse cross spectral density'''
+        """Logarithmic inverse cross spectral density"""
         return np.log10(np.abs(self.G()))
 
     @memoize
     def COH(self):
-        '''Coherence'''
+        """Coherence"""
         S = self.S()
         COH = np.zeros(S.shape, np.complex)
         for k in range(self.nfft):
@@ -174,12 +174,12 @@ class Connectivity:
 
     @memoize
     def PHI(self):
-        '''Phase angle'''
+        """Phase angle"""
         return np.angle(self.S())
 
     @memoize
     def pCOH(self):
-        '''Partial coherence'''
+        """Partial coherence"""
         G = self.G()
         pCOH = np.zeros(G.shape, np.complex)
         for k in range(self.nfft):
@@ -189,7 +189,7 @@ class Connectivity:
 
     @memoize
     def PDC(self):
-        '''Partial directed coherence'''
+        """Partial directed coherence"""
         A = self.A()
         PDC = np.zeros(A.shape, np.complex)
         for k in range(self.nfft):
@@ -200,7 +200,7 @@ class Connectivity:
 
     @memoize
     def ffPDC(self):
-        '''Full frequency partial directed coherence'''
+        """Full frequency partial directed coherence"""
         A = self.A()
         PDC = np.zeros(A.shape, np.complex)
         for j in range(self.m):
@@ -212,7 +212,7 @@ class Connectivity:
 
     @memoize
     def PDCF(self):
-        '''Partial directed coherence factor'''
+        """Partial directed coherence factor"""
         A = self.A()
         PDCF = np.zeros(A.shape, np.complex)
         for k in range(self.nfft):
@@ -223,7 +223,7 @@ class Connectivity:
 
     @memoize
     def GPDC(self):
-        '''Generalized partial directed coherence'''
+        """Generalized partial directed coherence"""
         A = self.A()
         DC = np.diag(1/np.diag(self.c))
         DS = np.sqrt(1/np.diag(self.c))
@@ -236,7 +236,7 @@ class Connectivity:
 
     @memoize
     def DTF(self):
-        '''Directed transfer function'''
+        """Directed transfer function"""
         H = self.H()
         DTF = np.zeros(H.shape, np.complex)
         for k in range(self.nfft):
@@ -247,7 +247,7 @@ class Connectivity:
 
     @memoize
     def ffDTF(self):
-        '''Full frequency directed transfer function'''
+        """Full frequency directed transfer function"""
         H = self.H()
         DTF = np.zeros(H.shape, np.complex)
         for i in range(self.m):
@@ -259,12 +259,12 @@ class Connectivity:
 
     @memoize
     def dDTF(self):
-        '''"Direct" dirrected transfer function'''
+        """"Direct" dirrected transfer function"""
         return np.abs(self.pCOH()) * self.ffDTF()
 
     @memoize
     def GDTF(self):
-        '''Generalized directed transfer function'''
+        """Generalized directed transfer function"""
         H = self.H()
         DC = np.diag(np.diag(self.c))
         DS = np.sqrt(np.diag(self.c))
