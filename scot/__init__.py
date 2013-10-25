@@ -4,6 +4,8 @@
 
 """ SCoT: The Source Connectivity Toolbox """
 
+__all__ = ['connectivity', 'datatools', 'matfiles', 'ooapi', 'plainica', 'plotting', 'var', 'varica', 'xvschema']
+
 from . import config
 
 # default backend
