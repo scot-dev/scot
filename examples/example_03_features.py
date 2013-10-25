@@ -44,7 +44,7 @@ ws.set_data(data, classes)
 ws.do_cspvarica()
 
 # Find optimal regularization parameter for single-trial fitting
-ws.optimize_regularization(scot.xvschema.singletrial, 60)
+#ws.optimize_regularization(scot.xvschema.singletrial, 60)
 
 freq = np.linspace(0, fs, ws.nfft_)
 

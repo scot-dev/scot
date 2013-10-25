@@ -26,31 +26,13 @@ def csp( X, cl, numcomp=np.inf ):
     V   inverse (reconstruction) filter  X = Y * V
     '''
     
-    # TODO: optimization:
-    #   1. subtracting the mean is not required
-    #   2. normalizing each trial is not required, if instead we normalize by the diagonal of the covariance matrix
-    #   3. then X.copy() is no longer required.
-    
-    # TODO: normalize by trace
-    
-    # make sure we don't mess with the outside X
-    X = np.atleast_3d(X).copy()    
+    X = np.atleast_3d(X)    
     cl = np.asarray(cl).ravel()
     
     N, M, T = X.shape
     
     if T != cl.size:
         raise AttributeError('CSP only works with multiple classes. Number of elemnts in cl (%d) must equal 3rd dimension of X (%d)'%(cl.size, T))
-        
-    # subtract mean for each trial separately
-    for t in range(T):
-        for m in range(M):
-            X[:,m,t] -= np.mean(X[:,m,t])
-            
-    # normalize each trial separately
-    for t in range(T):
-        K = np.diag(1.0 / np.std(X[:,:,t], 0, ddof=1))
-        X[:,:,t] = X[:,:,t].dot(K)
         
     X1 = X[:,:,cl==1]
     X2 = X[:,:,cl!=1]
