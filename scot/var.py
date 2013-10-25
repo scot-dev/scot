@@ -193,8 +193,8 @@ def simulate( l, b, noisefunc=None ):
     if noisefunc is None:
         noisefunc = partial( np.random.normal, size=(1,m) )
         
-    n = l + 10 * p;
-    
+    n = l + 10 * p
+
     y = np.zeros((n,m,t))
     
     for s in range(t):
@@ -488,10 +488,10 @@ def __construct_eqns( data, p ):
             x[:,i*p+k-1] = np.reshape( data[p-k:-k, i, :], n )
             
     # Construct vectors yi (response variables for each channel i)
-    y = np.zeros( (n, m) );
+    y = np.zeros( (n, m) )
     for i in range(m):
-        y[:,i] = np.reshape( data[p:, i, :], n );
-            
+        y[:,i] = np.reshape( data[p:, i, :], n )
+
     return x, y
     
 def __construct_eqns_rls( data, p, sqrtdelta ):
@@ -506,9 +506,9 @@ def __construct_eqns_rls( data, p, sqrtdelta ):
     np.fill_diagonal(x[n:,:], sqrtdelta)
             
     # Construct vectors yi (response variables for each channel i)
-    y = np.zeros( (n + m*p, m) );
+    y = np.zeros( (n + m*p, m) )
     for i in range(m):
-        y[:n,i] = np.reshape( data[p:, i, :], n );
-            
+        y[:n,i] = np.reshape( data[p:, i, :], n )
+
     return x, y
     

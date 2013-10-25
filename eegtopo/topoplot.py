@@ -36,8 +36,8 @@ class Topoplot:
                 ]
         self.path_head = path.Path(verts, codes)
            
-        x = head_radius * np.cos((90.0-nose_angle/2)*np.pi/180.0);
-        y = head_radius * np.sin((90.0-nose_angle/2)*np.pi/180.0);        
+        x = head_radius * np.cos((90.0-nose_angle/2)*np.pi/180.0)
+        y = head_radius * np.sin((90.0-nose_angle/2)*np.pi/180.0)
         verts = np.array([(x,y), (0,head_radius * (1+nose_length)), (-x,y)])
         codes = [path.Path.MOVETO, path.Path.LINETO, path.Path.LINETO]
         self.path_nose = path.Path(verts, codes)
@@ -101,7 +101,7 @@ class Topoplot:
         cliptransform = axes.transData
         if crange is None:
             vru = np.nanmax(np.abs(self.image))
-            vrl = -vru;
+            vrl = -vru
         else:
             vrl, vru = crange            
         return axes.imshow(self.image, vmin=vrl, vmax=vru, clip_path=(self.path_head,cliptransform), extent=(-self.interprange, self.interprange, -self.interprange, self.interprange) )

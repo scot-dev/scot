@@ -51,8 +51,8 @@ class TestDataMangling(unittest.TestCase):
             
     def test_dot_special(self):
         x = np.random.randn(60,5,9)
-        a = np.eye(5) * 2;
-        
+        a = np.eye(5) * 2
+
         xc = x.copy()
         ac = a.copy()
         

@@ -97,8 +97,8 @@ class Circle:
 
         c = self.c.vector * self.x.vector.dot(self.c.vector) # center in circle plane
         
-        a = (self.x.vector - c).normalized( );
-        b = (p.vector - c).normalized( );
+        a = (self.x.vector - c).normalized( )
+        b = (p.vector - c).normalized( )
         return math.acos(a.dot(b))
         
     def distance(self, p):

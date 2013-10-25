@@ -445,7 +445,7 @@ class Workspace:
                 tfc[c] = self._clean_measure(measure, tfc[c])
                 if ignore_diagonal:
                     for m in range(tfc[c].shape[0]):
-                        tfc[c][m,m,:,:] = 0;
+                        tfc[c][m,m,:,:] = 0
                 highest = max(highest, np.max(tfc[c]))
                 lowest = min(lowest, np.min(tfc[c]))
                 
@@ -457,7 +457,7 @@ class Workspace:
             tfc = self._clean_measure(measure, tfc)
             if ignore_diagonal:
                 for m in range(tfc.shape[0]):
-                    tfc[m,m,:,:] = 0;
+                    tfc[m,m,:,:] = 0
             fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)], freq_range=freq_range, time_range=[t0, t1], topo=self.topo_, topomaps=self.mixmaps_)
         return fig
         
