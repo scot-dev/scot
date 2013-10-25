@@ -9,7 +9,7 @@ import math
 class Vector:
     """3D-Vector class"""
     
-    def __init__(self, x=0, y=0, z=0):
+    def __init__(self, x=0.0, y=0.0, z=0.0):
         """Initialize from three numbers"""
         self.x, self.y, self.z = float(x), float(y), float(z)
         

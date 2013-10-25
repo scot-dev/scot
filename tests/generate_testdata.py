@@ -21,7 +21,7 @@ def generate_covsig(covmat, n):
         to_go = min(randn_index+n*m-len(x),len(randn))
         x.extend(randn[randn_index:to_go])
         randn_index = to_go % len(randn)
-    x = np.reshape(x,[m,n])
+    x = np.reshape(x,(m,n))
     
     # matrix to make cov(x) = I
     d = np.linalg.inv(np.linalg.cholesky(np.atleast_2d(np.cov(x))))

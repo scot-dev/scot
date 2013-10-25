@@ -138,9 +138,11 @@ def fit_multiclass( data, cl, p, delta=None, return_residuals=False, return_cova
             
         if return_covariance:
             ccl[c] = np.cov(datatools.cat_trials(r), rowvar=False)
-    
+
+    result = []
+
     if return_residuals or return_covariance:
-        result = [bcl]
+        result.append(bcl)
     else:
         return bcl
         
