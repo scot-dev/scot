@@ -6,35 +6,35 @@ from uuid import uuid4
 import numpy as np
 import os, sys
 
-binica_binary_location = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
-binica_binary_path = os.path.dirname(os.path.relpath(__file__)) + '/binica'
+binica_binary = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
 
-def binica( data, binary_location = binica_binary_location ):
-    '''
+#noinspection PyNoneFunctionAssignment,PyTypeChecker
+def binica( data, binary = binica_binary ):
+    """
     binica( data )
-    
+
     Simple wrapper for the binica program.
-    
+
     BINICA is bundled with EEGLAB, or can be downloaded from here:
         http://sccn.ucsd.edu/eeglab/binica/
-    
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    data                  : N,M   : 2d data matrix (N samples, M signals)
-    binary_location: *    :       : path to the binica binary
-    
+    data                  : n,m   : 2d data matrix (n samples, m signals)
+    binary         : *    :       : path to the binica binary
+
     Output
     --------------------------------------------------------------------------
-    W   weights matrix
+    w   weights matrix
     S   sphering matrix
-    
-    The unmixing matrix is obtained by multiplying U = np.dot(S,W)
-    
+
+    The unmixing matrix is obtained by multiplying U = np.dot(S,w)
+
     * by default the binary is expected to be "binica/ica_linux" relative
       to the directory where this module lies (typically scot/binica/ica_linux)
-    '''
+    """
     
-    check_binary( )
+    check_binary(binary)
     
     data = np.array( data, dtype=np.float32 )
     
@@ -45,18 +45,17 @@ def binica( data, binary_location = binica_binary_location ):
     scriptfile = 'binica-%s.sc'%uid
     datafile = 'binica-%s.fdt'%uid
     weightsfile = 'binica-%s.wts'%uid
-    weightstmpfile = 'binicatmp-%s.wts'%uid
+    #weightstmpfile = 'binicatmp-%s.wts'%uid
     spherefile = 'binica-%s.sph'%uid
     
-    config = {}
-    config['DataFile'] = datafile
-    config['WeightsOutFile'] = weightsfile
-#    config['WeightsTempFile'] = weightstmpfile
-    config['SphereFile'] = spherefile
-    config['chans'] = nchans
-    config['frames'] = nframes
-    config['extended'] = 1
-    
+    config = {'DataFile': datafile,
+              'WeightsOutFile': weightsfile,
+              'SphereFile': spherefile,
+              'chans': nchans,
+              'frames': nframes,
+              'extended': 1}
+    #    config['WeightsTempFile'] = weightstmpfile
+
     # create data file
     f = open( datafile, 'wb' )
     data.tofile(f)
@@ -73,7 +72,7 @@ def binica( data, binary_location = binica_binary_location ):
     sys.stderr.flush()
     
     # run ICA    
-    os.system( binica_binary_location + ' < ' + scriptfile )
+    os.system(binary + ' < ' + scriptfile)
     
     os.remove(scriptfile)
     os.remove(datafile)    
@@ -98,26 +97,27 @@ def binica( data, binary_location = binica_binary_location ):
     return weights, sphere
     
 
-def check_binary():
+def check_binary(binary):
     """check if binary is available, and try to obtain it if not"""
     
-    if os.path.exists(binica_binary_location):
+    if os.path.exists(binary):
         return
+
+    url = 'http://sccn.ucsd.edu/eeglab/binica/binica.zip'
+    print(binary+' not found. Trying to download from '+url)
+
+    path = os.path.dirname(binary)
         
-    if not os.path.exists(binica_binary_path):
-        os.makedirs(binica_binary_path)
+    if not os.path.exists(path):
+        os.makedirs(path)
     
     import urllib.request
     import zipfile
     import stat
 
-    url = 'http://sccn.ucsd.edu/eeglab/binica/binica.zip'
-        
-    print(binica_binary_location+' not found. Trying to download from '+url)
+    urllib.request.urlretrieve(url, path+'/binica.zip')
     
-    urllib.request.urlretrieve(url, binica_binary_path+'/binica.zip')
+    with zipfile.ZipFile(path+'/binica.zip') as tgz:
+        tgz.extractall(path+'/..')
     
-    with zipfile.ZipFile(binica_binary_path+'/binica.zip') as tgz:
-        tgz.extractall(binica_binary_path+'/..')
-    
-    os.chmod(binica_binary_location, stat.S_IXUSR)
+    os.chmod(binary, stat.S_IXUSR)

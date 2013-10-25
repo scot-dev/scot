@@ -2,7 +2,7 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 Martin Billinger
 
-class struct:
+class Struct:
     
     def __init__(self, content=None):
         if type(content) == dict:
@@ -29,5 +29,5 @@ class struct:
         return '\n'.join(['%s : '%i.rjust(longest) + str(self[i]) for i in self.__dict__])
         
     def __repr__(self):
-        return 'struct( %s )'%str(self.__dict__)
+        return 'Struct( %s )'%str(self.__dict__)
         

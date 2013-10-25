@@ -2,26 +2,26 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 Martin Billinger
 
-'''Euclidean geometry support module'''
+"""Euclidean geometry support module"""
 
 import math
 
 class Vector:
-    '''3D-Vector class'''
+    """3D-Vector class"""
     
-    def __init__(self, x=0, y=0, z=0):
-        '''Initialize from three numbers'''
+    def __init__(self, x=0.0, y=0.0, z=0.0):
+        """Initialize from three numbers"""
         self.x, self.y, self.z = float(x), float(y), float(z)
         
     @classmethod
     def fromiterable(cls, itr):
-        '''Initialize from iterable'''
+        """Initialize from iterable"""
         x, y, z = itr
         return cls(x, y, z)
         
     @classmethod
     def fromvector(cls, v):
-        '''Copy another vector'''
+        """Copy another vector"""
         return cls(v.x, v.y, v.z)
         
     def __getitem__(self, index):
@@ -46,7 +46,7 @@ class Vector:
         yield self.z
         
     def copy(self):
-        '''return a copy of this vector'''
+        """return a copy of this vector"""
         return Vector(self.x, self.y, self.z)
         
     def __repr__(self):
@@ -105,26 +105,27 @@ class Vector:
         return self
    
     def dot(self, other):
-        '''Dot product with another vector'''
+        """Dot product with another vector"""
         return self.x*other.x + self.y*other.y + self.z*other.z
    
     def cross(self, other):
-        '''Cross product with another vector'''
+        """Cross product with another vector"""
         x = self.y * other.z - self.z * other.y
         y = self.z * other.x - self.x * other.z
         z = self.x * other.y - self.y * other.x
         return Vector(x, y, z)
         
     def norm2(self):
-        '''Squared norm of the vector'''
+        """Squared norm of the vector"""
         return self.x*self.x + self.y*self.y + self.z*self.z
         
     def norm(self):
-        '''Length of the vector'''
+        """Length of the vector"""
         return math.sqrt(self.norm2())
         
     def normalize(self):
-        '''Normalize vector to length 1'''
+        """Normalize vector to length 1"""
+        #noinspection PyMethodFirstArgAssignment
         self /= self.norm()
         return self
         

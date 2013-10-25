@@ -3,24 +3,23 @@
 # Copyright (c) 2013 SCoT Development Team
 
 from . import config
-from .datatools import cat_trials, dot_special
-from . import xvschema
-from . import var
+from .datatools import cat_trials
 
 import numpy as np
 
-def plainica(X, reducedim=0.99, backend=None):
-    '''
-    mvarica( X )
-    mvarica( X, reducedim, backend )
-    
-    Apply ICA to the data X, with optional PCA dimensionality reduction.
-    
+
+def plainica(x, reducedim=0.99, backend=None):
+    """
+    plainica( x )
+    plainica( x, reducedim, backend )
+
+    Apply ICA to the data x, with optional PCA dimensionality reduction.
+
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    X              :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                          : N,M   : 2d data matrix (N samples, M signals)
-    reducedim      :      : 0.99  : A number less than 1 is interpreted as the
+    x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
+                          : n,m   : 2d data matrix (n samples, m signals)
+    reducedim      :      : 0.99  : a number less than 1 is interpreted as the
                                     fraction of variance that should remain in
                                     the data. All components that describe in
                                     total less than 1-retain_variance of the
@@ -32,37 +31,36 @@ def plainica(X, reducedim=0.99, backend=None):
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
-    
+
     Output
     --------------------------------------------------------------------------
     U   Unmixing matrix
-    M   Mixing matrix
-    '''
-    
-    X = np.atleast_3d(X)
-    L, M, T = np.shape(X)
-    
-    if backend == None:
+    m   Mixing matrix
+    """
+
+    x = np.atleast_3d(x)
+    l, m, t = np.shape(x)
+
+    if backend is None:
         backend = config.backend
-    
+
     # pre-transform the data with PCA
     if reducedim == 'no pca':
-        C = np.eye(M)
-        D = np.eye(M)
-        Xpca = X
+        c = np.eye(m)
+        d = np.eye(m)
+        xpca = x
     else:
-        C, D, Xpca = backend['pca'](X, reducedim)
-        M = C.shape[1]
+        c, d, xpca = backend['pca'](x, reducedim)
 
     # run on residuals ICA to estimate volume conduction    
-    Mx, Ux = backend['ica'](cat_trials(Xpca))
-    
+    mx, ux = backend['ica'](cat_trials(xpca))
+
     # correct (un)mixing matrix estimatees
-    Mx = Mx.dot(D)
-    Ux = C.dot(Ux)
-    
-    class result:
-        unmixing = Ux
-        mixing = Mx
-        
-    return result
+    mx = mx.dot(d)
+    ux = c.dot(ux)
+
+    class Result:
+        unmixing = ux
+        mixing = mx
+
+    return Result
