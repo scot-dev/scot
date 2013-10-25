@@ -19,8 +19,8 @@ class TestICA(unittest.TestCase):
         pass
     
     def testModelIdentification(self):
-        """ generate independent signals, mix them, and see if ICA can reconstruct the mixing matrix """
-        """ do this for every backend """
+        """ generate independent signals, mix them, and see if ICA can reconstruct the mixing matrix
+            do this for every backend """
         
         # original model coefficients
         b0 = np.zeros((3,3))    # no connectivity

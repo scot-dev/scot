@@ -19,8 +19,8 @@ class TestMVARICA(unittest.TestCase):
         pass
     
     def testModelIdentification(self):
-        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals """
-        """ do this for every backend """
+        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
+            do this for every backend """
         
         # original model coefficients
         b0 = np.zeros((3,6))

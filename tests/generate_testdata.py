@@ -31,7 +31,7 @@ def generate_covsig(covmat, n):
     return x.T
 
 
-""" 497 random numbers drawn from the standard normal distribution"""
+# 497 random numbers drawn from the standard normal distribution
 #noinspection PyRedeclaration
 randn_index = 0;
 #noinspection PyRedeclaration

@@ -29,8 +29,8 @@ class TestMVARICA(unittest.TestCase):
         self.assertRaises(RuntimeError, api.get_tf_connectivity, 'PDC', 10, 1)
     
     def testModelIdentification(self):
-        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals """
-        """ do this for every backend """
+        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
+            do this for every backend """
         
         # original model coefficients
         b0 = np.zeros((3,6))
@@ -83,8 +83,8 @@ class TestMVARICA(unittest.TestCase):
             self.assertTrue(np.all(abs(d-b0) < 0.05))
     
     def testFunctionality(self):
-        """ generate VAR signals, and apply the api to them """
-        """ do this for every backend """
+        """ generate VAR signals, and apply the api to them
+            do this for every backend """
         
         # original model coefficients
         b0 = np.zeros((3,6))
