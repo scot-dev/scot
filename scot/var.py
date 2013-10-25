@@ -433,7 +433,7 @@ def _msge_with_gradient_underdetermined( data, p, delta, xvschema, skipstep):
         j += np.sum(beacc*bea - 2*bea*dc) + np.sum(d**2)
         k += np.sum(beea*dc - beacc*beea) * 4 * delta
             
-    return (j / (nt*d.size), k / (nt*d.size))
+    return j / (nt*d.size), k / (nt*d.size)
     
 def _msge_with_gradient_overdetermined( data, p, delta, xvschema, skipstep):
     (l,m,t) = data.shape
@@ -459,7 +459,7 @@ def _msge_with_gradient_overdetermined( data, p, delta, xvschema, skipstep):
         l += np.sum(baecc*bae - 2*bae*dc) + np.sum(d**2)
         k += np.sum(baee*dc - baecc*baee) * 4 * delta
             
-    return (l / (nt*d.size), k / (nt*d.size))
+    return l / (nt*d.size), k / (nt*d.size)
     
 def _msge_with_gradient( data, p, delta, underdetermined, xvschema, skipstep ):
     data = np.atleast_3d(data)

@@ -125,6 +125,7 @@ class Vector:
         
     def normalize(self):
         '''Normalize vector to length 1'''
+        #noinspection PyMethodFirstArgAssignment
         self /= self.norm()
         return self
         

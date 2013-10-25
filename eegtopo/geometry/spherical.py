@@ -120,7 +120,7 @@ class Construct:
         c1 = k.A.vector.cross(k.B.vector)
         c2 = l.A.vector.cross(l.B.vector)
         p = c1.cross(c2)
-        return (Point.fromvector(p), Point.fromvector(p*-1))
+        return Point.fromvector(p), Point.fromvector(p*-1)
         
     @staticmethod
     def line_intersect_circle(line, circle):
