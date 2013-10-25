@@ -20,6 +20,6 @@ def multitrial(t,num_trials):
     testset = [t]    
     trainset = [i for i in range(testset[0])] + [i for i in range(testset[-1]+1,num_trials)]
     
-    trainset = sort([t%num_trials for t in testset])
+    trainset = sort([t%num_trials for t in trainset])
     
     return trainset, testset
