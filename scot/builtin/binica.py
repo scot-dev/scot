@@ -9,6 +9,7 @@ import os, sys
 binica_binary_location = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
 binica_binary_path = os.path.dirname(os.path.relpath(__file__)) + '/binica'
 
+#noinspection PyNoneFunctionAssignment
 def binica( data, binary_location = binica_binary_location ):
     '''
     binica( data )

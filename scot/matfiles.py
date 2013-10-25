@@ -29,6 +29,7 @@ def _todict(matobj):
     A recursive function which constructs from matobjects nested dictionaries
     '''
     dict = {}
+    #noinspection PyProtectedMember
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
         if isinstance(elem, spio.matlab.mio5_params.mat_struct):
