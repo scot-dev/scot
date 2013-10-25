@@ -8,7 +8,6 @@ from .geometry import spherical as geo
 
 from .tools import Struct
 
-from math import *
 from numpy import *
 
 #import matplotlib.pyplot as plt

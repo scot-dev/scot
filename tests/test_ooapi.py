@@ -3,7 +3,6 @@
 # Copyright (c) 2013 SCoT Development Team
 
 import unittest
-import sys
 from importlib import import_module
 import numpy as np
 

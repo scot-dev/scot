@@ -5,12 +5,6 @@
 """ Object oriented API to SCoT """
 
 import numpy as np
-from .varica import mvarica
-from .plainica import plainica
-from .datatools import dot_special
-from .connectivity import Connectivity
-from . import var
-from eegtopo.topoplot import Topoplot
 
 try:
     #noinspection PyPep8Naming
@@ -18,6 +12,7 @@ try:
     from matplotlib.ticker import MaxNLocator
     _have_pyplot = True
 except ImportError:
+    plt, MaxNLocator = None, None
     _have_pyplot = False
 
 

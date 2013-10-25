@@ -3,9 +3,7 @@
 # Copyright (c) 2013 SCoT Development Team
 
 from . import config
-from .datatools import cat_trials, dot_special
-from . import xvschema
-from . import var
+from .datatools import cat_trials
 
 import numpy as np
 
