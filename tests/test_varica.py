@@ -3,7 +3,6 @@
 # Copyright (c) 2013 SCoT Development Team
 
 import unittest
-import sys
 from importlib import import_module
 import numpy as np
 
@@ -19,19 +18,19 @@ class TestMVARICA(unittest.TestCase):
         pass
     
     def testModelIdentification(self):
-        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals """
-        """ do this for every backend """
+        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
+            do this for every backend """
         
         # original model coefficients
-        B0 = np.zeros((3,6))
-        B0[1:3,2:6] = [[ 0.4, -0.2, 0.3, 0.0],
+        b0 = np.zeros((3,6))
+        b0[1:3,2:6] = [[ 0.4, -0.2, 0.3, 0.0],
                        [-0.7,  0.0, 0.9, 0.0]]            
-        M0 = B0.shape[0]
-        L, T = 1000, 100
+        m0 = b0.shape[0]
+        l, t = 1000, 100
         
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
-        noisefunc = lambda: np.random.normal( size=(1,M0) )**3   
-        sources = var.simulate( [L,T], B0, noisefunc )
+        noisefunc = lambda: np.random.normal( size=(1,m0) )**3
+        sources = var.simulate( [l,t], b0, noisefunc )
         
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -53,19 +52,19 @@ class TestMVARICA(unittest.TestCase):
             permutations = np.array([[0,1,2,3,4,5],[0,1,4,5,2,3],[2,3,4,5,0,1],[2,3,0,1,4,5],[4,5,0,1,2,3],[4,5,2,3,0,1]])
             signperms = np.array([[1,1,1,1,1,1], [1,1,1,1,-1,-1], [1,1,-1,-1,1,1], [1,1,-1,-1,-1,-1], [-1,-1,1,1,1,1], [-1,-1,1,1,-1,-1], [-1,-1,-1,-1,1,1], [-1,-1,-1,-1,-1,-1]])
             
-            best = np.inf
+            best, d = np.inf, None
     
             for perm in permutations:
-                B = result.B[perm[::2]//2,:]
-                B = B[:,perm]
+                b = result.b[perm[::2]//2,:]
+                b = b[:,perm]
                 for sgn in signperms:
-                    C = B * np.repeat([sgn],3,0) * np.repeat([sgn[::2]],6,0).T        
-                    d = np.sum((C-B0)**2)
-                    if d < best:
-                        best = d
-                        D = C
+                    c = b * np.repeat([sgn],3,0) * np.repeat([sgn[::2]],6,0).T
+                    err = np.sum((c-b0)**2)
+                    if err < best:
+                        best = err
+                        d = c
                         
-            self.assertTrue(np.all(abs(D-B0) < 0.05))
+            self.assertTrue(np.all(abs(d-b0) < 0.05))
                 
         
         

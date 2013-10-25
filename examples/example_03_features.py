@@ -15,16 +15,14 @@ from sklearn.lda import LDA
 
 import matplotlib.pyplot as plt
 
-"""
-The example data set contains a continuous 45 channel EEG recording of a motor
-imagery experiment. The data was preprocessed to reduce eye movement artifacts
-and resampled to a sampling rate of 100 Hz.
-With a visual cue the subject was instructed to perform either hand of foot
-motor imagery. The the trigger time points of the cues are stored in 'tr', and
-'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor 
-imagery period was approximately 6 seconds.
-"""
 
+# The example data set contains a continuous 45 channel EEG recording of a motor
+# imagery experiment. The data was preprocessed to reduce eye movement artifacts
+# and resampled to a sampling rate of 100 Hz.
+# With a visual cue the subject was instructed to perform either hand of foot
+# motor imagery. The the trigger time points of the cues are stored in 'tr', and
+# 'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor
+# imagery period was approximately 6 seconds.
 from motorimagery import data as midata
 
 raweeg = midata.eeg
@@ -33,45 +31,36 @@ classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
 
-"""
-Set up the analysis object
 
-We simply choose a VAR model order of 30, and reduction to 4 components.
-"""
+# Set up the analysis object
+# We simply choose a VAR model order of 30, and reduction to 4 components.
 ws = scot.Workspace(30, reducedim=4, fs=fs)
 
 
-"""
-Prepare the data
-
-Here we cut segments from 3s to 4s following each trigger out of the EEG. This
-is right in the middle of the motor imagery period.
-"""
+# Prepare the data
+#
+# Here we cut segments from 3s to 4s following each trigger out of the EEG. This
+# is right in the middle of the motor imagery period.
 data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
 
-"""
-Perform MVARICA
-"""
-ws.setData(data)
-ws.doMVARICA()
 
-"""
-Find optimal regularization parameter for single-trial fitting
-"""
-ws.optimizeRegularization(scot.xvschema.singletrial, 30)
+# Perform MVARICA
+ws.set_data(data)
+ws.do_mvarica()
+
+# Find optimal regularization parameter for single-trial fitting
+ws.optimize_regularization(scot.xvschema.singletrial, 30)
 
 freq = np.linspace(0,fs,ws.nfft_)
 
-"""
-Single-Trial Fitting and feature extraction
-"""
+# Single-Trial Fitting and feature extraction
 features = np.zeros((len(triggers), 32))
 for t in range(len(triggers)):
     print('Trial: %d   '%t, end='\r')
-    ws.setData(data[:,:,t])
-    ws.fitVAR()
+    ws.set_data(data[:,:,t])
+    ws.fit_var()
 
-    con = ws.getConnectivity('ffPDC')
+    con = ws.get_connectivity('ffPDC')
     
     alpha = np.mean(con[:,:,np.logical_and(7<freq, freq<13)], axis=2)
     beta = np.mean(con[:,:,np.logical_and(15<freq, freq<25)], axis=2)

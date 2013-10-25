@@ -7,32 +7,34 @@ import numpy as np
 global randn_index
 global randn
 
-def generate_covsig(C, n):
-    """generate pseudorandom stochastic signals with covariance matrix C"""
+def generate_covsig(covmat, n):
+    """generate pseudorandom stochastic signals with covariance matrix covmat"""
     global randn_index
     global randn
     
-    C = np.atleast_2d(C)
-    m = C.shape[0]
-    L = np.linalg.cholesky(C)
+    covmat = np.atleast_2d(covmat)
+    m = covmat.shape[0]
+    l = np.linalg.cholesky(covmat)
     
-    X = []
-    while len(X) < n*m:
-        to_go = min(randn_index+n*m-len(X),len(randn))
-        X.extend(randn[randn_index:to_go])
+    x = []
+    while len(x) < n*m:
+        to_go = min(randn_index+n*m-len(x),len(randn))
+        x.extend(randn[randn_index:to_go])
         randn_index = to_go % len(randn)
-    X = np.reshape(X,[m,n])
+    x = np.reshape(x,(m,n))
     
-    # matrix to make cov(X) = I
-    D = np.linalg.inv(np.linalg.cholesky(np.atleast_2d(np.cov(X))))
+    # matrix to make cov(x) = I
+    d = np.linalg.inv(np.linalg.cholesky(np.atleast_2d(np.cov(x))))
 
-    X = L.dot(D).dot(X)
+    x = l.dot(d).dot(x)
     
-    return X.T
+    return x.T
 
 
-""" 497 random numbers drawn from the standard normal distribution"""
-randn_index = 0;
+# 497 random numbers drawn from the standard normal distribution
+#noinspection PyRedeclaration
+randn_index = 0
+#noinspection PyRedeclaration
 randn=[ -1.28924940e+00,  -5.10070850e-01,   5.68293566e-01,
         -7.61050402e-02,  -1.01814943e+00,  -7.72800459e-01,
         -1.08905278e+00,   9.58712833e-01,   1.10965728e+00,
@@ -198,4 +200,4 @@ randn=[ -1.28924940e+00,  -5.10070850e-01,   5.68293566e-01,
         -1.07743609e+00,  -1.08187959e+00,  -9.62350076e-01,
          1.76105062e+00,  -1.00107943e+00,   2.39942500e-01,
         -2.33949747e+00,  -2.92544582e-01,  -1.14312833e-02,
-        -1.51159092e-01,  -1.63845479e+00];
+        -1.51159092e-01,  -1.63845479e+00]

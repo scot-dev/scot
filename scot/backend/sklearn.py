@@ -10,27 +10,32 @@ from .. import datatools
 
 from sklearn.decomposition import FastICA, PCA
 
+
 def wrapper_fastica(data):
     ica = FastICA()
     ica.fit(datatools.cat_trials(data))
-    U = ica.components_.T
-    M = ica.mixing_.T
-    return M, U
+    u = ica.components_.T
+    m = ica.mixing_.T
+    return m, u
 
-def wrapper_pca(X, reducedim):
+
+def wrapper_pca(x, reducedim):
     pca = PCA(n_components=reducedim)
-    Y = pca.fit(datatools.cat_trials(X))
-    D = pca.components_
-    C = pca.components_.T
-    Y = datatools.dot_special(X,C)
-    return C, D, Y
-    
+    pca.fit(datatools.cat_trials(x))
+    d = pca.components_
+    c = pca.components_.T
+    y = datatools.dot_special(x, c)
+    return c, d, y
+
+
 backend = {
     'ica': wrapper_fastica,
     'pca': wrapper_pca
-    }
-    
-def activate( ):
+}
+
+
+def activate():
     config.backend = backend
-    
+
+
 activate()

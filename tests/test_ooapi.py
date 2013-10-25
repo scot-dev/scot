@@ -3,7 +3,6 @@
 # Copyright (c) 2013 SCoT Development Team
 
 import unittest
-import sys
 from importlib import import_module
 import numpy as np
 
@@ -22,26 +21,26 @@ class TestMVARICA(unittest.TestCase):
     def testExceptions(self):        
         self.assertRaises(TypeError, scot.Workspace)
         api = scot.Workspace(var_order=50)
-        self.assertRaises(RuntimeError, api.doMVARICA)
-        self.assertRaises(RuntimeError, api.fitVAR)
-        self.assertRaises(TypeError, api.getConnectivity)
-        self.assertRaises(RuntimeError, api.getConnectivity, 'S')
-        self.assertRaises(RuntimeError, api.getTFConnectivity, 'PDC', 10, 1)
+        self.assertRaises(RuntimeError, api.do_mvarica)
+        self.assertRaises(RuntimeError, api.fit_var)
+        self.assertRaises(TypeError, api.get_connectivity)
+        self.assertRaises(RuntimeError, api.get_connectivity, 'S')
+        self.assertRaises(RuntimeError, api.get_tf_connectivity, 'PDC', 10, 1)
     
     def testModelIdentification(self):
-        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals """
-        """ do this for every backend """
+        """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
+            do this for every backend """
         
         # original model coefficients
-        B0 = np.zeros((3,6))
-        B0[1:3,2:6] = [[ 0.4, -0.2, 0.3, 0.0],
+        b0 = np.zeros((3,6))
+        b0[1:3,2:6] = [[ 0.4, -0.2, 0.3, 0.0],
                        [-0.7,  0.0, 0.9, 0.0]]            
-        M0 = B0.shape[0]
-        L, T = 1000, 100
+        m0 = b0.shape[0]
+        l, t = 1000, 100
         
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
-        noisefunc = lambda: np.random.normal( size=(1,M0) )**3   
-        sources = var.simulate( [L,T], B0, noisefunc )
+        noisefunc = lambda: np.random.normal( size=(1,m0) )**3
+        sources = var.simulate( [l,t], b0, noisefunc )
         
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -55,12 +54,12 @@ class TestMVARICA(unittest.TestCase):
             
             api = scot.Workspace(var_order=2, backend=bm.backend)
             
-            api.setData(data)
+            api.set_data(data)
             
             # apply MVARICA
             #  - default setting of 0.99 variance should reduce to 3 channels with this data
             #  - automatically determine delta (enough data, so it should most likely be 0)
-            api.doMVARICA()
+            api.do_mvarica()
             #result = varica.mvarica(data, 2, delta='auto', backend=bm.backend)
             
             # ICA does not define the ordering and sign of components
@@ -68,34 +67,34 @@ class TestMVARICA(unittest.TestCase):
             permutations = np.array([[0,1,2,3,4,5],[0,1,4,5,2,3],[2,3,4,5,0,1],[2,3,0,1,4,5],[4,5,0,1,2,3],[4,5,2,3,0,1]])
             signperms = np.array([[1,1,1,1,1,1], [1,1,1,1,-1,-1], [1,1,-1,-1,1,1], [1,1,-1,-1,-1,-1], [-1,-1,1,1,1,1], [-1,-1,1,1,-1,-1], [-1,-1,-1,-1,1,1], [-1,-1,-1,-1,-1,-1]])
             
-            best = np.inf
+            best, d = np.inf, None
     
             for perm in permutations:
-                B = api.var_model_[perm[::2]//2,:]
-                B = B[:,perm]
+                b = api.var_model_[perm[::2]//2,:]
+                b = b[:,perm]
                 for sgn in signperms:
-                    C = B * np.repeat([sgn],3,0) * np.repeat([sgn[::2]],6,0).T        
-                    d = np.sum((C-B0)**2)
-                    if d < best:
-                        best = d
-                        D = C
+                    c = b * np.repeat([sgn],3,0) * np.repeat([sgn[::2]],6,0).T
+                    err = np.sum((c-b0)**2)
+                    if err < best:
+                        best = err
+                        d = c
                         
-            self.assertTrue(np.all(abs(D-B0) < 0.05))
+            self.assertTrue(np.all(abs(d-b0) < 0.05))
     
     def testFunctionality(self):
-        """ generate VAR signals, and apply the api to them """
-        """ do this for every backend """
+        """ generate VAR signals, and apply the api to them
+            do this for every backend """
         
         # original model coefficients
-        B0 = np.zeros((3,6))
-        B0[1:3,2:6] = [[ 0.4, -0.2, 0.3, 0.0],
+        b0 = np.zeros((3,6))
+        b0[1:3,2:6] = [[ 0.4, -0.2, 0.3, 0.0],
                        [-0.7,  0.0, 0.9, 0.0]]            
-        M0 = B0.shape[0]
-        L, T = 1000, 10
+        m0 = b0.shape[0]
+        l, t = 1000, 10
         
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
-        noisefunc = lambda: np.random.normal( size=(1,M0) )**3   
-        sources = var.simulate( [L,T], B0, noisefunc )
+        noisefunc = lambda: np.random.normal( size=(1,m0) )**3
+        sources = var.simulate( [l,t], b0, noisefunc )
         
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -111,39 +110,39 @@ class TestMVARICA(unittest.TestCase):
             
             api = scot.Workspace(var_order=2, reducedim=3, backend=bm.backend)
             
-            api.setData(data)
+            api.set_data(data)
             
-            api.doICA()
+            api.do_ica()
             
             self.assertEqual(api.mixing_.shape, (3,7))
             self.assertEqual(api.unmixing_.shape, (7,3))
             
-            api.doMVARICA()
+            api.do_mvarica()
             
-            self.assertEqual(api.getConnectivity('S').shape, (3,3,512))
+            self.assertEqual(api.get_connectivity('S').shape, (3,3,512))
             
-            api.setData(data)
+            api.set_data(data)
             
-            api.fitVAR()
+            api.fit_var()
             
-            self.assertEqual(api.getConnectivity('S').shape, (3,3,512))
-            self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (3,3,512,18))
+            self.assertEqual(api.get_connectivity('S').shape, (3,3,512))
+            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (3,3,512,18))
             
-            api.setData(data, cl)
+            api.set_data(data, cl)
             
-            api.fitVAR()
+            api.fit_var()
                         
-            fc = api.getConnectivity('S')
-            tfc = api.getTFConnectivity('S', 100, 50)
+            fc = api.get_connectivity('S')
+            tfc = api.get_tf_connectivity('S', 100, 50)
             for c in tfc:
                 self.assertEqual(fc[c].shape, (3,3,512))
                 self.assertEqual(tfc[c].shape, (3,3,512,18))
                             
-            api.setData(data)
-            api.removeSources([0,2])
-            api.fitVAR()            
-            self.assertEqual(api.getConnectivity('S').shape, (1,1,512))
-            self.assertEqual(api.getTFConnectivity('S', 100, 50).shape, (1,1,512,18))
+            api.set_data(data)
+            api.remove_sources([0,2])
+            api.fit_var()
+            self.assertEqual(api.get_connectivity('S').shape, (1,1,512))
+            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1,1,512,18))
             
             
                 

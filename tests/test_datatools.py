@@ -3,7 +3,6 @@
 # Copyright (c) 2013 SCoT Development Team
 
 import unittest
-import sys
 
 import numpy as np
 
@@ -25,42 +24,42 @@ class TestDataMangling(unittest.TestCase):
         start = -10
         stop = 50
         
-        X = datatools.cut_segments(rawdata, triggers, -10, 50)
+        x = datatools.cut_segments(rawdata, triggers, -10, 50)
         
         self.assertTrue(np.all(rawdata == rawcopy))
-        self.assertEqual(X.shape, (stop-start, X.shape[1], len(triggers)))
+        self.assertEqual(x.shape, (stop-start, x.shape[1], len(triggers)))
         
         for it in range(len(triggers)):
             a = rawdata[triggers[it]+start : triggers[it]+stop, :]
-            b = X[:,:,it]
+            b = x[:,:,it]
             self.assertTrue(np.all(a == b))
             
     def test_cat_trials(self):
-        X = np.random.randn(60,5,9)
-        XC = X.copy()
+        x = np.random.randn(60,5,9)
+        xc = x.copy()
         
-        Y = datatools.cat_trials(X)
+        y = datatools.cat_trials(x)
         
-        self.assertTrue(np.all(X == XC))
-        self.assertEqual(Y.shape, (X.shape[0]*X.shape[2], X.shape[1]))
+        self.assertTrue(np.all(x == xc))
+        self.assertEqual(y.shape, (x.shape[0]*x.shape[2], x.shape[1]))
         
-        for it in range(X.shape[2]):
-            a = Y[it*X.shape[0] : (it+1)*X.shape[0], :]
-            b = X[:,:,it]
+        for it in range(x.shape[2]):
+            a = y[it*x.shape[0] : (it+1)*x.shape[0], :]
+            b = x[:,:,it]
             self.assertTrue(np.all(a == b))
             
     def test_dot_special(self):
-        X = np.random.randn(60,5,9)
-        A = np.eye(5) * 2;
+        x = np.random.randn(60,5,9)
+        a = np.eye(5) * 2
+
+        xc = x.copy()
+        ac = a.copy()
         
-        XC = X.copy()
-        AC = A.copy()
+        y = datatools.dot_special(x, a)
         
-        Y = datatools.dot_special(X, A)
-        
-        self.assertTrue(np.all(X == XC))
-        self.assertTrue(np.all(A == AC))        
-        self.assertTrue(np.all(X*2 == Y))
+        self.assertTrue(np.all(x == xc))
+        self.assertTrue(np.all(a == ac))
+        self.assertTrue(np.all(x*2 == y))
 
 class TestRegressions(unittest.TestCase):
 

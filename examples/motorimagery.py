@@ -10,11 +10,11 @@ from eegtopo.eegpos3d import positions as eeg_locations
 def __load( ):
     matfile = loadmat(join(abspath(dirname(__file__)), 'motorimagery.mat'))['s0']
 
-    class data: pass    
+    class Data: pass
     
-    data.description = """
-                       The data set contains a continuous 45 channel EEG recording of a motor imagery
-                       experiment. The data was preprocessed to reduce eye movement artifacts and
+    Data.description = """
+                       The Data set contains a continuous 45 channel EEG recording of a motor imagery
+                       experiment. The Data was preprocessed to reduce eye movement artifacts and
                        resampled to a sampling rate of 100 Hz.
                        With a visual cue the subject was instructed to perform either hand of foot
                        motor imagery. The the trigger time points of the cues are stored in 'tr', and
@@ -22,14 +22,14 @@ def __load( ):
                        imagery period was approximately 6 seconds.
                        """
 
-    data.samplerate = matfile['fs'] # Sampling rate
-    data.num_trials = matfile['T']  # Number of trials
-    data.triggers = matfile['tr']   # Trigger locations
-    data.classes = matfile['cl']    # Class labels
-    data.eeg = matfile['eeg']       # EEG data
+    Data.samplerate = matfile['fs'] # Sampling rate
+    Data.num_trials = matfile['T']  # Number of trials
+    Data.triggers = matfile['tr']   # Trigger locations
+    Data.classes = matfile['cl']    # Class labels
+    Data.eeg = matfile['eeg']       # EEG Data
 
     # Unfortunately, the EEG channel labels are not stored in the file, so we set them manually.
-    data.labels = ['AF7', 'AFz', 'AF8', 'F3', 'F1',
+    Data.labels = ['AF7', 'AFz', 'AF8', 'F3', 'F1',
                    'Fz', 'F2', 'F4', 'FT7', 'FC5',
                    'FC3', 'FC1', 'FCz', 'FC2', 'FC4',
                    'FC6', 'FT8', 'C5', 'C3', 'C1',
@@ -40,8 +40,8 @@ def __load( ):
                    'Oz', 'O2', 'O9', 'Iz', 'O10']
 
     # Obtain default electrode locations corresponding to the channels
-    data.locations = [[v for v in eeg_locations[l].vector] for l in data.labels]
+    Data.locations = [[v for v in eeg_locations[l].vector] for l in Data.labels]
     
-    return data
+    return Data
     
 data = __load()

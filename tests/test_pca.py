@@ -3,7 +3,6 @@
 # Copyright (c) 2013 SCoT Development Team
 
 import unittest
-import sys
 
 import numpy as np
 
@@ -29,99 +28,99 @@ class TestFunctionality(unittest.TestCase):
            test for up to 50 dimensions
         """
         for i in range(1,50):
-            X = generate_covsig(np.eye(i), 500)
-            W, V = pca(X)
-            C = np.cov(W.dot(X.T))
-            self.assertTrue(np.allclose(C, np.eye(i)))
+            x = generate_covsig(np.eye(i), 500)
+            w, v = pca(x)
+            c = np.cov(w.dot(x.T))
+            self.assertTrue(np.allclose(c, np.eye(i)))
     
     def testSorting(self):
         """components should be sorted by decreasing variance
         """
-        X = generate_covsig(np.diag([1,9,2,6,3,8,4,5,7]), 500)
-        W, V = pca(X, sort_components=True)
-        C = np.cov(X.dot(W).T)
-        self.assertTrue(np.allclose(C, np.diag([9,8,7,6,5,4,3,2,1]), rtol=1e-1, atol=1e-2))
-        W, V = pca(X, sort_components=True)
-        C = np.cov(X.dot(W).T)
-        self.assertTrue(np.allclose(C, np.diag([9,8,7,6,5,4,3,2,1]), rtol=1e-1, atol=1e-2))
+        x = generate_covsig(np.diag([1,9,2,6,3,8,4,5,7]), 500)
+        w, v = pca(x, sort_components=True)
+        c = np.cov(x.dot(w).T)
+        self.assertTrue(np.allclose(c, np.diag([9,8,7,6,5,4,3,2,1]), rtol=1e-1, atol=1e-2))
+        w, v = pca(x, sort_components=True)
+        c = np.cov(x.dot(w).T)
+        self.assertTrue(np.allclose(c, np.diag([9,8,7,6,5,4,3,2,1]), rtol=1e-1, atol=1e-2))
     
     def testDecorrelation(self):
         """components should be decorrelated after PCA
         """
-        X = generate_covsig([[3,2,1],[2,3,2],[1,2,3]], 500)
-        W, V = pca(X)
-        C = np.cov(X.dot(W).T)
-        C -= np.diag(C.diagonal())
-        self.assertTrue(np.allclose(C, np.zeros((3,3)), rtol=1e-2, atol=1e-3))
+        x = generate_covsig([[3,2,1],[2,3,2],[1,2,3]], 500)
+        w, v = pca(x)
+        c = np.cov(x.dot(w).T)
+        c -= np.diag(c.diagonal())
+        self.assertTrue(np.allclose(c, np.zeros((3,3)), rtol=1e-2, atol=1e-3))
 
 class TestDefaults(unittest.TestCase):
 
     def setUp(self):
-        self.X = np.random.rand(100,10)
-        self.Y = self.X.copy()
-        self.N, self.M = self.X.shape
-        self.W, self.V = pca(self.X)
+        self.x = np.random.rand(100,10)
+        self.y = self.x.copy()
+        self.n, self.m = self.x.shape
+        self.w, self.v = pca(self.x)
 
     def tearDown(self):
         pass
     
     def testInputSafety(self):
-        self.assertTrue((self.X == self.Y).all())
+        self.assertTrue((self.x == self.y).all())
         
-        W, V = pca(self.X, subtract_mean=True, normalize=True)
-        self.assertTrue((self.X == self.Y).all())
+        pca(self.x, subtract_mean=True, normalize=True)
+        self.assertTrue((self.x == self.y).all())
 
     def testOutputSizes(self):
-        self.assertTrue(self.W.shape == (self.M, self.M))
-        self.assertTrue(self.V.shape == (self.M, self.M))
+        self.assertTrue(self.w.shape == (self.m, self.m))
+        self.assertTrue(self.v.shape == (self.m, self.m))
 
     def testInverse(self):
-        I = np.abs(self.V.dot(self.W))        
-        self.assertTrue(np.abs(np.mean(I.diagonal())) - 1 < epsilon)
-        self.assertTrue(np.abs(np.sum(I) - I.trace()) < epsilon)        
+        i = np.abs(self.v.dot(self.w))
+        self.assertTrue(np.abs(np.mean(i.diagonal())) - 1 < epsilon)
+        self.assertTrue(np.abs(np.sum(i) - i.trace()) < epsilon)
         
-        W, V = pca(self.X, subtract_mean=True, normalize=True)
-        I = np.abs(V.dot(W))        
-        self.assertTrue(np.abs(np.mean(I.diagonal())) - 1 < epsilon)
-        self.assertTrue(np.abs(np.sum(I) - I.trace()) < epsilon)
+        w, v = pca(self.x, subtract_mean=True, normalize=True)
+        i = np.abs(v.dot(w))
+        self.assertTrue(np.abs(np.mean(i.diagonal())) - 1 < epsilon)
+        self.assertTrue(np.abs(np.sum(i) - i.trace()) < epsilon)
 
 
 class TestDimensionalityReduction(unittest.TestCase):
 
     def setUp(self):
-        self.X = np.random.rand(100,10)
-        self.Y = self.X.copy()
-        self.N, self.M = self.X.shape
-        self.W1, self.V1 = pca(self.X, reducedim=0.9)
-        self.W2, self.V2 = pca(self.X, reducedim=5)
+        self.x = np.random.rand(100,10)
+        self.y = self.x.copy()
+        self.n, self.m = self.x.shape
+        self.w1, self.v1 = pca(self.x, reducedim=0.9)
+        self.w2, self.v2 = pca(self.x, reducedim=5)
 
     def tearDown(self):
         pass
 
     def testOutputSizes(self):
-        self.assertTrue(self.W2.shape == (self.M, 5))
-        self.assertTrue(self.V2.shape == (5, self.M))
+        self.assertTrue(self.w2.shape == (self.m, 5))
+        self.assertTrue(self.v2.shape == (5, self.m))
 
     def testPseudoInverse(self):
-        I = self.V1.dot(self.W1)        
-        self.assertTrue(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
+        i = self.v1.dot(self.w1)
+        self.assertTrue(np.abs(np.mean(i.diagonal()) - 1) < epsilon)
         
-        I = self.W1.dot(self.V1)        
-        self.assertFalse(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
+        i = self.w1.dot(self.v1)
+        self.assertFalse(np.abs(np.mean(i.diagonal()) - 1) < epsilon)
         
-        I = self.V2.dot(self.W2)        
-        self.assertTrue(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
+        i = self.v2.dot(self.w2)
+        self.assertTrue(np.abs(np.mean(i.diagonal()) - 1) < epsilon)
         
-        I = self.W2.dot(self.V2)
-        self.assertFalse(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
+        i = self.w2.dot(self.v2)
+        self.assertFalse(np.abs(np.mean(i.diagonal()) - 1) < epsilon)
     
     def testSorting(self):
         """components should be sorted by decreasing variance
         """
-        X = generate_covsig(np.diag([1,9,2,6,3,8,4,5,7]), 500)
-        W, V = pca(X, reducedim=5)
-        C = np.cov(X.dot(W).T)
-        self.assertTrue(np.allclose(C, np.diag([9,8,7,6,5]), rtol=1e-1, atol=1e-2))
+        x = generate_covsig(np.diag([1,9,2,6,3,8,4,5,7]), 500)
+        w, v = pca(x, reducedim=5)
+        c = np.cov(x.dot(w).T)
+        self.assertTrue(np.allclose(c, np.diag([9,8,7,6,5]), rtol=1e-1, atol=1e-2))
         
 def main():
     unittest.main()
