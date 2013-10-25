@@ -39,10 +39,16 @@ class Topoplot:
         codes = [path.Path.MOVETO, path.Path.LINETO, path.Path.LINETO]
         self.path_nose = path.Path(verts, codes)
         
-        self.calc_legendre_factors( m, num_lterms )
+        self.legendre_factors = self.calc_legendre_factors( m, num_lterms )
+
+        self.locations = None
+        self.G = None
+        self.Z = None
+        self.C = None
+        self.image = None
         
-    def calc_legendre_factors(self, m, num_lterms ):
-        self.legendre_factors = [(2*n+1) / (n**m * (n+1)**m * 4*np.pi) for n in range(1,num_lterms+1)]
+    def calc_legendre_factors(self, m, num_lterms):
+        return [(2*n+1) / (n**m * (n+1)**m * 4*np.pi) for n in range(1, num_lterms+1)]
         
     def g(self, x):
         return np.polynomial.legendre.legval( x, self.legendre_factors )
