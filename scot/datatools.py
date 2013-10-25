@@ -6,7 +6,8 @@
 
 import numpy as np
 
-def cut_segments(rawdata, tr, start, stop):  
+
+def cut_segments(rawdata, tr, start, stop):
     """
     x = cut_segments(rawdata, tr, start, stop):
 
@@ -26,8 +27,9 @@ def cut_segments(rawdata, tr, start, stop):
     rawdata = np.atleast_2d(rawdata)
     tr = np.array(tr, dtype='int').ravel()
     win = range(start, stop)
-    return np.dstack([rawdata[tr[t]+win,:] for t in range(len(tr))])
-    
+    return np.dstack([rawdata[tr[t] + win, :] for t in range(len(tr))])
+
+
 def cat_trials(x):
     """
     y = cat_trials(x):
@@ -44,7 +46,8 @@ def cat_trials(x):
     """
     x = np.atleast_3d(x)
     t = x.shape[2]
-    return np.squeeze(np.vstack(np.dsplit(x,t)), axis=2)
+    return np.squeeze(np.vstack(np.dsplit(x, t)), axis=2)
+
 
 def dot_special(x, a):
     """
@@ -68,5 +71,5 @@ def dot_special(x, a):
     """
     x = np.atleast_3d(x)
     a = np.atleast_2d(a)
-    return np.dstack([x[:,:,i].dot(a) for i in range(x.shape[2])])
+    return np.dstack([x[:, :, i].dot(a) for i in range(x.shape[2])])
     

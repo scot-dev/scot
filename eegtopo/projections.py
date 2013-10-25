@@ -4,7 +4,8 @@
 
 from numpy import arcsin, sin, cos, pi
 
-def project_radial_to2d( point_3d ):
+
+def project_radial_to2d(point_3d):
     point_2d = point_3d.copy()
     point_2d.z = 0
     beta = point_2d.norm()
@@ -12,15 +13,16 @@ def project_radial_to2d( point_3d ):
         alpha = 0
     else:
         alpha = arcsin(beta) / beta
-    
+
     if point_3d.z < 0:
         alpha = pi / beta - alpha
-        
+
     point_2d *= alpha
-    
+
     return point_2d
-    
-def project_radial_to3d( point_2d ):
+
+
+def project_radial_to3d(point_2d):
     alpha = point_2d.norm()
     if alpha == 0:
         beta = 1

@@ -2,11 +2,10 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-from .. import config
-
-from .. import datatools
-
 from sklearn.decomposition import FastICA, PCA
+
+from .. import config
+from .. import datatools
 
 
 def wrapper_fastica(data):

@@ -10,23 +10,28 @@ from .. import datatools
 
 from ..builtin import binica, pca
 
+
 def wrapper_binica(data):
     w, s = binica.binica(datatools.cat_trials(data))
     u = s.dot(w)
     m = np.linalg.inv(u)
     return m, u
 
+
 def wrapper_pca(x, reducedim):
     c, d = pca.pca(datatools.cat_trials(x), subtract_mean=False, reducedim=reducedim)
     y = datatools.dot_special(x, c)
     return c, d, y
-    
+
+
 backend = {
     'ica': wrapper_binica,
     'pca': wrapper_pca
-    }
-    
-def activate( ):
+}
+
+
+def activate():
     config.backend = backend
-    
+
+
 activate()

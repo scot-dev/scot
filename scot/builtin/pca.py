@@ -7,23 +7,24 @@
 import numpy as np
 from ..datatools import cat_trials
 
-def pca_svd( data ):
+
+def pca_svd(data):
     """calculate PCA from SVD (observations in rows)"""
-    
-    (w,s,v) = np.linalg.svd( data.transpose() )
-    
-    return w, s**2
-    
 
-def pca_eig( x ):
+    (w, s, v) = np.linalg.svd(data.transpose())
+
+    return w, s ** 2
+
+
+def pca_eig(x):
     """calculate PCA as eigenvalues of the covariance (observations in rows)"""
-            
-    [w,v] = np.linalg.eigh( x.transpose().dot(x) )
-    
-    return v, w
-    
 
-def pca( x, subtract_mean=False, normalize=False, sort_components=True, reducedim=None, algorithm=pca_eig ):
+    [w, v] = np.linalg.eigh(x.transpose().dot(x))
+
+    return v, w
+
+
+def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim=None, algorithm=pca_eig):
     """
     pca( x, subtract_mean=False,
             normalize=False,
@@ -58,15 +59,15 @@ def pca( x, subtract_mean=False, normalize=False, sort_components=True, reducedi
     w   PCA weights      y = x * w
     v   inverse weights  x = y * v
     """
-    
+
     x = cat_trials(np.atleast_3d(x))
-    
+
     if reducedim:
         sort_components = True
-    
+
     if subtract_mean:
         for i in range(np.shape(x)[1]):
-            x[:,i] -= np.mean(x[:,i])
+            x[:, i] -= np.mean(x[:, i])
 
     k, l = None, None
     if normalize:
@@ -74,39 +75,38 @@ def pca( x, subtract_mean=False, normalize=False, sort_components=True, reducedi
         k = np.diag(1.0 / l)
         l = np.diag(l)
         x = x.dot(k)
-        
-    w, latent = algorithm( x )
-        
+
+    w, latent = algorithm(x)
+
     #v = np.linalg.inv(w)
     # PCA is just a rotation, so inverse is equal transpose...
     v = w.T
-    
+
     if normalize:
         w = k.dot(w)
         v = v.dot(l)
-        
+
     latent /= sum(latent)
-        
-    if sort_components:        
+
+    if sort_components:
         order = np.argsort(latent)[::-1]
-        w = w[:,order]
-        v = v[order,:]
-        latent = latent[:,order]
-    
+        w = w[:, order]
+        v = v[order, :]
+        latent = latent[:, order]
+
     if reducedim and reducedim < 1:
-        selected = np.nonzero(np.cumsum(latent)<reducedim)[0]
+        selected = np.nonzero(np.cumsum(latent) < reducedim)[0]
         try:
-            selected = np.concatenate( [selected, [selected[-1]+1]] )
+            selected = np.concatenate([selected, [selected[-1] + 1]])
         except IndexError:
             selected = [0]
         if selected[-1] >= w.shape[1]:
-            selected = selected[0:-1]        
-        w = w[:,selected]
-        v = v[selected,:]
-        
-        
+            selected = selected[0:-1]
+        w = w[:, selected]
+        v = v[selected, :]
+
     if reducedim and reducedim >= 1:
-        w = w[:,np.arange(reducedim)]
-        v = v[np.arange(reducedim),:]
-        
+        w = w[:, np.arange(reducedim)]
+        v = v[np.arange(reducedim), :]
+
     return w, v
