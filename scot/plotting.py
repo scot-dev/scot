@@ -70,7 +70,7 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
         tmp = tmp[np.logical_not(np.isnan(tmp))]   
         mmax = np.percentile(np.abs(tmp), global_scale)
         mmin = -mmax
-        mrange = [umin,umax]
+        mrange = [mmin,mmax]
         
     y = np.floor(np.sqrt(m*3/4))
     x = np.ceil(m/y)
@@ -85,7 +85,7 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
         axes[-1].set_title(str(i))
         
         axes.append(fig.add_subplot(2*y, x, m+i+1))
-        h2 = plot_topo(axes[-1], topo, mixmaps[i], crange=urange)
+        h2 = plot_topo(axes[-1], topo, mixmaps[i], crange=mrange)
         axes[-1].set_title(str(i))
         
     for a in axes:
