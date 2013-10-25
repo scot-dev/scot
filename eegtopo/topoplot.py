@@ -47,7 +47,8 @@ class Topoplot:
         self.C = None
         self.image = None
         
-    def calc_legendre_factors(self, m, num_lterms):
+    @staticmethod
+    def calc_legendre_factors(m, num_lterms):
         return [(2*n+1) / (n**m * (n+1)**m * 4*np.pi) for n in range(1, num_lterms+1)]
         
     def g(self, x):

@@ -356,7 +356,8 @@ class Workspace:
                 i += 1
         return result
                 
-    def showPlots(self):
+    @staticmethod
+    def showPlots():
         """Show current plots."""
         plotting.show_plots( )
     
@@ -474,7 +475,8 @@ class Workspace:
         if unmixing and not self.unmixmaps_:
             self.unmixmaps_ = plotting.prepare_topoplots(self.topo_, self.unmixing_.transpose())
             
-    def _cleanMeasure(self, measure, A):
+    @staticmethod
+    def _cleanMeasure(measure, A):
         if measure in ['A', 'H', 'COH', 'pCOH']:
             return np.abs(A)
         elif measure in ['S', 'G']:
