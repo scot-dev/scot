@@ -73,33 +73,33 @@ class Workspace:
         '''Information about the Workspace.'''
         
         if self.data_ is not None:
-            data = '%d samples, %d channels, %d trials'%self.data_.shape
+            datastr = '%d samples, %d channels, %d trials'%self.data_.shape
         else:
-            data = 'None'
+            datastr = 'None'
             
             
         if self.cl_ is not None:
-            cl = str(np.unique(self.cl_))
+            clstr = str(np.unique(self.cl_))
         else:
-            cl = 'None'
+            clstr = 'None'
 
         if self.unmixing_ is not None:
-            sources = str(self.unmixing_.shape[1])
+            sourcestr = str(self.unmixing_.shape[1])
         else:
-            sources = 'None'
+            sourcestr = 'None'
             
         if self.var_model_ is None:
-            var = 'None'
+            varstr = 'None'
         elif isinstance(self.var_model_, dict):
-            var = str(len(self.var_model_))
+            varstr = str(len(self.var_model_))
         else:
-            var = '1'
+            varstr = '1'
         
         s = 'SCoT(var_order = %d):\n'%self.var_order_
-        s += '  Data      : ' + data + '\n'
-        s += '  Classes   : ' + cl + '\n'
-        s += '  Sources   : ' + sources + '\n'
-        s += '  VAR models: ' + var + '\n'
+        s += '  Data      : ' + datastr + '\n'
+        s += '  Classes   : ' + clstr + '\n'
+        s += '  Sources   : ' + sourcestr + '\n'
+        s += '  VAR models: ' + varstr + '\n'
         
         return s
     

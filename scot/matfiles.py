@@ -15,27 +15,27 @@ def loadmat(filename):
     
 savemat = spsavemat
 
-def _check_keys(dict):
+def _check_keys(dictionary):
     '''
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
     '''
-    for key in dict:
-        if isinstance(dict[key], matlab.mio5_params.mat_struct):
-            dict[key] = _todict(dict[key])
-    return dict        
+    for key in dictionary:
+        if isinstance(dictionary[key], matlab.mio5_params.mat_struct):
+            dictionary[key] = _todict(dictionary[key])
+    return dictionary
 
 def _todict(matobj):
     '''
     a recursive function which constructs from matobjects nested dictionaries
     '''
-    dict = {}
+    dictionary = {}
     #noinspection PyProtectedMember
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
         if isinstance(elem, matlab.mio5_params.mat_struct):
-            dict[strg] = _todict(elem)
+            dictionary[strg] = _todict(elem)
         else:
-            dict[strg] = elem
-    return dict
+            dictionary[strg] = elem
+    return dictionary
 

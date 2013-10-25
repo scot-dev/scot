@@ -8,10 +8,10 @@ import numbers
 import numpy as np
 from functools import partial
 from . import datatools
-from . import xvschema
+from . import xvschema as xv
 
 class Defaults:
-    xvschema = xvschema.multitrial
+    xvschema = xv.multitrial
 
 def fit( data, p, delta=None, return_residuals=False, return_covariance=False ):
     '''
