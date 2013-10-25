@@ -412,7 +412,7 @@ def _is_underdetermined( l, m, t, p ):
     
 def _msge_with_gradient_underdetermined( data, p, delta, xvschema, skipstep):
     (l,m,t) = data.shape
-    
+    d = None
     j, k = 0, 0
     nt = np.ceil(t/skipstep)
     for s in range(0,t,skipstep):
@@ -439,7 +439,7 @@ def _msge_with_gradient_underdetermined( data, p, delta, xvschema, skipstep):
     
 def _msge_with_gradient_overdetermined( data, p, delta, xvschema, skipstep):
     (l,m,t) = data.shape
-
+    d = None
     l, k = 0, 0
     nt = np.ceil(t/skipstep)
     for s in range(0,t,skipstep):

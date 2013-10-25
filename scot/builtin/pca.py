@@ -67,7 +67,8 @@ def pca( x, subtract_mean=False, normalize=False, sort_components=True, reducedi
     if subtract_mean:
         for i in range(np.shape(x)[1]):
             x[:,i] -= np.mean(x[:,i])
-            
+
+    k, l = None, None
     if normalize:
         l = np.std(x, 0, ddof=1)
         k = np.diag(1.0 / l)

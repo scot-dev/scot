@@ -65,7 +65,8 @@ def construct_1020_easycap(variant=0):
     if variant == 0:
         circle_3 = Circle(p.Fp1, p.C3, p.O1)
         circle_4 = Circle(p.Fp2, p.C4, p.O2)
-    elif variant == 1:
+    #elif variant == 1:
+    else:
         circle_3 = Circle(p.Fpz, p.C3, p.Oz)
         circle_4 = Circle(p.Fpz, p.C4, p.Oz)    
     

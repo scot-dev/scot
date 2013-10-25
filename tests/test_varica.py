@@ -53,7 +53,7 @@ class TestMVARICA(unittest.TestCase):
             permutations = np.array([[0,1,2,3,4,5],[0,1,4,5,2,3],[2,3,4,5,0,1],[2,3,0,1,4,5],[4,5,0,1,2,3],[4,5,2,3,0,1]])
             signperms = np.array([[1,1,1,1,1,1], [1,1,1,1,-1,-1], [1,1,-1,-1,1,1], [1,1,-1,-1,-1,-1], [-1,-1,1,1,1,1], [-1,-1,1,1,-1,-1], [-1,-1,-1,-1,1,1], [-1,-1,-1,-1,-1,-1]])
             
-            best = np.inf
+            best, d = np.inf, None
     
             for perm in permutations:
                 b = result.b[perm[::2]//2,:]
