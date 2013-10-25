@@ -21,15 +21,15 @@ def binica( data, binary_location = binica_binary_location ):
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    data                  : N,M   : 2d data matrix (N samples, M signals)
+    data                  : n,m   : 2d data matrix (n samples, m signals)
     binary_location: *    :       : path to the binica binary
     
     Output
     --------------------------------------------------------------------------
-    W   weights matrix
+    w   weights matrix
     S   sphering matrix
     
-    The unmixing matrix is obtained by multiplying U = np.dot(S,W)
+    The unmixing matrix is obtained by multiplying U = np.dot(S,w)
     
     * by default the binary is expected to be "binica/ica_linux" relative
       to the directory where this module lies (typically scot/binica/ica_linux)

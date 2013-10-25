@@ -49,13 +49,13 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
 """
 Perform MVARICA
 """
-ws.setData(data)
-ws.doMVARICA()
+ws.set_data(data)
+ws.do_mvarica()
 
 """
 Find optimal regularization parameter for single-trial fitting
 """
-ws.optimizeRegularization(scot.xvschema.singletrial, 30)
+ws.optimize_regularization(scot.xvschema.singletrial, 30)
 
 freq = np.linspace(0,fs,ws.nfft_)
 
@@ -65,10 +65,10 @@ Single-Trial Fitting and feature extraction
 features = np.zeros((len(triggers), 32))
 for t in range(len(triggers)):
     print('Trial: %d   '%t, end='\r')
-    ws.setData(data[:,:,t])
-    ws.fitVAR()
+    ws.set_data(data[:,:,t])
+    ws.fit_var()
 
-    con = ws.getConnectivity('ffPDC')
+    con = ws.get_connectivity('ffPDC')
     
     alpha = np.mean(con[:,:,np.logical_and(7<freq, freq<13)], axis=2)
     beta = np.mean(con[:,:,np.logical_and(15<freq, freq<25)], axis=2)

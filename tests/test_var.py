@@ -21,67 +21,67 @@ class TestVAR(unittest.TestCase):
     
     def test_simulate(self):
         noisefunc = lambda: [1,1]   # use deterministic function instead of noise
-        B = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-        L = 100
-        X = var.simulate(L, B, noisefunc)
+        b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        num_samples = 100
+        x = var.simulate(num_samples, b, noisefunc)
         
         # make sure we got expected values within reasonable accuracy
-        for n in range(10,L):
-            self.assertTrue( np.all(np.abs(X[n,:] - 1 - np.dot(B[:,0::2], X[n-1,:]) - np.dot(B[:,1::2], X[n-2,:])) < epsilon) )
+        for n in range(10,num_samples):
+            self.assertTrue( np.all(np.abs(x[n,:] - 1 - np.dot(b[:,0::2], x[n-1,:]) - np.dot(b[:,1::2], x[n-2,:])) < epsilon) )
     
     def test_fit(self):
-        B = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-        L = 100000
-        X = var.simulate(L, B)
-        Y = X.copy()
+        b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = 100000
+        x = var.simulate(l, b)
+        y = x.copy()
         
-        B_fit = var.fit(X, 2)
+        b_fit = var.fit(x, 2)
 
         # make sure the input remains unchanged
-        self.assertTrue(np.all(X == Y))        
+        self.assertTrue(np.all(x == y))
         
         # that limit is rather generous, but we don't want tests to fail due to random variation
-        self.assertTrue(np.all(np.abs(B-B_fit) < 0.02))
+        self.assertTrue(np.all(np.abs(b-b_fit) < 0.02))
     
     def test_fit_regularized(self):
-        B = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-        L = 100000
-        X = var.simulate(L, B)
-        Y = X.copy()
+        b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = 100000
+        x = var.simulate(l, b)
+        y = x.copy()
         
-        B_fit = var.fit(X, 10, delta=1)
+        b_fit = var.fit(x, 10, delta=1)
 
         # make sure the input remains unchanged
-        self.assertTrue(np.all(X == Y))
+        self.assertTrue(np.all(x == y))
         
-        B0 = np.zeros((2,20))
-        B0[:,0:2] = B[:,0:2]
-        B0[:,10:12] = B[:,2:4]
+        b0 = np.zeros((2,20))
+        b0[:,0:2] = b[:,0:2]
+        b0[:,10:12] = b[:,2:4]
         
         # that limit is rather generous, but we don't want tests to fail due to random variation
-        self.assertTrue(np.all(np.abs(B0-B_fit) < 0.02))
+        self.assertTrue(np.all(np.abs(b0-b_fit) < 0.02))
     
     def test_predict(self):
-        B = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-        L = 100000
-        X = var.simulate(L, B)
-        Y = X.copy()
+        b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = 100000
+        x = var.simulate(l, b)
+        y = x.copy()
         
-        Z = var.predict(X, B)
+        z = var.predict(x, b)
         
         # that limit is rather generous, but we don't want tests to fail due to random variation
-        self.assertTrue( np.abs(np.var(X[100:,:]-Z[100:,:]) - 1) < 0.02 )
+        self.assertTrue( np.abs(np.var(x[100:,:]-z[100:,:]) - 1) < 0.02 )
         
     def test_residuals(self):
-        B = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-        L = 100000
-        X = var.simulate(L, B)
+        b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = 100000
+        x = var.simulate(l, b)
         
-        _, R, C = var.fit(X, 2, return_residuals=True, return_covariance=True)
+        _, r, c = var.fit(x, 2, return_residuals=True, return_covariance=True)
         
-        self.assertEqual(X.shape, R.shape)
+        self.assertEqual(x.shape, r.shape)
         
-        self.assertTrue(np.allclose(C, np.eye(C.shape[0]), 1e-2, 1e-2))
+        self.assertTrue(np.allclose(c, np.eye(c.shape[0]), 1e-2, 1e-2))
         
 def main():
     unittest.main()

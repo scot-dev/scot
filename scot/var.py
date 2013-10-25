@@ -10,79 +10,78 @@ from functools import partial
 from . import datatools
 from . import xvschema
 
-class defaults:
+class Defaults:
     xvschema = xvschema.multitrial
 
-def fit( data, P, delta=None, return_residuals=False, return_covariance=False ):
+def fit( data, p, delta=None, return_residuals=False, return_covariance=False ):
     '''
-    fit( data, P )
-    fit( data, P, delta )
+    fit( data, p )
+    fit( data, p, delta )
         
     Fit least squares estimate of vector autoregressive (VAR) model with
-    order P to the data.
+    order p to the data.
     
     If sqrtdelta is provited and nonzero, the least squares estimation is
     regularized with ridge regression.
     
     Parameters       Default  Shape   Description
     --------------------------------------------------------------------------
-    data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                            : N,M   : 2d data matrix (N samples, M signals)
-    P                :      :       : Model order
+    data             :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
+                            : n,m   : 2d data matrix (n samples, m signals)
+    p                :      :       : Model order
     delta            : None :       : regularization parameter
     return_residuals : False :      : if True, also return model residuals
     return_covariance: False :      : if True, also return covariance
     
     Output
     --------------------------------------------------------------------------
-    B   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size M*M
+    b   Model coefficients: [b_0, b_1, ... b_p], each sub matrix b_k is of size m*m
     res (optional) Model residuals: (same shape as data), note that
-        the first P residuals are invalid.
-    C   (optional) Covariance of residuals
+        the first p residuals are invalid.
+    c   (optional) Covariance of residuals
     
     Note on the arrangement of model coefficients:
-        B is of shape M, M*P, with sub matrices arranged as follows:
-            b_00 b_01 ... b_0M
-            b_10 b_11 ... b_1M
+        b is of shape m, m*p, with sub matrices arranged as follows:
+            b_00 b_01 ... b_0m
+            b_10 b_11 ... b_1m
             .... ....     ....
-            b_M0 b_M1 ... b_MM
-        Each sub matrix b_ij is a column vector of length P that contains the
+            b_m0 b_m1 ... b_mm
+        Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
     '''
     data = np.atleast_3d(data)
-    (L,M,T) = np.shape( data )
     
     if delta == 0 or delta is None:
         # normal least squares
-        (X,y) = __construct_eqns( data, P )
+        (x,y) = __construct_eqns( data, p )
     else:    
         # regularized least squares
-        (X,y) = __construct_eqns_RLS( data, P, delta )
+        (x,y) = __construct_eqns_rls( data, p, delta )
     
-    (B, res, rank, s) = np.linalg.lstsq( X, y )
-    B = B.transpose()
+    (b, res, rank, s) = np.linalg.lstsq( x, y )
+    b = b.transpose()
     
     if return_residuals or return_covariance:
-        result = [B]
-        res = data - predict( data, B )
+        result = [b]
+        res = data - predict( data, b )
     else:
-        return B
+        return b
         
     if return_residuals:
         result.append(res)
         
     if return_covariance:
-        C = np.cov(datatools.cat_trials(res), rowvar=False)
-        result.append(C)
+        c = np.cov(datatools.cat_trials(res), rowvar=False)
+        result.append(c)
         
     return tuple(result)
    
    
     
-def fit_multiclass( data, cl, P, delta=None, return_residuals=False, return_covariance=False ):
+def fit_multiclass( data, cl, p, delta=None, return_residuals=False, return_covariance=False ):
     '''
-    fit_multiclass( data, cl, P )
-    fit_multiclass( data, cl, P, delta )
+    fit_multiclass( data, cl, p )
+    fit_multiclass( data, cl, p, delta )
     
     Fits a separate autoregressive model for each class.
     
@@ -91,9 +90,9 @@ def fit_multiclass( data, cl, P, delta=None, return_residuals=False, return_cova
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
+    data             :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
     cl               :      : T     : class label for each trial
-    P                :      :       : Model order can be scalar (same model order for each class)
+    p                :      :       : Model order can be scalar (same model order for each class)
                                       or a dictionary that contains a key for each unique class label
                                       to specify the model order for each class individually.
     delta            : None :       : regularization parameter
@@ -102,10 +101,10 @@ def fit_multiclass( data, cl, P, delta=None, return_residuals=False, return_cova
     
     Output
     --------------------------------------------------------------------------
-    Bcl   dictionary of model coefficients for each class
+    bcl   dictionary of model coefficients for each class
     res   (optional) Model residuals: (same shape as data), note that
-          the first P (depending on the class) residuals are invalid.
-    Ccl   (optional) dictionary of residual covariances for each class
+          the first p (depending on the class) residuals are invalid.
+    ccl   (optional) dictionary of residual covariances for each class
     '''
     
     data = np.atleast_3d(data)
@@ -116,155 +115,155 @@ def fit_multiclass( data, cl, P, delta=None, return_residuals=False, return_cova
     if cl.size != data.shape[2]:
         raise AttributeError('cl must contain a class label for each trial (expected size %d, but got %d).'%(data.shape[2], cl.size))
     
-    if isinstance(P, numbers.Number):
-        P = dict.fromkeys(labels, P)
+    if isinstance(p, numbers.Number):
+        p = dict.fromkeys(labels, p)
     else:
         try:
-            assert(set(labels)==set(P.keys()))
+            assert(set(labels)==set(p.keys()))
         except:
-            raise AttributeError('Model order P must be either a scalar number, or a dictionary containing a key for each unique label in cl.')
+            raise AttributeError('Model order p must be either a scalar number, or a dictionary containing a key for each unique label in cl.')
     
-    Bcl, Ccl = {}, {}
+    bcl, ccl = {}, {}
     res = np.zeros(data.shape)
     for c in labels:
-        X = data[:,:,cl==c]
-        B = fit( X, P[c], delta )            
-        Bcl[c] = B
+        x = data[:,:,cl==c]
+        b = fit( x, p[c], delta )
+        bcl[c] = b
     
         if return_residuals or return_covariance:
-            r = X - predict( X, B )
+            r = x - predict( x, b )
             
         if return_residuals:
              res[:,:,cl==c] = r
             
         if return_covariance:
-            Ccl[c] = np.cov(datatools.cat_trials(r), rowvar=False)    
+            ccl[c] = np.cov(datatools.cat_trials(r), rowvar=False)
     
     if return_residuals or return_covariance:
-        result = [Bcl]
+        result = [bcl]
     else:
-        return Bcl
+        return bcl
         
     if return_residuals:
         result.append(res)
         
     if return_covariance:
-        result.append(Ccl)
+        result.append(ccl)
         
     return tuple(result)
     
     
     
-def simulate( L, B, noisefunc=None ):
+def simulate( l, b, noisefunc=None ):
     '''
-    simulate( L, B )
-    simulate( L, B, noisefunc )
+    simulate( l, b )
+    simulate( l, b, noisefunc )
     
     Simulate vector autoregressive (VAR) model with optional noise generating function.
     
     Note on the arrangement of model coefficients:
-        B is of shape M, M*P, with sub matrices arranged as follows:
-            b_00 b_01 ... b_0M
-            b_10 b_11 ... b_1M
+        b is of shape m, m*p, with sub matrices arranged as follows:
+            b_00 b_01 ... b_0m
+            b_10 b_11 ... b_1m
             .... ....     ....
-            b_M0 b_M1 ... b_MM
-        Each sub matrix b_ij is a column vector of length P that contains the
+            b_m0 b_m1 ... b_mm
+        Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    L              :      : 1     : Number of samples to generate
-                   :      : 2     : L[0]: number of samples, L[1]: number of trials
-    B              :      : M,M*P : Model coefficients
-    noisefunc      : None :       : callback function that takes no parameter and returns M values
+    l              :      : 1     : Number of samples to generate
+                   :      : 2     : l[0]: number of samples, l[1]: number of trials
+    b              :      : m,m*p : Model coefficients
+    noisefunc      : None :       : callback function that takes no parameter and returns m values
     
     Output           Shape   Description
     --------------------------------------------------------------------------
-    data           : L,M,T : 3D data matrix
+    data           : l,m,t : 3D data matrix
     '''
-    B = np.atleast_2d(B)
-    (M,N) = np.shape( B )
-    P = int(N / M)
+    b = np.atleast_2d(b)
+    (m,n) = np.shape( b )
+    p = int(n / m)
     
     try:
-        (L,T) = L
+        (l,t) = l
     except TypeError:
-        T = 1
+        t = 1
         
     if noisefunc is None:
-        noisefunc = partial( np.random.normal, size=(1,M) )
+        noisefunc = partial( np.random.normal, size=(1,m) )
         
-    N = L + 10 * P;
+    n = l + 10 * p;
     
-    y = np.zeros((N,M,T))
+    y = np.zeros((n,m,t))
     
-    for t in range(T):
-        for n in range(P):
-            y[n,:,t] = noisefunc()
-        for n in range(P,N):
-            y[n,:,t] = noisefunc()
-            for p in range(1,P+1):
-                y[n,:,t] += np.dot( B[:,(p-1)::P], y[n-p,:,t] )
+    for s in range(t):
+        for i in range(p):
+            y[i,:,s] = noisefunc()
+        for i in range(p,n):
+            y[i,:,s] = noisefunc()
+            for k in range(1,p+1):
+                y[i,:,s] += np.dot( b[:,(k-1)::p], y[i-k,:,s] )
                 
-    return y[10*P:,:,:]
+    return y[10*p:,:,:]
     
     
     
-def predict( data, B ):
+def predict( data, b ):
     '''
-    predict( data, B )
+    predict( data, b )
     
-    Predict samples from actual data using VAR model coefficients B.
+    Predict samples from actual data using VAR model coefficients b.
     
-    Note that the model requires P past samples for prediction. Thus, the first
-    P samples are invalid and set to 0.
+    Note that the model requires p past samples for prediction. Thus, the first
+    p samples are invalid and set to 0.
     
     Note on the arrangement of model coefficients:
-        B is of shape M, M*P, with sub matrices arranged as follows:
-            b_00 b_01 ... b_0M
-            b_10 b_11 ... b_1M
+        b is of shape m, m*p, with sub matrices arranged as follows:
+            b_00 b_01 ... b_0m
+            b_10 b_11 ... b_1m
             .... ....     ....
-            b_M0 b_M1 ... b_MM
-        Each sub matrix b_ij is a column vector of length P that contains the
+            b_m0 b_m1 ... b_mm
+        Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    data           :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                          : N,M   : 2d data matrix (N samples, M signals)
-    B              :      : M,M*P : Model coefficients
+    data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
+                          : n,m   : 2d data matrix (n samples, m signals)
+    b              :      : m,m*p : Model coefficients
     
     Output           Shape   Description
     --------------------------------------------------------------------------
-    predicted      : L,M,T : 3D data matrix
+    predicted      : l,m,t : 3D data matrix
     '''
     data = np.atleast_3d(data)
-    (L,M,T) = data.shape
+    (l,m,t) = data.shape
     
-    P = int(np.shape(B)[1] / M)
+    p = int(np.shape(b)[1] / m)
 
     y = np.zeros(np.shape(data))
-    for p in range(1,P+1):
-        Bp = B[:,(p-1)::P]
-        for n in range(P,L):
-            y[n,:,:] += np.dot( Bp, data[n-p,:,:] )
+    for k in range(1,p+1):
+        bp = b[:,(k-1)::p]
+        for n in range(p,l):
+            y[n,:,:] += np.dot( bp, data[n-k,:,:] )
     return y
     
 
     
-def optimize_delta_bisection( data, P, xvschema=lambda t,T: defaults.xvschema(t,T), skipstep=1 ):
+def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t,nt), skipstep=1 ):
     '''
-    optimize_delta_bisection( data, P )
-    optimize_delta_bisection( data, P, xvschema )
-    optimize_delta_bisection( data, P, xvschema, skipstep )
+    optimize_delta_bisection( data, p )
+    optimize_delta_bisection( data, p, xvschema )
+    optimize_delta_bisection( data, p, xvschema, skipstep )
     
     Use the bisection method to find optimal regularization parameter delta.
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    data           :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                          : N,M   : 2d data matrix (N samples, M signals)
-    P              :      :       : Model order
+    data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
+                          : n,m   : 2d data matrix (n samples, m signals)
+    p              :      :       : Model order
     xvschema       :      : func  : Function to generate training and testing set.
                                     See xvschema module.
     skipstep       : 1    : 1     : Higher values speed up the calculation but
@@ -276,76 +275,76 @@ def optimize_delta_bisection( data, P, xvschema=lambda t,T: defaults.xvschema(t,
     delta         : 1     : Optimal regularization parameter
     '''
     data = np.atleast_3d(data)
-    (L,M,T) = data.shape
+    (l,m,t) = data.shape
     
-    underdetermined = _is_underdetermined(L, M, 1, P)
+    underdetermined = _is_underdetermined(l, m, 1, p)
     
-    MAXSTEPS = 10
-    MININTERVAL = 1
-    MAXDELTA = 1e50
+    maxsteps = 10
+    mininterval = 1
+    maxdelta = 1e50
     
     a = -10
     b = 10
     
     transform = lambda x: np.sqrt(np.exp(x))
     
-    (Ja,Ka) = _msge_with_gradient(data, P, transform(a), underdetermined, xvschema, skipstep)
-    (Jb,Kb) = _msge_with_gradient(data, P, transform(b), underdetermined, xvschema, skipstep)
+    (ja,ka) = _msge_with_gradient(data, p, transform(a), underdetermined, xvschema, skipstep)
+    (jb,kb) = _msge_with_gradient(data, p, transform(b), underdetermined, xvschema, skipstep)
     
     # before starting the real bisection, make sure the interval actually contains 0
-    while np.sign(Ka) == np.sign(Kb):
+    while np.sign(ka) == np.sign(kb):
         print( 'Bisection initial interval (%f,%f) does not contain zero. New interval: (%f,%f)'%(a,b,a*2,b*2) )
         a *= 2
         b *= 2
-        (Jb,Kb) = _msge_with_gradient(data, P, transform(b), underdetermined, xvschema, skipstep)
+        (jb,kb) = _msge_with_gradient(data, p, transform(b), underdetermined, xvschema, skipstep)
         
-        if transform(b) >= MAXDELTA:
+        if transform(b) >= maxdelta:
             print( 'Bisection: could not find initial interval.')
             print( ' ********* Delta set to zero! ************ ')
             return 0
     
     nsteps = 0
     
-    K = np.inf
+    k = np.inf
     sqrtei = np.sqrt(np.exp([a,b]))
-    while nsteps < MAXSTEPS:
+    while nsteps < maxsteps:
         
         # point where the line between a and b crosses zero
         # this is not very stable!
-        #c = a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka)
+        #c = a + (b-a) * np.abs(ka) / np.abs(kb-ka)
         c = (a+b)/2
-        (J,K) = _msge_with_gradient(data, P, transform(c), underdetermined, xvschema, skipstep)
-        if np.sign(K) == np.sign(Ka):
-            a, Ka = c, K
+        (j,k) = _msge_with_gradient(data, p, transform(c), underdetermined, xvschema, skipstep)
+        if np.sign(k) == np.sign(ka):
+            a, ka = c, k
         else:
-            b, Kb = c, K
+            b, kb = c, k
         
         nsteps += 1
         sqrtei = transform([a,b])
-        #print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, sqrtei[0], sqrtei[1], transform(a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka))))
-        tmp = transform([a, b, a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka)])
+        #print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, sqrtei[0], sqrtei[1], transform(a + (b-a) * np.abs(ka) / np.abs(kb-ka))))
+        tmp = transform([a, b, a + (b-a) * np.abs(ka) / np.abs(kb-ka)])
         print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, tmp[0], tmp[1], tmp[2]))
     
-    delta = transform( a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka) )
+    delta = transform( a + (b-a) * np.abs(ka) / np.abs(kb-ka) )
     print('Final point: %f'%delta)
     return delta
 
 
 
-def optimize_delta_gradientdescent( data, P, skipstep=1, xvschema=lambda t,T: defaults.xvschema(t,T) ):
+def optimize_delta_gradientdescent( data, p, skipstep=1, xvschema=lambda t,nt: Defaults.xvschema(t,nt) ):
     '''
-    optimize_delta_bisection( data, P )
-    optimize_delta_bisection( data, P, xvschema )
-    optimize_delta_bisection( data, P, xvschema, skipstep )
+    optimize_delta_bisection( data, p )
+    optimize_delta_bisection( data, p, xvschema )
+    optimize_delta_bisection( data, p, xvschema, skipstep )
     
     Use gradient descent to find optimal regularization parameter delta.
     Stable but slow. Use optimize_delta_bisection instead.
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    data           :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                          : N,M   : 2d data matrix (N samples, M signals)
-    P              :      :       : Model order
+    data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
+                          : n,m   : 2d data matrix (n samples, m signals)
+    p              :      :       : Model order
     xvschema       :      : func  : Function to generate training and testing set.
                                     See xvschema module.
     skipstep       : 1    : 1     : Higher values speed up the calculation but
@@ -357,27 +356,27 @@ def optimize_delta_gradientdescent( data, P, skipstep=1, xvschema=lambda t,T: de
     delta         : 1     : Optimal regularization parameter
     '''
     data = np.atleast_3d(data)
-    (L,M,T) = data.shape
+    (l,m,t) = data.shape
     
-    underdetermined = _is_underdetermined(L, M, 1, P)
+    underdetermined = _is_underdetermined(l, m, 1, p)
     
-    K = np.inf
+    k = np.inf
     delta = 1
     step = np.inf
-    last_J = np.inf
-    J = np.inf
+    last_j = np.inf
+    j = np.inf
     nsteps = 0
-    #while not(last_J-J < 1e-10 and step < 1e-5) and nsteps < 100:        
-    while abs(K) > 1e-5:
-        last_J = J
-        (J,K) = _msge_with_gradient(data, P, delta, underdetermined, xvschema, skipstep)
+    #while not(last_j-j < 1e-10 and step < 1e-5) and nsteps < 100:
+    while abs(k) > 1e-5:
+        last_j = j
+        (j,k) = _msge_with_gradient(data, p, delta, underdetermined, xvschema, skipstep)
         
-        step = -K * 1.0
+        step = -k * 1.0
                 
         delta += step
         
         nsteps += 1
-        print('%d Gradient Descent: %f'%(nsteps, K))
+        print('%d Gradient Descent: %f'%(nsteps, k))
     
     return np.sqrt(np.exp(delta))
     
@@ -385,131 +384,131 @@ def optimize_delta_gradientdescent( data, P, skipstep=1, xvschema=lambda t,T: de
  ############################################################################    
     
     
-def _msge_crossvalidated( data, P, delta, xvschema, skipstep):
+def _msge_crossvalidated( data, p, delta, xvschema, skipstep):
     '''leave-one-trial-out cross validation of VAR prediction error'''
     data = np.atleast_3d(data)
-    (L,M,T) = np.shape( data )    
-    assert(T>1)
+    (l,m,t) = np.shape( data )
+    assert(t>1)
     
     msge = []   # mean squared generalization error
-    for t in range(0,T,skipstep):        
-        trainset, testset = xvschema(t,T)
+    for s in range(0,t,skipstep):
+        trainset, testset = xvschema(s,t)
         
         traindata = np.atleast_3d(data[:,:,trainset])
         testdata = np.atleast_3d(data[:,:,testset])
         
-        B = fit(traindata, P, delta)
-        r = (testdata - predict(testdata, B))[P:,:,:]
+        b = fit(traindata, p, delta)
+        r = (testdata - predict(testdata, b))[p:,:,:]
         
         msge.append( np.mean(r**2) )
         
     return np.mean(msge)
     
-def _is_underdetermined( L, M, T, P ):
-    N = (L-P)*T     # number of linear relations
-    return N < M*P
+def _is_underdetermined( l, m, t, p ):
+    n = (l-p)*t     # number of linear relations
+    return n < m*p
     
-def _msge_with_gradient_underdetermined( data, P, delta, xvschema, skipstep):
-    (L,M,T) = data.shape
+def _msge_with_gradient_underdetermined( data, p, delta, xvschema, skipstep):
+    (l,m,t) = data.shape
     
-    J, K = 0, 0
-    NT = np.ceil(T/skipstep)
-    for t in range(0,T,skipstep):        
-        trainset, testset = xvschema(t,T)
+    j, k = 0, 0
+    nt = np.ceil(t/skipstep)
+    for s in range(0,t,skipstep):
+        trainset, testset = xvschema(s,t)
         
-        (A,b) = __construct_eqns( np.atleast_3d(data[:,:,trainset]), P )
-        (B,c) = __construct_eqns( np.atleast_3d(data[:,:,testset]), P )
+        (a,b) = __construct_eqns( np.atleast_3d(data[:,:,trainset]), p )
+        (c,d) = __construct_eqns( np.atleast_3d(data[:,:,testset]), p )
         
-        D = np.linalg.inv(np.eye(A.shape[0])*delta**2 + A.dot(A.transpose()))
+        e = np.linalg.inv(np.eye(a.shape[0])*delta**2 + a.dot(a.transpose()))
             
-        BB = B.transpose().dot(B)
+        cc = c.transpose().dot(c)
 
-        bD = b.transpose().dot(D)
-        bDD = bD.dot(D)
-        bDA = bD.dot(A)
-        bDDA = bDD.dot(A)
-        bDABB = bDA.dot(BB)
-        cB = c.transpose().dot(B)
+        be = b.transpose().dot(e)
+        bee = be.dot(e)
+        bea = be.dot(a)
+        beea = bee.dot(a)
+        beacc = bea.dot(cc)
+        dc = d.transpose().dot(c)
         
-        J += np.sum(bDABB*bDA - 2*bDA*cB) + np.sum(c**2)
-        K += np.sum(bDDA*cB - bDABB*bDDA) * 4 * delta
+        j += np.sum(beacc*bea - 2*bea*dc) + np.sum(d**2)
+        k += np.sum(beea*dc - beacc*beea) * 4 * delta
             
-    return (J / (NT*c.size), K / (NT*c.size))
+    return (j / (nt*d.size), k / (nt*d.size))
     
-def _msge_with_gradient_overdetermined( data, P, delta, xvschema, skipstep):
-    (L,M,T) = data.shape
+def _msge_with_gradient_overdetermined( data, p, delta, xvschema, skipstep):
+    (l,m,t) = data.shape
 
-    J, K = 0, 0
-    NT = np.ceil(T/skipstep)
-    for t in range(0,T,skipstep):        
-        #print(t,drange)
-        trainset, testset = xvschema(t,T)
+    l, k = 0, 0
+    nt = np.ceil(t/skipstep)
+    for s in range(0,t,skipstep):
+        #print(s,drange)
+        trainset, testset = xvschema(s,t)
         
-        (A,b) = __construct_eqns( np.atleast_3d(data[:,:,trainset]), P )
-        (B,c) = __construct_eqns( np.atleast_3d(data[:,:,testset]), P )
+        (a,b) = __construct_eqns( np.atleast_3d(data[:,:,trainset]), p )
+        (c,d) = __construct_eqns( np.atleast_3d(data[:,:,testset]), p )
 
-        #D = sp.linalg.inv(np.eye(A.shape[1])*delta**2 + A.transpose().dot(A), overwrite_a=True, check_finite=False)
-        D = np.linalg.inv(np.eye(A.shape[1])*delta**2 + A.transpose().dot(A))
+        #e = sp.linalg.inv(np.eye(a.shape[1])*delta**2 + a.transpose().dot(a), overwrite_a=True, check_finite=False)
+        e = np.linalg.inv(np.eye(a.shape[1])*delta**2 + a.transpose().dot(a))
 	
-        bA = b.transpose().dot(A)
-        cB = c.transpose().dot(B)
-        bAD = bA.dot(D)
-        bADD = bAD.dot(D)
-        bADBB = bAD.dot(B.transpose().dot(B))
+        ba = b.transpose().dot(a)
+        dc = d.transpose().dot(c)
+        bae = ba.dot(e)
+        baee = bae.dot(e)
+        baecc = bae.dot(c.transpose().dot(c))
            
-        J += np.sum(bADBB*bAD - 2*bAD*cB) + np.sum(c**2)
-        K += np.sum(bADD*cB - bADBB*bADD) * 4 * delta
+        l += np.sum(baecc*bae - 2*bae*dc) + np.sum(d**2)
+        k += np.sum(baee*dc - baecc*baee) * 4 * delta
             
-    return (J / (NT*c.size), K / (NT*c.size))
+    return (l / (nt*d.size), k / (nt*d.size))
     
-def _msge_with_gradient( data, P, delta, underdetermined, xvschema, skipstep ):
+def _msge_with_gradient( data, p, delta, underdetermined, xvschema, skipstep ):
     data = np.atleast_3d(data)
-    (L,M,T) = data.shape
-    assert(T>1)
+    (l,m,t) = data.shape
+    assert(t>1)
     
     if underdetermined is None:
-        underdetermined = _is_underdetermined(L, M, T, P)
+        underdetermined = _is_underdetermined(l, m, t, p)
 
     if underdetermined:
-        return _msge_with_gradient_underdetermined( data, P, delta, xvschema, skipstep )
+        return _msge_with_gradient_underdetermined( data, p, delta, xvschema, skipstep )
     else:
-        return _msge_with_gradient_overdetermined( data, P, delta, xvschema, skipstep )
+        return _msge_with_gradient_overdetermined( data, p, delta, xvschema, skipstep )
 
     
     
     
-def __construct_eqns( data, P ):
-    '''construct VAR equation system'''
-    (L,M,T) = np.shape( data )
-    N = (L-P)*T     # number of linear relations
-    # construct matrix X (predictor variables)
-    X = np.zeros( (N, M*P) )
-    for m in range(M):
-        for p in range(1,P+1):
-            X[:,m*P+p-1] = np.reshape( data[P-p:-p, m, :], N )
+def __construct_eqns( data, p ):
+    '''Construct VAR equation system'''
+    (l,m,t) = np.shape( data )
+    n = (l-p)*t     # number of linear relations
+    # Construct matrix x (predictor variables)
+    x = np.zeros( (n, m*p) )
+    for i in range(m):
+        for k in range(1,p+1):
+            x[:,i*p+k-1] = np.reshape( data[p-k:-k, i, :], n )
             
-    # construct vectors yi (response variables for each channel i)
-    y = np.zeros( (N, M) );
-    for i in range(M):
-        y[:,i] = np.reshape( data[P:, i, :], N );
+    # Construct vectors yi (response variables for each channel i)
+    y = np.zeros( (n, m) );
+    for i in range(m):
+        y[:,i] = np.reshape( data[p:, i, :], n );
             
-    return X, y   
+    return x, y
     
-def __construct_eqns_RLS( data, P, sqrtdelta ):
-    '''construct VAR equation system with RLS constraint'''
-    (L,M,T) = np.shape( data )
-    N = (L-P)*T     # number of linear relations
-    # construct matrix X (predictor variables)
-    X = np.zeros( (N + M*P, M*P) )
-    for m in range(M):
-        for p in range(1,P+1):
-            X[:N,m*P+p-1] = np.reshape( data[P-p:-p, m, :], N )
-    np.fill_diagonal(X[N:,:], sqrtdelta)
+def __construct_eqns_rls( data, p, sqrtdelta ):
+    '''Construct VAR equation system with RLS constraint'''
+    (l,m,t) = np.shape( data )
+    n = (l-p)*t     # number of linear relations
+    # Construct matrix x (predictor variables)
+    x = np.zeros( (n + m*p, m*p) )
+    for i in range(m):
+        for k in range(1,p+1):
+            x[:n,i*p+k-1] = np.reshape( data[p-k:-k, i, :], n )
+    np.fill_diagonal(x[n:,:], sqrtdelta)
             
-    # construct vectors yi (response variables for each channel i)
-    y = np.zeros( (N + M*P, M) );
-    for i in range(M):
-        y[:N,i] = np.reshape( data[P:, i, :], N );
+    # Construct vectors yi (response variables for each channel i)
+    y = np.zeros( (n + m*p, m) );
+    for i in range(m):
+        y[:n,i] = np.reshape( data[p:, i, :], n );
             
-    return X, y
+    return x, y
     

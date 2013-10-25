@@ -6,7 +6,7 @@
 
 from .geometry import spherical as geo
 
-from .tools import struct
+from .tools import Struct
 
 from math import *
 from numpy import *
@@ -18,18 +18,19 @@ from numpy import *
 Point = geo.Point
 Line = geo.Line
 Circle = geo.Circle
-construct = geo.construct
+construct = geo.Construct
 
 def intersection( a, b, expr = lambda c: c.vector.z>=0 ):
     pts = construct.circle_intersect_circle(a, b)
     return [c for c in pts if expr(c)]
     
-midpoint = construct.midpoint    
-       
+midpoint = construct.midpoint
 
+
+#noinspection PyPep8Naming
 def construct_1020_easycap(variant=0):
     
-    p = struct()
+    p = Struct()
     
     p.Cz = Point(0,0,1)
     p.Fpz = Point(0,1,0)
@@ -45,18 +46,18 @@ def construct_1020_easycap(variant=0):
     sagittal = Line(p.Fpz, p.Cz)       # grand-circle in sagittal plane
     coronal = Line(p.T7, p.Cz)        # grand-circle in coronal plane
     
-    p.Fz = sagittal.getPoint(0.5)
-    p.Pz = sagittal.getPoint(1.5)
-    p.C3 = coronal.getPoint(0.5)
-    p.C4 = coronal.getPoint(1.5)
-    p.Fp1 = horizontal.getPoint(0.2)
-    p.Fp2 = horizontal.getPoint(-0.2)
-    p.F7 = horizontal.getPoint(0.6)
-    p.F8 = horizontal.getPoint(-0.6)
-    p.P7 = horizontal.getPoint(1.4)
-    p.P8 = horizontal.getPoint(-1.4)
-    p.O1 = horizontal.getPoint(1.8)
-    p.O2 = horizontal.getPoint(-1.8)
+    p.Fz = sagittal.get_point(0.5)
+    p.Pz = sagittal.get_point(1.5)
+    p.C3 = coronal.get_point(0.5)
+    p.C4 = coronal.get_point(1.5)
+    p.Fp1 = horizontal.get_point(0.2)
+    p.Fp2 = horizontal.get_point(-0.2)
+    p.F7 = horizontal.get_point(0.6)
+    p.F8 = horizontal.get_point(-0.6)
+    p.P7 = horizontal.get_point(1.4)
+    p.P8 = horizontal.get_point(-1.4)
+    p.O1 = horizontal.get_point(1.8)
+    p.O2 = horizontal.get_point(-1.8)
     
     circle_F = Circle(p.F7, p.Fz, p.F8)
     circle_P = Circle(p.P7, p.Pz, p.P8)
@@ -79,15 +80,15 @@ def construct_1020_easycap(variant=0):
     
     circle_AF = Circle(p.AF7, p.AFz, p.AF8)
     angle_AF = circle_AF.angle(p.AF7) / 2
-    p.AF3 = circle_AF.getPoint( angle_AF )
-    p.AF4 = circle_AF.getPoint( -angle_AF )
+    p.AF3 = circle_AF.get_point( angle_AF )
+    p.AF4 = circle_AF.get_point( -angle_AF )
     
     angle_F2 = circle_F.angle(p.F4) / 2
     angle_F6 = circle_F.angle(p.F4) + (circle_F.angle(p.F8) - circle_F.angle(p.F4)) / 2
-    p.F2 = circle_F.getPoint( angle_F2 )
-    p.F1 = circle_F.getPoint( -angle_F2 )
-    p.F6 = circle_F.getPoint( angle_F6 )
-    p.F5 = circle_F.getPoint( -angle_F6 )
+    p.F2 = circle_F.get_point( angle_F2 )
+    p.F1 = circle_F.get_point( -angle_F2 )
+    p.F6 = circle_F.get_point( angle_F6 )
+    p.F5 = circle_F.get_point( -angle_F6 )
     
     p.C1 = midpoint( p.C3, p.Cz )
     p.C2 = midpoint( p.C4, p.Cz )
@@ -96,10 +97,10 @@ def construct_1020_easycap(variant=0):
     
     angle_P2 = circle_P.angle(p.P4) / 2
     angle_P6 = circle_P.angle(p.P4) + (circle_P.angle(p.P8) - circle_P.angle(p.P4)) / 2
-    p.P2 = circle_P.getPoint( angle_P2 )
-    p.P1 = circle_P.getPoint( -angle_P2 )
-    p.P6 = circle_P.getPoint( angle_P6 )
-    p.P5 = circle_P.getPoint( -angle_P6 )
+    p.P2 = circle_P.get_point( angle_P2 )
+    p.P1 = circle_P.get_point( -angle_P2 )
+    p.P6 = circle_P.get_point( angle_P6 )
+    p.P5 = circle_P.get_point( -angle_P6 )
     
     circle_5 = Circle(p.F5, p.C5, p.P5)
     circle_1 = Circle(p.F1, p.C1, p.P1)
@@ -137,34 +138,34 @@ def construct_1020_easycap(variant=0):
     
     circle_PO = Circle(p.PO7, p.POz, p.PO8)
     angle_PO = circle_PO.angle(p.PO7) / 2
-    p.PO3 = circle_PO.getPoint( -angle_PO )
-    p.PO4 = circle_PO.getPoint( angle_PO )
+    p.PO3 = circle_PO.get_point( -angle_PO )
+    p.PO4 = circle_PO.get_point( angle_PO )
     
     # below the equator
     
-    p.Iz = sagittal.getPoint(2.25)
-    p.T9 = coronal.getPoint(-0.25)
-    p.T10 = coronal.getPoint(2.25)
+    p.Iz = sagittal.get_point(2.25)
+    p.T9 = coronal.get_point(-0.25)
+    p.T10 = coronal.get_point(2.25)
     
     circle_9 = Circle( p.T9, p.Iz, p.T10 )
     
-    p.O9 = circle_9.getPoint( -pi/2 * 0.2 )
-    p.O10 = circle_9.getPoint( pi/2 * 0.2 )
+    p.O9 = circle_9.get_point( -pi/2 * 0.2 )
+    p.O10 = circle_9.get_point( pi/2 * 0.2 )
     
-    p.PO9 = circle_9.getPoint( -pi/2 * 0.4 )
-    p.PO10 = circle_9.getPoint( pi/2 * 0.4 )
+    p.PO9 = circle_9.get_point( -pi/2 * 0.4 )
+    p.PO10 = circle_9.get_point( pi/2 * 0.4 )
     
-    p.P9 = circle_9.getPoint( -pi/2 * 0.6 )
-    p.P10 = circle_9.getPoint( pi/2 * 0.6 )
+    p.P9 = circle_9.get_point( -pi/2 * 0.6 )
+    p.P10 = circle_9.get_point( pi/2 * 0.6 )
     
-    p.TP9 = circle_9.getPoint( -pi/2 * 0.8 )
-    p.TP10 = circle_9.getPoint( pi/2 * 0.8 )
+    p.TP9 = circle_9.get_point( -pi/2 * 0.8 )
+    p.TP10 = circle_9.get_point( pi/2 * 0.8 )
     
-    p.FT9 = circle_9.getPoint( -pi/2 * 1.2 )
-    p.FT10 = circle_9.getPoint( pi/2 * 1.2 )
+    p.FT9 = circle_9.get_point( -pi/2 * 1.2 )
+    p.FT10 = circle_9.get_point( pi/2 * 1.2 )
     
-    p.F9 = circle_9.getPoint( -pi/2 * 1.4 )
-    p.F10 = circle_9.getPoint( pi/2 * 1.4 )
+    p.F9 = circle_9.get_point( -pi/2 * 1.4 )
+    p.F10 = circle_9.get_point( pi/2 * 1.4 )
     
     return p
 

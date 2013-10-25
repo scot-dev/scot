@@ -7,28 +7,28 @@ import numpy as np
 global randn_index
 global randn
 
-def generate_covsig(C, n):
-    """generate pseudorandom stochastic signals with covariance matrix C"""
+def generate_covsig(covmat, n):
+    """generate pseudorandom stochastic signals with covariance matrix covmat"""
     global randn_index
     global randn
     
-    C = np.atleast_2d(C)
-    m = C.shape[0]
-    L = np.linalg.cholesky(C)
+    covmat = np.atleast_2d(covmat)
+    m = covmat.shape[0]
+    l = np.linalg.cholesky(covmat)
     
-    X = []
-    while len(X) < n*m:
-        to_go = min(randn_index+n*m-len(X),len(randn))
-        X.extend(randn[randn_index:to_go])
+    x = []
+    while len(x) < n*m:
+        to_go = min(randn_index+n*m-len(x),len(randn))
+        x.extend(randn[randn_index:to_go])
         randn_index = to_go % len(randn)
-    X = np.reshape(X,[m,n])
+    x = np.reshape(x,[m,n])
     
-    # matrix to make cov(X) = I
-    D = np.linalg.inv(np.linalg.cholesky(np.atleast_2d(np.cov(X))))
+    # matrix to make cov(x) = I
+    d = np.linalg.inv(np.linalg.cholesky(np.atleast_2d(np.cov(x))))
 
-    X = L.dot(D).dot(X)
+    x = l.dot(d).dot(x)
     
-    return X.T
+    return x.T
 
 
 """ 497 random numbers drawn from the standard normal distribution"""

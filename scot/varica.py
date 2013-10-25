@@ -9,13 +9,13 @@ from . import var
 
 import numpy as np
 
-def mvarica(X, P, reducedim=0.99, delta=0, backend=None):
+def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     '''
-    mvarica( X, P )
-    mvarica( X, P, retain_variance, delta )
-    mvarica( X, P, numcomp, delta )
+    mvarica( x, p )
+    mvarica( x, p, retain_variance, delta )
+    mvarica( x, p, numcomp, delta )
     
-    Apply MVARICA to the data X. MVARICA performs the following steps:
+    Apply MVARICA to the data x. MVARICA performs the following steps:
         1. Optional dimensionality reduction with PCA
         2. Fitting a VAR model tho the data
         3. Decomposing the VAR model residuals with ICA
@@ -23,10 +23,10 @@ def mvarica(X, P, reducedim=0.99, delta=0, backend=None):
     
     Parameters     Default  Shape   Description
     --------------------------------------------------------------------------
-    X              :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                          : N,M   : 2d data matrix (N samples, M signals)
-    P              :      :       : VAR model order
-    reducedim      : 0.99 :       : A number less than 1 is interpreted as the
+    x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
+                          : n,m   : 2d data matrix (n samples, m signals)
+    p              :      :       : VAR model order
+    reducedim      : 0.99 :       : a number less than 1 is interpreted as the
                                     fraction of variance that should remain in
                                     the data. All components that describe in
                                     total less than 1-retain_variance of the
@@ -43,69 +43,69 @@ def mvarica(X, P, reducedim=0.99, delta=0, backend=None):
     
     Output
     --------------------------------------------------------------------------
-    B   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size M*M
+    b   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size m*m
     U   Unmixing matrix
-    M   Mixing matrix
+    m   Mixing matrix
     e   Residual process
-    C   Residual covariance matrix
+    c   Residual covariance matrix
     delta   Regularization parameter
     
     Note on the arrangement of model coefficients:
-        B is of shape M, M*P, with sub matrices arranged as follows:
-            b_00 b_01 ... b_0M
-            b_10 b_11 ... b_1M
+        b is of shape m, m*p, with sub matrices arranged as follows:
+            b_00 b_01 ... b_0m
+            b_10 b_11 ... b_1m
             .... ....     ....
-            b_M0 b_M1 ... b_MM
-        Each sub matrix b_ij is a column vector of length P that contains the
+            b_m0 b_m1 ... b_mm
+        Each sub matrix b_ij is a column vector of length p that contains the
         filter coefficients from channel j (source) to channel i (sink).
     '''
     
-    X = np.atleast_3d(X)
-    L, M, T = np.shape(X)
+    x = np.atleast_3d(x)
+    l, m, t = np.shape(x)
     
     if backend is None:
         backend = config.backend
     
     # pre-transform the data with PCA
     if reducedim == 'no pca':
-        C = np.eye(M)
-        D = np.eye(M)
-        Xpca = X
+        c = np.eye(m)
+        d = np.eye(m)
+        xpca = x
     else:
-        C, D, Xpca = backend['pca'](X, reducedim)
-        M = C.shape[1]
+        c, d, xpca = backend['pca'](x, reducedim)
+        m = c.shape[1]
     
     if delta == 'auto':
-        delta = var.optimize_delta_bisection( Xpca[:,:,:], P, xvschema=xvschema.multitrial )
+        delta = var.optimize_delta_bisection( xpca[:,:,:], p, xvschema=xvschema.multitrial )
     
     # fit MVAR model
-    A = var.fit( Xpca, P, delta )
+    a = var.fit( xpca, p, delta )
     
     # residuals
-    r = Xpca - var.predict( Xpca, A )
+    r = xpca - var.predict( xpca, a )
 
     # run on residuals ICA to estimate volume conduction    
-    Mx, Ux = backend['ica'](cat_trials(r))
+    mx, ux = backend['ica'](cat_trials(r))
     
     # driving process
-    e = dot_special(r, Ux)
+    e = dot_special(r, ux)
 
     # correct AR coefficients
-    B = np.zeros(A.shape)
-    for p in range(0,P):
-        B[:,p::P] = Mx.dot(A[:,p::P].transpose()).dot(Ux).transpose()
+    b = np.zeros(a.shape)
+    for k in range(0,p):
+        b[:,k::p] = mx.dot(a[:,k::p].transpose()).dot(ux).transpose()
     
     # correct (un)mixing matrix estimatees
-    Mx = Mx.dot(D)
-    Ux = C.dot(Ux)
+    mx = mx.dot(d)
+    ux = c.dot(ux)
     
-    class result:
-        unmixing = Ux
-        mixing = Mx
+    class Result:
+        unmixing = ux
+        mixing = mx
         residuals = e
-        C = np.cov(cat_trials(e), rowvar=False)
-    result.delta = delta
-    result.B = B
+        c = np.cov(cat_trials(e), rowvar=False)
+    Result.delta = delta
+    Result.b = b
         
     
-    return result
+    return Result

@@ -43,8 +43,8 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3*fs, 4*fs)
 """
 Perform MVARICA
 """
-ws.setData(data, time_offset=3)
-ws.doMVARICA()
+ws.set_data(data, time_offset=3)
+ws.do_mvarica()
 
 
 """
@@ -61,7 +61,7 @@ Connectivity Analysis
 Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
 """
-ws.setData(data, classes, time_offset=-1)
-ws.plotTFConnectivity('ffDTF', 1*fs, int(0.2*fs), freq_range=[0,30])
+ws.set_data(data, classes, time_offset=-1)
+ws.plot_tf_connectivity('ffDTF', 1*fs, int(0.2*fs), freq_range=[0,30])
 
-ws.showPlots()
+ws.show_plots()

@@ -23,13 +23,13 @@ class TestICA(unittest.TestCase):
         """ do this for every backend """
         
         # original model coefficients
-        B0 = np.zeros((3,3))    # no connectivity
-        M0 = B0.shape[0]
-        L, T = 100, 100
+        b0 = np.zeros((3,3))    # no connectivity
+        m0 = b0.shape[0]
+        l, t = 100, 100
         
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
-        noisefunc = lambda: np.random.normal( size=(1,M0) )**3   
-        sources = var.simulate( [L,T], B0, noisefunc )
+        noisefunc = lambda: np.random.normal( size=(1,m0) )**3
+        sources = var.simulate( [l,t], b0, noisefunc )
         
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -43,8 +43,8 @@ class TestICA(unittest.TestCase):
             
             result = plainica.plainica(data, backend=bm.backend)
             
-            I = result.mixing.dot(result.unmixing)
-            self.assertTrue(np.allclose(I,np.eye(I.shape[0]), rtol=1e-6, atol=1e-7))
+            i = result.mixing.dot(result.unmixing)
+            self.assertTrue(np.allclose(i,np.eye(i.shape[0]), rtol=1e-6, atol=1e-7))
             
             permutations = [[0,1,2], [0,2,1], [1,0,2], [1,2,0], [2,0,1], [2,1,0]]
             

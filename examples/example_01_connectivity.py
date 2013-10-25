@@ -48,11 +48,11 @@ ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
 Perform MVARICA and plot the components
 """
 
-ws.setData(data, classes)
+ws.set_data(data, classes)
 
-ws.doMVARICA()
+ws.do_mvarica()
 
-ws.plotSourceTopos()
+ws.plot_source_topos()
 
 """
 Connectivity Analysis
@@ -61,8 +61,8 @@ Extract the full frequency directed transfer function (ffDTF) from the
 activations of each class and plot them with matplotlib.
 """
 
-ws.fitVAR()
+ws.fit_var()
 
-ws.plotConnectivity('ffDTF', freq_range=[0,30])
+ws.plot_connectivity('ffDTF', freq_range=[0,30])
 
-ws.showPlots()
+ws.show_plots()
