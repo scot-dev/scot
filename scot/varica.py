@@ -63,7 +63,7 @@ def mvarica(X, P, reducedim=0.99, delta=0, backend=None):
     X = np.atleast_3d(X)
     L, M, T = np.shape(X)
     
-    if backend == None:
+    if backend is None:
         backend = config.backend
     
     # pre-transform the data with PCA

@@ -74,7 +74,7 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
     Y = np.floor(np.sqrt(M*3/4))
     X = np.ceil(M/Y)
     
-    if fig == None:    
+    if fig is None:
         fig = plt.figure()
     
     axes = []
@@ -110,7 +110,7 @@ def plot_connectivity_spectrum(A, fs=2, freq_range=[-np.inf, np.inf], topo=None,
     left = max(freq_range[0], freq[0])
     right = min(freq_range[1], freq[-1])
     
-    if fig == None:    
+    if fig is None:
         fig = plt.figure()
     
     axes = []
@@ -162,10 +162,10 @@ def plot_connectivity_timespectrum(A, fs=2, crange=None, freq_range=[-np.inf, np
     A = np.asarray(A)
     [N,M,F,T] = A.shape
     
-    if crange == None:
+    if crange is None:
         crange = [np.min(A), np.max(A)]
     
-    if time_range == None:
+    if time_range is None:
         t0 = 0
         t1 = T
     else:
@@ -177,7 +177,7 @@ def plot_connectivity_timespectrum(A, fs=2, crange=None, freq_range=[-np.inf, np
     ymin = max(freq_range[0], f1)
     ymax = min(freq_range[1], f0)
     
-    if fig == None:    
+    if fig is None:
         fig = plt.figure()
     
     axes = []

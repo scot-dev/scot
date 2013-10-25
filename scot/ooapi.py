@@ -239,7 +239,7 @@ class Workspace:
         '''
         if self.activations_ == None:
             raise RuntimeError("VAR fitting requires source activations (run doMVARICA first)")
-        if self.cl_ == None:
+        if self.cl_ is None:
             self.var_model_, self.var_cov_ = var.fit(data=self.activations_, P=self.var_order_, delta=self.var_delta_, return_covariance=True)
             self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
         else:
@@ -292,7 +292,7 @@ class Workspace:
             nfft_
             cl_        
         '''
-        if self.connectivity_ == None:
+        if self.connectivity_ is None:
             raise RuntimeError("Connectivity requires a VAR model (run doMVARICA or fitVAR first)")
         if isinstance(self.connectivity_, dict):
             result = {}
@@ -330,7 +330,7 @@ class Workspace:
         
         Nstep = (N-winlen)//winstep
         
-        if self.cl_ == None:
+        if self.cl_ is None:
             result = np.zeros((M, M, self.nfft_, Nstep), np.complex64)
             i = 0
             for n in range(0, N-winlen, winstep):
@@ -461,10 +461,10 @@ class Workspace:
         return fig
         
     def _preparePlots(self, mixing=False, unmixing=False):
-        if self.locations_ == None:
+        if self.locations_ is None:
             raise RuntimeError("Need sensor locations for plotting")
             
-        if self.topo_ == None:
+        if self.topo_ is None:
             self.topo_ = Topoplot( )
             self.topo_.set_locations(self.locations_)
         

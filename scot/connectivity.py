@@ -105,7 +105,7 @@ class Connectivity:
         if M * P != MP:
             raise AttributeError('Second dimension of B must be an integer multiple of the first dimension.')
             
-        if C == None:
+        if C is None:
             self.C = None
         else:
             self.C = np.asarray(C)

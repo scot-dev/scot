@@ -87,9 +87,9 @@ class Topoplot:
                     self.image[i,j] = self.C[0] + self.C[1:].dot( self.g( np.dot( self.locations, [k for k in e] ) ) )
                     
     def plot_map(self, axes=None, crange=None):
-        if axes==None: axes = plot.gca()
+        if axes is None: axes = plot.gca()
         clipTransform = axes.transData
-        if crange==None:
+        if crange is None:
             vru = np.nanmax(np.abs(self.image))
             vrl = -vru;
         else:
@@ -97,18 +97,18 @@ class Topoplot:
         return axes.imshow(self.image, vmin=vrl, vmax=vru, clip_path=(self.path_head,clipTransform), extent=(-self.interprange, self.interprange, -self.interprange, self.interprange) )
         
     def plot_locations(self, axes=None):
-        if axes==None: axes = plot.gca()
+        if axes is None: axes = plot.gca()
         for p in self.locations:
             p2 = project_radial_to2d( Vector.fromiterable(p) )
             axes.plot(p2.x, p2.y, 'k.')
             
     def plot_head(self, axes=None):
-        if axes==None: axes = plot.gca()
+        if axes is None: axes = plot.gca()
         axes.add_patch(patches.PathPatch(self.path_head, facecolor='none', lw=2))
         axes.add_patch(patches.PathPatch(self.path_nose, facecolor='none', lw=2))
         
     def plot_circles(self, radius, axes=None):
-        if axes==None: axes = plot.gca()
+        if axes is None: axes = plot.gca()
         col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
             p3 = self.locations[i]

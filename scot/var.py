@@ -54,7 +54,7 @@ def fit( data, P, delta=None, return_residuals=False, return_covariance=False ):
     data = np.atleast_3d(data)
     (L,M,T) = np.shape( data )
     
-    if delta == 0 or delta == None:
+    if delta == 0 or delta is None:
         # normal least squares
         (X,y) = __construct_eqns( data, P )
     else:    
@@ -193,7 +193,7 @@ def simulate( L, B, noisefunc=None ):
     except TypeError:
         T = 1
         
-    if noisefunc==None:
+    if noisefunc is None:
         noisefunc = partial( np.random.normal, size=(1,M) )
         
     N = L + 10 * P;
@@ -467,7 +467,7 @@ def _msge_with_gradient( data, P, delta, underdetermined, xvschema, skipstep ):
     (L,M,T) = data.shape
     assert(T>1)
     
-    if underdetermined==None:
+    if underdetermined is None:
         underdetermined = _is_underdetermined(L, M, T, P)
 
     if underdetermined:

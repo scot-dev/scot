@@ -17,11 +17,11 @@ class Point:
     '''Point on the surface of a sphere'''
     
     def __init__(self, x=None, y=None, z=None):
-        if x == None and y == None and z == None:
+        if x is None and y is None and z is None:
             self._pos3d = Vector(0, 0, 1)
-        elif x != None and y != None and z == None:
+        elif x is not None and y is not None and z is None:
             self._pos3d = Vector(x, y, math.sqrt(1-x**2-y**2))
-        elif x != None and y != None and z != None:
+        elif x is not None and y is not None and z is not None:
             self._pos3d = Vector(x, y, z).normalized()
         else:
             raise RuntimeError('invalid parameters')
@@ -80,7 +80,7 @@ class Circle:
     '''Arbitrary circle on the spherical surface'''
     
     def __init__(self, A, B, C=None ):
-        if C==None:
+        if C is None:
             self.C = Point.fromvector(A.vector)     # Center
             self.X = Point.fromvector(B.vector)     # A point on the circle
         else:
