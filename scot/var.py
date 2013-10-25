@@ -4,6 +4,8 @@
 
 """ vector autoregressive (VAR) model implementation"""
 
+from __future__ import division
+
 import numbers
 import numpy as np
 from functools import partial
