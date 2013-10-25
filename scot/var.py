@@ -6,8 +6,6 @@
 
 import numbers
 import numpy as np
-import scipy as sp
-import scipy.linalg
 from functools import partial
 from . import datatools
 from . import xvschema
@@ -450,7 +448,8 @@ def _msge_with_gradient_overdetermined( data, P, delta, xvschema, skipstep):
         (A,b) = __construct_eqns( np.atleast_3d(data[:,:,trainset]), P )
         (B,c) = __construct_eqns( np.atleast_3d(data[:,:,testset]), P )
 
-        D = sp.linalg.inv(np.eye(A.shape[1])*delta**2 + A.transpose().dot(A), overwrite_a=True, check_finite=False)
+        #D = sp.linalg.inv(np.eye(A.shape[1])*delta**2 + A.transpose().dot(A), overwrite_a=True, check_finite=False)
+        D = np.linalg.inv(np.eye(A.shape[1])*delta**2 + A.transpose().dot(A))
 	
         bA = b.transpose().dot(A)
         cB = c.transpose().dot(B)
