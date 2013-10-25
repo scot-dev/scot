@@ -325,7 +325,8 @@ def optimize_delta_bisection( data, P, xvschema=lambda t,T: defaults.xvschema(t,
         nsteps += 1
         sqrtei = transform([a,b])
         #print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, sqrtei[0], sqrtei[1], transform(a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka))))
-        print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, transform(a), transform(b), transform(a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka))))
+        tmp = transform([a, b, a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka)])
+        print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, tmp[0], tmp[1], tmp[2]))
     
     delta = transform( a + (b-a) * np.abs(Ka) / np.abs(Kb-Ka) )
     print('Final point: %f'%delta)
