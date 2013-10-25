@@ -282,7 +282,6 @@ def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t
     underdetermined = _is_underdetermined(l, m, 1, p)
     
     maxsteps = 10
-    mininterval = 1
     maxdelta = 1e50
     
     a = -10
@@ -307,8 +306,6 @@ def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t
     
     nsteps = 0
     
-    k = np.inf
-    sqrtei = np.sqrt(np.exp([a,b]))
     while nsteps < maxsteps:
         
         # point where the line between a and b crosses zero
@@ -322,8 +319,6 @@ def optimize_delta_bisection( data, p, xvschema=lambda t,nt: Defaults.xvschema(t
             b, kb = c, k
         
         nsteps += 1
-        sqrtei = transform([a,b])
-        #print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, sqrtei[0], sqrtei[1], transform(a + (b-a) * np.abs(ka) / np.abs(kb-ka))))
         tmp = transform([a, b, a + (b-a) * np.abs(ka) / np.abs(kb-ka)])
         print('%d Bisection Interval: %f - %f, (projected: %f)'%(nsteps, tmp[0], tmp[1], tmp[2]))
     
@@ -364,14 +359,9 @@ def optimize_delta_gradientdescent( data, p, skipstep=1, xvschema=lambda t,nt: D
     
     k = np.inf
     delta = 1
-    step = np.inf
-    last_j = np.inf
-    j = np.inf
     nsteps = 0
-    #while not(last_j-j < 1e-10 and step < 1e-5) and nsteps < 100:
     while abs(k) > 1e-5:
-        last_j = j
-        (j,k) = _msge_with_gradient(data, p, delta, underdetermined, xvschema, skipstep)
+        (j, k) = _msge_with_gradient(data, p, delta, underdetermined, xvschema, skipstep)
         
         step = -k * 1.0
                 

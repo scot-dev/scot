@@ -81,11 +81,11 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
     axes = []
     for i in range(m):
         axes.append(fig.add_subplot(2*y, x, i+1))
-        h1 = plot_topo(axes[-1], topo, unmixmaps[i], crange=urange)
+        plot_topo(axes[-1], topo, unmixmaps[i], crange=urange)
         axes[-1].set_title(str(i))
         
         axes.append(fig.add_subplot(2*y, x, m+i+1))
-        h2 = plot_topo(axes[-1], topo, mixmaps[i], crange=mrange)
+        plot_topo(axes[-1], topo, mixmaps[i], crange=mrange)
         axes[-1].set_title(str(i))
         
     for a in axes:
@@ -95,9 +95,6 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
         
     axes[0].set_ylabel('Unmixing weights')
     axes[1].set_ylabel('Scalp projections')
-    
-    #plt.colorbar(h1, plt.subplot(2, m+1, m+1))
-    #plt.colorbar(h2, plt.subplot(2, m+1, 0))
     
     return fig
     
@@ -161,7 +158,7 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), topo=None,
     
 def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np.inf), time_range=None, topo=None, topomaps=None, fig=None):
     a = np.asarray(a)
-    [n,m,f,t] = a.shape
+    [n,m,_,t] = a.shape
     
     if crange is None:
         crange = [np.min(a), np.max(a)]

@@ -45,7 +45,7 @@ def binica( data, binary = binica_binary ):
     scriptfile = 'binica-%s.sc'%uid
     datafile = 'binica-%s.fdt'%uid
     weightsfile = 'binica-%s.wts'%uid
-    weightstmpfile = 'binicatmp-%s.wts'%uid
+    #weightstmpfile = 'binicatmp-%s.wts'%uid
     spherefile = 'binica-%s.sph'%uid
     
     config = {'DataFile': datafile,

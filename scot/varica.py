@@ -73,7 +73,6 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
         xpca = x
     else:
         c, d, xpca = backend['pca'](x, reducedim)
-        m = c.shape[1]
     
     if delta == 'auto':
         delta = var.optimize_delta_bisection( xpca[:,:,:], p, xvschema=xvschema.multitrial )

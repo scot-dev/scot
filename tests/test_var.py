@@ -65,7 +65,6 @@ class TestVAR(unittest.TestCase):
         b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
         l = 100000
         x = var.simulate(l, b)
-        y = x.copy()
         
         z = var.predict(x, b)
         

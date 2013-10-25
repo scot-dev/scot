@@ -53,7 +53,6 @@ def plainica(x, reducedim=0.99, backend=None):
         xpca = x
     else:
         c, d, xpca = backend['pca'](x, reducedim)
-        m = c.shape[1]
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(xpca))

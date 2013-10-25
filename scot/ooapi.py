@@ -326,7 +326,7 @@ class Workspace:
         """
         if self.activations_ == None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
-        [n,m,t] = self.activations_.shape
+        [n,m,_] = self.activations_.shape
         
         nstep = (n-winlen)//winstep
         
@@ -428,8 +428,6 @@ class Workspace:
 
         Requires: var model
         """
-        fig = None        
-        
         t0 = 0.5*winlen/self.fs_ + self.time_offset_
         t1 = self.data_.shape[0]/self.fs_ - 0.5*winlen/self.fs_ + self.time_offset_
         
@@ -438,10 +436,8 @@ class Workspace:
         
         if isinstance(tfc, dict):
             ncl = np.unique(self.cl_).size
-            y = np.floor(np.sqrt(ncl))
-            x = np.ceil(ncl/y)
             lowest, highest = np.inf, -np.inf
-            for c in np.unique(self.cl_):
+            for c in ncl:
                 tfc[c] = self._clean_measure(measure, tfc[c])
                 if ignore_diagonal:
                     for m in range(tfc[c].shape[0]):
@@ -450,7 +446,7 @@ class Workspace:
                 lowest = min(lowest, np.min(tfc[c]))
                 
             fig = {}
-            for c in np.unique(self.cl_):
+            for c in ncl:
                 fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=[lowest, highest], freq_range=freq_range, time_range=[t0, t1], topo=self.topo_, topomaps=self.mixmaps_)
                 
         else:

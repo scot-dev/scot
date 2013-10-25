@@ -38,9 +38,9 @@ def construct_1020_easycap(variant=0):
     p.T7 = Point(-1,0,0)
     p.T8 = Point(1,0,0)
     
-    horizontal = Circle(p.Cz, p.Fpz)    # grand-circle in horizontal plane
-    sagittal = Circle(p.T7, p.Cz)       # grand-circle in sagittal plane
-    coronal = Circle(p.Oz, p.Cz)        # grand-circle in coronal plane
+    #horizontal = Circle(p.Cz, p.Fpz)    # grand-circle in horizontal plane
+    #sagittal = Circle(p.T7, p.Cz)       # grand-circle in sagittal plane
+    #coronal = Circle(p.Oz, p.Cz)        # grand-circle in coronal plane
     
     horizontal = Line(p.Fpz, p.T7)    # grand-circle in horizontal plane
     sagittal = Line(p.Fpz, p.Cz)       # grand-circle in sagittal plane

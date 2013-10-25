@@ -27,10 +27,13 @@ class memoize(object):
     """
     def __init__(self, func):
         self.func = func
+
+    #noinspection PyUnusedLocal
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self.func
         return partial(self, obj)
+
     def __call__(self, *args, **kw):
         obj = args[0]
         try:
