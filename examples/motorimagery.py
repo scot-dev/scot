@@ -28,7 +28,7 @@ def __load():
     Data.eeg = matfile['eeg']       # EEG Data
 
     # Class labels
-    cltrans = { -1 : 'hand', 1 : 'foot' }
+    cltrans = { 1 : 'hand', -1 : 'foot' }
     Data.classes = np.array([cltrans[c] for c in matfile['cl']])
 
     # Unfortunately, the EEG channel labels are not stored in the file, so we set them manually.
