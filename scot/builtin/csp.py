@@ -33,9 +33,14 @@ def csp( X, cl, numcomp=np.inf ):
     
     if T != cl.size:
         raise AttributeError('CSP only works with multiple classes. Number of elemnts in cl (%d) must equal 3rd dimension of X (%d)'%(cl.size, T))
+
+    labels = np.unique(cl)
+    
+    if labels.size != 2:
+        raise AttributeError('CSP is currently ipmlemented for 2 classes (got %d)'%(labels.size))
         
-    X1 = X[:,:,cl==1]
-    X2 = X[:,:,cl!=1]
+    X1 = X[:,:,cl==labels[0]]
+    X2 = X[:,:,cl==labels[1]]
     
     Sigma1 = np.zeros((M,M))
     for t in range(X1.shape[2]):
