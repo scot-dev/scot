@@ -44,7 +44,7 @@ ws.set_data(data, classes)
 ws.do_cspvarica()
 
 # Find optimal regularization parameter for single-trial fitting
-#ws.optimize_regularization(scot.xvschema.singletrial, 60)
+#ws.optimize_regularization(scot.xvschema.singletrial, 30)
 
 freq = np.linspace(0, fs, ws.nfft_)
 
@@ -63,10 +63,15 @@ for t in range(len(triggers)):
     features[t, :] = np.array([alpha, beta]).flatten()
 print('')
 
+# LDA requires numeric class labels
+clunique = np.unique(midata.classes)
+classids = [dict( zip(clunique,range(len(clunique))))[c] for c in midata.classes]
+
+
 lda = LDA()
-lda.fit(features, classes)
+lda.fit(features, classids)
 
 llh = lda.transform(features)
 
-plt.hist([llh[classes == -1, :], llh[classes == 1, :]])
+plt.hist([llh[classes == 'hand', :], llh[classes == 'foot', :]])
 plt.show()
