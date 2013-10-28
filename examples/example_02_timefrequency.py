@@ -51,6 +51,6 @@ data = scot.datatools.cut_segments(raweeg, triggers, -1 * fs, 7 * fs)
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and plot them with matplotlib.
 ws.set_data(data, classes, time_offset=-1)
-ws.plot_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), freq_range=[0, 30])
+ws.plot_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), freq_range=[0, 30], crange=[0,30])
 
 ws.show_plots()
