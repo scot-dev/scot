@@ -455,6 +455,7 @@ class Workspace:
                 fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=[lowest, highest],
                                                                  freq_range=freq_range, time_range=[t0, t1],
                                                                  topo=self.topo_, topomaps=self.mixmaps_)
+                fig[c].suptitle(str(c))
 
         else:
             tfc = self._clean_measure(measure, tfc)
