@@ -48,19 +48,19 @@ ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
 """
 Perform MVARICA
 """
-ws.setData(data, classes)
-ws.doMVARICA()
-ws.fitVAR()
-fig1 = ws.plotConnectivity('ffDTF', freq_range=[0,30])
+ws.set_data(data, classes)
+ws.do_mvarica()
+ws.fit_var()
+fig1 = ws.plot_connectivity('ffDTF', freq_range=[0,30])
 fig1.suptitle('MVARICA')
 
 """
 Perform CSPVARICA
 """
-ws.setData(data, classes)
-ws.doCSPVARICA()
-ws.fitVAR()
-fig2 = ws.plotConnectivity('ffDTF', freq_range=[0,30])
+ws.set_data(data, classes)
+ws.do_cspvarica()
+ws.fit_var()
+fig2 = ws.plot_connectivity('ffDTF', freq_range=[0,30])
 fig2.suptitle('CSPVARICA')
 
-ws.showPlots()
+ws.show_plots()
