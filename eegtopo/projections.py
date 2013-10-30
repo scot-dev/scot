@@ -2,7 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 Martin Billinger
 
-from numpy import arcsin, sin, cos, pi
+from numpy import arcsin, sin, cos, pi, sqrt, sum
+from numpy import atleast_2d, asarray
 
 
 def project_radial_to2d(point_3d):
@@ -31,3 +32,20 @@ def project_radial_to3d(point_2d):
     point_3d = point_2d * beta
     point_3d.z = cos(alpha)
     return point_3d
+
+
+def array_project_radial_to3d(points_2d):
+    points_2d = atleast_2d(points_2d)
+
+    alphas = sqrt(sum(points_2d**2, -1))
+
+    betas = sin(alphas) / alphas
+    betas[alphas == 0] = 1
+
+    x = points_2d[..., 0] * betas
+    y = points_2d[..., 1] * betas
+    z = cos(alphas)
+
+    points_3d = asarray([x, y, z]).T
+
+    return points_3d
