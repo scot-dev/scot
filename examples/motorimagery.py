@@ -1,7 +1,7 @@
 """
 Load Motor Imagery example data
 """
-
+import numpy as np
 from os.path import abspath, dirname, join
 from scot.matfiles import loadmat
 from eegtopo.eegpos3d import positions as eeg_locations
@@ -25,8 +25,11 @@ def __load():
     Data.samplerate = matfile['fs'] # Sampling rate
     Data.num_trials = matfile['T']  # Number of trials
     Data.triggers = matfile['tr']   # Trigger locations
-    Data.classes = matfile['cl']    # Class labels
     Data.eeg = matfile['eeg']       # EEG Data
+
+    # Class labels
+    cltrans = { 1 : 'hand', -1 : 'foot' }
+    Data.classes = np.array([cltrans[c] for c in matfile['cl']])
 
     # Unfortunately, the EEG channel labels are not stored in the file, so we set them manually.
     Data.labels = ['AF7', 'AFz', 'AF8', 'F3', 'F1',
@@ -46,3 +49,4 @@ def __load():
 
 
 data = __load()
+

@@ -414,7 +414,7 @@ class Workspace:
                                                       topomaps=self.mixmaps_)
         return fig
 
-    def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), ignore_diagonal=True):
+    def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), crange=None, ignore_diagonal=True):
         """
         Workspace.plot_tf_connectivity(measure, winlen, winstep, freq_range)
 
@@ -450,11 +450,15 @@ class Workspace:
                 highest = max(highest, np.max(tfc[c]))
                 lowest = min(lowest, np.min(tfc[c]))
 
+            if crange is None:
+                crange = [lowest, highest]
+
             fig = {}
             for c in ncl:
-                fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=[lowest, highest],
+                fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=crange,
                                                                  freq_range=freq_range, time_range=[t0, t1],
                                                                  topo=self.topo_, topomaps=self.mixmaps_)
+                fig[c].suptitle(str(c))
 
         else:
             tfc = self._clean_measure(measure, tfc)
