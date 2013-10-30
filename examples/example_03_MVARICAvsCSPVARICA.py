@@ -63,4 +63,7 @@ ws.fit_var()
 fig2 = ws.plot_connectivity('ffDTF', freq_range=[0,30])
 fig2.suptitle('CSPVARICA')
 
+fig1.savefig('mvarica.png', dpi=900)
+fig2.savefig('cspvarica.png', dpi=900)
+
 ws.show_plots()
