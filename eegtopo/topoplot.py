@@ -10,14 +10,14 @@ import matplotlib.pyplot as plot
 import matplotlib.path as path
 #noinspection PyPep8Naming
 import matplotlib.patches as patches
-from .projections import project_radial_to3d, project_radial_to2d
+from .projections import array_project_radial_to3d, project_radial_to2d
 from .geometry.euclidean import Vector
 
 
 class Topoplot:
     """ Creates 2D scalp maps. """
 
-    def __init__(self, m=4, num_lterms=20):
+    def __init__(self, m=4, num_lterms=10):
         self.interprange = np.pi * 3 / 4
         head_radius = self.interprange
         nose_angle = 15
@@ -52,6 +52,8 @@ class Topoplot:
         self.c = None
         self.image = None
 
+        self.g_map = {}
+
     @staticmethod
     def calc_legendre_factors(m, num_lterms):
         return [(2 * n + 1) / (n ** m * (n + 1) ** m * 4 * np.pi) for n in range(1, num_lterms + 1)]
@@ -83,20 +85,27 @@ class Topoplot:
     def set_map(self, img):
         self.image = img
 
+    def calc_gmap(self, pixels):
+
+        try:
+            return self.g_map[pixels]
+        except KeyError:
+            pass
+
+        x = np.linspace(-self.interprange, self.interprange, pixels)
+        y = np.linspace(self.interprange, -self.interprange, pixels)
+
+        xy = np.transpose(np.meshgrid(x, y))
+
+        e = array_project_radial_to3d(xy)
+
+        gmap = self.calc_g(e.dot(np.transpose(self.locations)))
+        self.g_map[pixels] = gmap
+        return gmap
+
     def create_map(self, pixels=32):
-        self.image = np.zeros((pixels, pixels)) * np.nan
-
-        gridlocs = np.linspace(-self.interprange, self.interprange, pixels)
-        dx2 = (gridlocs[2] - gridlocs[0]) # distance of two pixels
-
-        for j in range(pixels):
-            x = gridlocs[j]
-            for i in range(pixels):
-                y = -gridlocs[i]
-
-                if x ** 2 + y ** 2 <= (self.interprange + dx2) ** 2: # skip some unnecessary calculations
-                    e = project_radial_to3d(Vector(x, y, 0))
-                    self.image[i, j] = self.c[0] + self.c[1:].dot(self.calc_g(np.dot(self.locations, [k for k in e])))
+        gm = self.calc_gmap(pixels)
+        self.image = gm.dot(self.c[1:]) + self.c[0]
 
     def plot_map(self, axes=None, crange=None):
         if axes is None: axes = plot.gca()
