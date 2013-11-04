@@ -7,12 +7,12 @@ pkgdesc="EEG Source Connectivity Toolbox"
 arch=('any')
 url="https://github.com/SCoT-dev/SCoT"
 license=('MIT')
-provides=('python-scot' 'python-eegtopo')
+provides=('python2-scot' 'python2-eegtopo')
 makedepends=('git')
-depends=('python' 'python-numpy' 'python-scipy')
-optdepends=('python-scikit-learn: processing backend'
-            'python-matplotlib: plotting support')
-source=("$pkgname"::'git+https://github.com/SCoT-dev/SCoT.git')
+depends=('python2' 'python2-numpy' 'python2-scipy')
+optdepends=('python2-scikit-learn: processing backend'
+            'python2-matplotlib: plotting support')
+source=("$pkgname"::'git+https://github.com/SCoT-dev/SCoT.git#branch=py27')
 md5sums=('SKIP')
 
 pkgver() {
@@ -23,10 +23,10 @@ pkgver() {
 build() {
   cd "$srcdir/$pkgname"
   # nothing to build - package is pure python
-  #python setup.py build
+  #python2 setup.py build
 }
 
 package() {
   cd "$srcdir/$pkgname"
-  python setup.py install --prefix=$pkgdir/usr --optimize=1
+  python2 setup.py install --prefix=$pkgdir/usr --optimize=1
 }
