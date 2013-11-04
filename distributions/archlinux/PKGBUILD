@@ -1,6 +1,6 @@
 # Maintainer: SCoT Development Team
 
-pkgname=python-scot-git
+pkgname=python2-scot-git
 pkgver=0.0.0
 pkgrel=1
 pkgdesc="EEG Source Connectivity Toolbox"
