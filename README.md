@@ -1,7 +1,7 @@
 SCoT
 ====
 
-Source Connectivity Toolbox for Python
+EEG Source Connectivity Toolbox in Python
 
 
 Dependencies
