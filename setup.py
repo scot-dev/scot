@@ -2,8 +2,14 @@
 
 from distutils.core import setup
 
+
+versionfile = open('VERSION', 'r')
+ver = versionfile.read().strip()
+versionfile.close()
+
+
 setup(name='SCoT',
-      version='0.1.0',
+      version=ver,
       description='Source Connectivity Toolbox',
       author='Martin Billinger',
       author_email='martin.billinger@tugraz.at',

@@ -10,18 +10,19 @@ import matplotlib.pyplot as plot
 import matplotlib.path as path
 #noinspection PyPep8Naming
 import matplotlib.patches as patches
-from .projections import project_radial_to3d, project_radial_to2d
+import matplotlib.transforms as transforms
+from .projections import array_project_radial_to3d, project_radial_to2d
 from .geometry.euclidean import Vector
 
 
 class Topoplot:
     """ Creates 2D scalp maps. """
 
-    def __init__(self, m=4, num_lterms=20):
+    def __init__(self, m=4, num_lterms=10):
         self.interprange = np.pi * 3 / 4
-        head_radius = self.interprange
-        nose_angle = 15
-        nose_length = 0.12
+        self.head_radius = self.interprange
+        self.nose_angle = 15
+        self.nose_length = 0.12
 
         verts = np.array([
             (1, 0),
@@ -38,9 +39,9 @@ class Topoplot:
         ]
         self.path_head = path.Path(verts, codes)
 
-        x = head_radius * np.cos((90.0 - nose_angle / 2) * np.pi / 180.0)
-        y = head_radius * np.sin((90.0 - nose_angle / 2) * np.pi / 180.0)
-        verts = np.array([(x, y), (0, head_radius * (1 + nose_length)), (-x, y)])
+        x = self.head_radius * np.cos((90.0 - self.nose_angle / 2) * np.pi / 180.0)
+        y = self.head_radius * np.sin((90.0 - self.nose_angle / 2) * np.pi / 180.0)
+        verts = np.array([(x, y), (0, self.head_radius * (1 + self.nose_length)), (-x, y)])
         codes = [path.Path.MOVETO, path.Path.LINETO, path.Path.LINETO]
         self.path_nose = path.Path(verts, codes)
 
@@ -51,6 +52,8 @@ class Topoplot:
         self.z = None
         self.c = None
         self.image = None
+
+        self.g_map = {}
 
     @staticmethod
     def calc_legendre_factors(m, num_lterms):
@@ -83,61 +86,74 @@ class Topoplot:
     def set_map(self, img):
         self.image = img
 
+    def calc_gmap(self, pixels):
+
+        try:
+            return self.g_map[pixels]
+        except KeyError:
+            pass
+
+        x = np.linspace(-self.interprange, self.interprange, pixels)
+        y = np.linspace(self.interprange, -self.interprange, pixels)
+
+        xy = np.transpose(np.meshgrid(x, y))
+
+        e = array_project_radial_to3d(xy)
+
+        gmap = self.calc_g(e.dot(np.transpose(self.locations)))
+        self.g_map[pixels] = gmap
+        return gmap
+
     def create_map(self, pixels=32):
-        self.image = np.zeros((pixels, pixels)) * np.nan
+        gm = self.calc_gmap(pixels)
+        self.image = gm.dot(self.c[1:]) + self.c[0]
 
-        gridlocs = np.linspace(-self.interprange, self.interprange, pixels)
-        dx2 = (gridlocs[2] - gridlocs[0]) # distance of two pixels
-
-        for j in range(pixels):
-            x = gridlocs[j]
-            for i in range(pixels):
-                y = -gridlocs[i]
-
-                if x ** 2 + y ** 2 <= (self.interprange + dx2) ** 2: # skip some unnecessary calculations
-                    e = project_radial_to3d(Vector(x, y, 0))
-                    self.image[i, j] = self.c[0] + self.c[1:].dot(self.calc_g(np.dot(self.locations, [k for k in e])))
-
-    def plot_map(self, axes=None, crange=None):
+    def plot_map(self, axes=None, crange=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
-        cliptransform = axes.transData
         if crange is None:
             vru = np.nanmax(np.abs(self.image))
             vrl = -vru
         else:
             vrl, vru = crange
-        return axes.imshow(self.image, vmin=vrl, vmax=vru, clip_path=(self.path_head, cliptransform),
-                           extent=(-self.interprange, self.interprange, -self.interprange, self.interprange))
+        head = self.path_head.deepcopy()
+        head.vertices += offset
+        return axes.imshow(self.image, vmin=vrl, vmax=vru, clip_path=(head, axes.transData),
+                           extent=(offset[0]-self.interprange, offset[0]+self.interprange,
+                                   offset[1]-self.interprange, offset[1]+self.interprange))
 
-    def plot_locations(self, axes=None):
+    def plot_locations(self, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
         for p in self.locations:
             p2 = project_radial_to2d(Vector.fromiterable(p))
-            axes.plot(p2.x, p2.y, 'k.')
+            axes.plot(p2.x+offset[0], p2.y+offset[1], 'k.')
 
-    def plot_head(self, axes=None):
+    def plot_head(self, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
-        axes.add_patch(patches.PathPatch(self.path_head, facecolor='none', lw=2))
-        axes.add_patch(patches.PathPatch(self.path_nose, facecolor='none', lw=2))
+        head = self.path_head.deepcopy()
+        nose = self.path_nose.deepcopy()
+        head.vertices += offset
+        nose.vertices += offset
+        axes.add_patch(patches.PathPatch(head, facecolor='none', lw=2))
+        axes.add_patch(patches.PathPatch(nose, facecolor='none', lw=2))
 
-    def plot_circles(self, radius, axes=None):
+    def plot_circles(self, radius, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
         col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
             p3 = self.locations[i]
             p2 = project_radial_to2d(Vector.fromiterable(p3))
-            circ = plot.Circle((p2.x, p2.y), radius=radius, color=col(self.z[i]))
+            circ = plot.Circle((p2.x+offset[0], p2.y+offset[1]), radius=radius, color=col(self.z[i]))
             axes.add_patch(circ)
 
 
-def topoplot(values, locations, axes=None):
+def topoplot(values, locations, offset=(0,0), axes=None):
     topo = Topoplot()
     topo.set_locations(locations)
     topo.set_values(values)
     topo.create_map()
     #h = topo.plot_map(axes)
-    topo.plot_map(axes)
-    topo.plot_locations(axes)
-    topo.plot_head(axes)
+    topo.plot_map(offset, axes)
+    topo.plot_locations(offset, axes)
+    topo.plot_head(offset, axes)
     #plot.colorbar(h)
     return topo
