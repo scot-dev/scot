@@ -20,9 +20,9 @@ class Topoplot:
 
     def __init__(self, m=4, num_lterms=10):
         self.interprange = np.pi * 3 / 4
-        head_radius = self.interprange
-        nose_angle = 15
-        nose_length = 0.12
+        self.head_radius = self.interprange
+        self.nose_angle = 15
+        self.nose_length = 0.12
 
         verts = np.array([
             (1, 0),
@@ -39,9 +39,9 @@ class Topoplot:
         ]
         self.path_head = path.Path(verts, codes)
 
-        x = head_radius * np.cos((90.0 - nose_angle / 2) * np.pi / 180.0)
-        y = head_radius * np.sin((90.0 - nose_angle / 2) * np.pi / 180.0)
-        verts = np.array([(x, y), (0, head_radius * (1 + nose_length)), (-x, y)])
+        x = self.head_radius * np.cos((90.0 - self.nose_angle / 2) * np.pi / 180.0)
+        y = self.head_radius * np.sin((90.0 - self.nose_angle / 2) * np.pi / 180.0)
+        verts = np.array([(x, y), (0, self.head_radius * (1 + self.nose_length)), (-x, y)])
         codes = [path.Path.MOVETO, path.Path.LINETO, path.Path.LINETO]
         self.path_nose = path.Path(verts, codes)
 
@@ -108,7 +108,7 @@ class Topoplot:
         gm = self.calc_gmap(pixels)
         self.image = gm.dot(self.c[1:]) + self.c[0]
 
-    def plot_map(self, offset=(0,0), axes=None, crange=None):
+    def plot_map(self, axes=None, crange=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
         if crange is None:
             vru = np.nanmax(np.abs(self.image))
@@ -121,13 +121,13 @@ class Topoplot:
                            extent=(offset[0]-self.interprange, offset[0]+self.interprange,
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
-    def plot_locations(self, offset=(0,0), axes=None):
+    def plot_locations(self, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
         for p in self.locations:
             p2 = project_radial_to2d(Vector.fromiterable(p))
             axes.plot(p2.x+offset[0], p2.y+offset[1], 'k.')
 
-    def plot_head(self, offset=(0,0), axes=None):
+    def plot_head(self, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
         head = self.path_head.deepcopy()
         nose = self.path_nose.deepcopy()
@@ -136,7 +136,7 @@ class Topoplot:
         axes.add_patch(patches.PathPatch(head, facecolor='none', lw=2))
         axes.add_patch(patches.PathPatch(nose, facecolor='none', lw=2))
 
-    def plot_circles(self, radius, offset=(0,0), axes=None):
+    def plot_circles(self, radius, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
         col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
