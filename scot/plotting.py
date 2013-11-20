@@ -2,7 +2,7 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-""" Object oriented API to SCoT """
+""" Graphical output with matplotlib """
 
 import numpy as np
 
@@ -34,11 +34,11 @@ def prepare_topoplots(topo, values):
     return topomaps
 
 
-def plot_topo(axis, topo, topomap, crange=None):
+def plot_topo(axis, topo, topomap, crange=None, offset=(0,0)):
     topo.set_map(topomap)
-    h = topo.plot_map(axis, crange=crange)
-    topo.plot_locations(axis)
-    topo.plot_head(axis)
+    h = topo.plot_map(axis, crange=crange, offset=offset)
+    topo.plot_locations(axis, offset=offset)
+    topo.plot_head(axis, offset=offset)
     return h
 
 
@@ -216,4 +216,116 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
     fig.text(0.05, 0.5, 'frequency (Hz)' , horizontalalignment='center', rotation='vertical')
 
     return fig
-    
+
+
+def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=None, axes=None, order=None):
+    colors = np.asarray(colors)
+    widths = np.asarray(widths)
+    mask = np.asarray(mask)
+
+    colors = np.maximum(colors, 0)
+    colors = np.minimum(colors, 1)
+
+    if len(widths.shape) > 2:
+        [n, m] = widths.shape
+    elif len(colors.shape) > 3:
+        [n, m, c] = widths.shape
+    elif len(mask.shape) > 2:
+        [n, m] = mask.shape
+    else:
+        n = len(topomaps)
+        m = n
+
+    if not order:
+        order = list(range(n))
+
+    #a = np.asarray(a)
+    #[n, m] = a.shape
+
+    assert(n == m)
+
+    if axes is None:
+        fig = plt.figure()
+        axes = fig.add_subplot(111)
+    #axes.set_yticks([])
+    #axes.set_xticks([])
+    #axes.set_frame_on(False)
+
+    if len(colors.shape) < 3:
+        colors = np.tile(colors, (n,n,1))
+
+    if len(widths.shape) < 2:
+        widths = np.tile(widths, (n,n))
+
+    if len(mask.shape) < 2:
+        mask = np.tile(mask, (n,n))
+    np.fill_diagonal(mask, False)
+
+    if topo:
+        r = 2 * topo.head_radius / (np.sin(np.pi/n))
+    else:
+        r = 1
+
+    for i in range(n):
+        if topo:
+            o = (r*np.sin(i*2*np.pi/n), r*np.cos(i*2*np.pi/n))
+            plot_topo(axes, topo, topomaps[order[i]], offset=o)
+
+    for i in range(n):
+        for j in range(n):
+            if not mask[order[i], order[j]]:
+                continue
+            a0 = j*2*np.pi/n
+            a1 = i*2*np.pi/n
+
+            x0, y0 = r*np.sin(a0), r*np.cos(a0)
+            x1, y1 = r*np.sin(a1), r*np.cos(a1)
+
+            ex = (x0 + x1) / 2
+            ey = (y0 + y1) / 2
+            en = np.sqrt(ex**2 + ey**2)
+
+            if en < 1e-10:
+                en = 0
+                ex = y0 / r
+                ey = -x0 / r
+                w = -r
+            else:
+                ex /= en
+                ey /= en
+                w = np.sqrt((x1-x0)**2 + (y1-y0)**2) / 2
+
+                if x0*y1-y0*x1 < 0:
+                    w = -w
+
+            d = en*(1-curviness)
+            h = en-d
+
+            t = np.linspace(-1, 1, 100)
+
+            dist = (t**2+2*t+1)*w**2 + (t**4-2*t**2+1)*h**2
+
+            tmask1 = dist >= (1.4*topo.head_radius)**2
+            tmask2 = dist >= (1.2*topo.head_radius)**2
+            tmask = np.logical_and(tmask1, tmask2[::-1])
+            t = t[tmask]
+
+            x = (h*t*t+d)*ex - w*t*ey
+            y = (h*t*t+d)*ey + w*t*ex
+
+            # Arrow Head
+            s = np.sqrt((x[-2] - x[-1])**2 + (y[-2] - y[-1])**2)
+
+            width = widths[order[i], order[j]]
+
+            x1 = 0.1*width*(x[-2] - x[-1] + y[-2] - y[-1])/s + x[-1]
+            y1 = 0.1*width*(y[-2] - y[-1] - x[-2] + x[-1])/s + y[-1]
+
+            x2 = 0.1*width*(x[-2] - x[-1] - y[-2] + y[-1])/s + x[-1]
+            y2 = 0.1*width*(y[-2] - y[-1] + x[-2] - x[-1])/s + y[-1]
+
+            x = np.concatenate([x, [x1, x[-1], x2]])
+            y = np.concatenate([y, [y1, y[-1], y2]])
+            axes.plot(x, y, lw=width, color=colors[order[i], order[j]], solid_capstyle='round', solid_joinstyle='round')
+
+    return axes
