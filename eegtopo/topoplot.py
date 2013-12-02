@@ -146,14 +146,14 @@ class Topoplot:
             axes.add_patch(circ)
 
 
-def topoplot(values, locations, offset=(0,0), axes=None):
+def topoplot(values, locations, axes=None, offset=(0,0)):
     topo = Topoplot()
     topo.set_locations(locations)
     topo.set_values(values)
     topo.create_map()
-    #h = topo.plot_map(axes)
-    topo.plot_map(offset, axes)
-    topo.plot_locations(offset, axes)
-    topo.plot_head(offset, axes)
+    #h = topo.plot_map(axes, offset)
+    topo.plot_map(axes=axes, offset=offset)
+    topo.plot_locations(axes=axes, offset=offset)
+    topo.plot_head(axes=axes, offset=offset)
     #plot.colorbar(h)
     return topo
