@@ -247,9 +247,9 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     if axes is None:
         fig = plt.figure()
         axes = fig.add_subplot(111)
-    #axes.set_yticks([])
-    #axes.set_xticks([])
-    #axes.set_frame_on(False)
+    axes.set_yticks([])
+    axes.set_xticks([])
+    axes.set_frame_on(False)
 
     if len(colors.shape) < 3:
         colors = np.tile(colors, (n,n,1))
@@ -262,7 +262,7 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     np.fill_diagonal(mask, False)
 
     if topo:
-        r = 2 * topo.head_radius / (np.sin(np.pi/n))
+        r = 1.25 * topo.head_radius / (np.sin(np.pi/n))
     else:
         r = 1
 
