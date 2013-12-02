@@ -44,7 +44,7 @@ ws = scot.Workspace(30, reducedim=15, fs=fs, locations=locs)
 
 # Perform MVARICA to obtain
 ws.set_data(data, classes)
-ws.do_mvarica()
+ws.do_cspvarica()
 
 
 # Connectivity Analysis
