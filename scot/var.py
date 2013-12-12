@@ -8,6 +8,7 @@ import numbers
 from functools import partial
 
 import numpy as np
+import scipy as sp
 
 from . import datatools
 from . import xvschema as xv
@@ -253,6 +254,53 @@ def predict(data, b):
         for n in range(p, l):
             y[n, :, :] += np.dot(bp, data[n - k, :, :])
     return y
+
+
+def is_stable(b):
+    """
+    is_stable( b )
+
+    Test if the VAR model is stable.
+
+    Note on the arrangement of model coefficients:
+        b is of shape m, m*p, with sub matrices arranged as follows:
+            b_00 b_01 ... b_0m
+            b_10 b_11 ... b_1m
+            .... ....     ....
+            b_m0 b_m1 ... b_mm
+        Each sub matrix b_ij is a column vector of length p that contains the
+        filter coefficients from channel j (source) to channel i (sink).
+
+    Parameters     Default  Shape   Description
+    --------------------------------------------------------------------------
+    b              :      : m,m*p : Model coefficients
+
+    Output           Shape   Description
+    --------------------------------------------------------------------------
+    stable         :       : True of False if the model is stable/unstable
+
+    References:
+    [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", Springer, Berlin, Germany
+    """
+
+    m, mp = b.shape
+    p = mp // m
+    assert(mp == m*p)
+
+    top_block = []
+    for i in range(p):
+        top_block.append(b[:, i::p])
+    top_block = np.hstack(top_block)
+
+    im = np.eye(m)
+    eye_block = im
+    for i in range(p-2):
+        eye_block = sp.linalg.block_diag(im, eye_block)
+    eye_block = np.hstack([eye_block, np.zeros((m*(p-1), m))])
+
+    tmp = np.vstack([top_block, eye_block])
+
+    return np.all(np.abs(np.linalg.eig(tmp)[0]) < 1)
 
 
 def optimize_delta_bisection(data, p, xvschema=lambda t, nt: Defaults.xvschema(t, nt), skipstep=1):
