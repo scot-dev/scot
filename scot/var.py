@@ -280,7 +280,7 @@ def is_stable(b):
     stable         :       : True of False if the model is stable/unstable
 
     References:
-    [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", Springer, Berlin, Germany
+    [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
     """
 
     m, mp = b.shape
