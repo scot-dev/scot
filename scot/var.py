@@ -12,6 +12,7 @@ import scipy as sp
 
 from . import datatools
 from . import xvschema as xv
+from .utils import acm
 
 
 class Defaults:
@@ -422,6 +423,23 @@ def optimize_delta_gradientdescent(data, p, skipstep=1, xvschema=lambda t, nt: D
     return np.sqrt(np.exp(delta))
 
 
+def test_whiteness(x, p, h, repeats=100, get_q=False):
+    x = np.atleast_3d(x)
+    (n, m, t) = x.shape
+    nt = (n-p)*t
+
+    q0 = _calc_q_h0(repeats, x, h, nt)[:,2,-1]
+    q = _calc_q_statistic(x, h, nt)[2,-1]
+
+    # probability of observing a result more extreme than q under the null-hypothesis
+    pr = np.sum(q0 >= q) / repeats
+
+    if get_q:
+        return pr, q0, q
+    else:
+        return pr
+
+
     ############################################################################
 
 
@@ -555,4 +573,55 @@ def __construct_eqns_rls(data, p, sqrtdelta):
         y[:n, i] = np.reshape(data[p:, i, :], n)
 
     return x, y
-    
+
+
+def _calc_q_statistic(x, h, nt):
+    """ calculate portmanteau statistics up to a lag of h.
+    """
+    (n, m, t) = x.shape
+
+    # covariance matrix of x
+    c0 = acm(x, 0)
+
+    # LU factorization of covariance matrix
+    c0f = sp.linalg.lu_factor(c0, overwrite_a=False, check_finite=True)
+
+    q = np.zeros((3, h+1))
+    for l in range(1, h+1):
+        cl = acm(x, l)
+
+        # calculate tr(cl' * c0^-1 * cl * c0^-1)
+        a = sp.linalg.lu_solve(c0f, cl)
+        b = sp.linalg.lu_solve(c0f, cl.T)
+        tmp = a.dot(b).trace()
+
+        # Box-Pierce
+        q[0, l] = tmp
+
+        # Ljung-Box
+        q[1, l] = tmp / (nt-l)
+
+        # Li-McLeod
+        q[2, l] = tmp
+
+    q *= nt
+    q[1, :] *= (nt+2)
+
+    q = np.cumsum(q, axis=1)
+
+    for l in range(1, h+1):
+        q[2, l] = q[0, l] + m*m*h*(l+1) / (2*nt)
+
+    return q
+
+
+def _calc_q_h0(n, x, h, nt):
+    """ calculate q under the null-hypothesis of whiteness
+    """
+    x = x.copy()
+
+    q = []
+    for i in range(n):
+        np.random.shuffle(x)    # shuffle along time axis
+        q.append(_calc_q_statistic(x, h, nt))
+    return np.array(q)
