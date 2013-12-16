@@ -46,7 +46,7 @@ def acm(x, l):
     """
     x = np.atleast_3d(x)
 
-    if l > x.shape[0]-2:
+    if l > x.shape[0]-1:
         raise AttributeError("lag exceeds data length")
 
     ## subtract mean from each trial
