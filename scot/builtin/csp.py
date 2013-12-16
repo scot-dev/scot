@@ -54,8 +54,6 @@ def csp( X, cl, numcomp=np.inf ):
         
     E, W = eig(Sigma1, Sigma1 + Sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
 
-    print(E.shape, W.shape)
-        
     order = np.argsort(E)[::-1]
     W = W[:,order]
     E = E[order]
