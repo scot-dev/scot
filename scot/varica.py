@@ -78,6 +78,14 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     if delta == 'auto':
         delta = var.optimize_delta_bisection(xpca[:, :, :], p, xvschema=xvschema.multitrial)
 
+    #r = np.zeros(xpca.shape)
+    #for i in range(t):
+    #    # fit MVAR model
+    #    a = var.fit(xpca[:,:,i], p, delta)
+    #
+    #    # residuals
+    #    r[:,:,i] = xpca[:,:,i] - var.predict(xpca[:,:,i], a)[:,:,0]
+
     # fit MVAR model
     a = var.fit(xpca, p, delta)
 
@@ -103,9 +111,12 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
         unmixing = ux
         mixing = mx
         residuals = e
+        var_residuals = r
         c = np.cov(cat_trials(e), rowvar=False)
 
     Result.delta = delta
     Result.b = b
+    Result.a = a
+    Result.xpca = xpca
 
     return Result
