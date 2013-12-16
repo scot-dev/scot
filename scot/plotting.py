@@ -5,6 +5,7 @@
 """ Graphical output with matplotlib """
 
 import numpy as np
+from . import var
 
 try:
     #noinspection PyPep8Naming
@@ -247,9 +248,9 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     if axes is None:
         fig = plt.figure()
         axes = fig.add_subplot(111)
-    #axes.set_yticks([])
-    #axes.set_xticks([])
-    #axes.set_frame_on(False)
+    axes.set_yticks([])
+    axes.set_xticks([])
+    axes.set_frame_on(False)
 
     if len(colors.shape) < 3:
         colors = np.tile(colors, (n,n,1))
@@ -262,7 +263,7 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     np.fill_diagonal(mask, False)
 
     if topo:
-        r = 2 * topo.head_radius / (np.sin(np.pi/n))
+        r = 1.75 * topo.head_radius / (np.sin(np.pi/n))
     else:
         r = 1
 
@@ -329,3 +330,26 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
             axes.plot(x, y, lw=width, color=colors[order[i], order[j]], solid_capstyle='round', solid_joinstyle='round')
 
     return axes
+
+
+def plot_whiteness(x, p, h, repeats=1000, axis=None):
+    pr, q0, q = var.test_whiteness(x, p, h, repeats, True)
+
+    (n,m,t) = x.shape
+
+    if axis is None:
+        axis = plt.gca()
+
+    pdf, _, _ = axis.hist(q0, 30, normed=True, label='surrogate distribution')
+    axis.plot([q,q], [0,np.max(pdf)], 'r-', label='fitted model')
+
+    #df = m*m*(h-p)
+    #x = np.linspace(np.min(q0)*0.0, np.max(q0)*2.0, 100)
+    #y = sp.stats.chi2.pdf(x, df)
+    #hc = axis.plot(x, y, label='chi-squared distribution (df=%i)' % df)
+
+    axis.set_title('significance: p = %f'%pr)
+    axis.set_xlabel('Li-McLeod statistic (Q)')
+    axis.set_ylabel('probability')
+
+    axis.legend()
