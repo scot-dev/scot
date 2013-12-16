@@ -610,7 +610,7 @@ def _calc_q_statistic(x, h, nt):
     q = np.cumsum(q, axis=1)
 
     for l in range(1, h+1):
-        q[2, l] = q[0, l] + m*m*h*(l+1) / (2*nt)
+        q[2, l] = q[0, l] + m*m*l*(l+1) / (2*nt)
 
     return q
 
