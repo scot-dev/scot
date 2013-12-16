@@ -82,6 +82,19 @@ class TestVAR(unittest.TestCase):
 
         self.assertTrue(np.allclose(c, np.eye(c.shape[0]), 1e-2, 1e-2))
 
+    def test_whiteness(self):
+        r = np.random.randn(100,5,10)
+        r0 = r.copy()
+        p = var.test_whiteness(r, 0, 20)
+
+        self.assertTrue(np.all(r == r0))
+        self.assertTrue(p>0.05)
+
+        r[3:,1,:] = r[:-3,0,:]
+        p = var.test_whiteness(r, 0, 20)
+        self.assertFalse(p>0.05)
+
+
 
 def main():
     unittest.main()
