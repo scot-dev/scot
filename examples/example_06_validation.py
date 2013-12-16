@@ -7,8 +7,8 @@ import scot.backend.sklearn     # use builtin (default) backend
 from scot.varica import mvarica
 from scot.datatools import cut_segments
 import scot.plotting as splot
+from scot.var import is_stable
 import matplotlib.pyplot as plt
-import numpy as np
 
 # The example data set contains a continuous 45 channel EEG recording of a motor
 # imagery experiment. The data was preprocessed to reduce eye movement artifacts
@@ -42,6 +42,12 @@ for p in [22, 33]:
 
     print('    Performing MVARICA')
     result = mvarica(data, p, m)
+
+    if is_stable(result.a):
+        s = ''
+    else:
+        s = '*NOT* '
+    print('    VAR model is %sstable.'%s)
 
     # discard the first p residuals
     r = result.var_residuals[p:, :, :]
