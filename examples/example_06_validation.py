@@ -4,7 +4,7 @@ MVARICA, and visualize a connectivity.
 """
 
 import scot.backend.sklearn     # use builtin (default) backend
-from scot.varica import mvarica
+from scot.varica import cspvarica
 from scot.datatools import cut_segments
 import scot.plotting as splot
 from scot.var import is_stable
@@ -40,8 +40,8 @@ for p in [22, 33]:
     i += 1
     print('Model order:', p)
 
-    print('    Performing MVARICA')
-    result = mvarica(data, p, m)
+    print('    Performing CSPVARICA')
+    result = cspvarica(data, classes, p, m)
 
     if is_stable(result.a):
         s = ''
