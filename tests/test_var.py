@@ -82,6 +82,19 @@ class TestVAR(unittest.TestCase):
 
         self.assertTrue(np.allclose(c, np.eye(c.shape[0]), 1e-2, 1e-2))
 
+    def test_whiteness(self):
+        r = np.random.randn(100, 5, 10)     # gaussian white noise
+        r0 = r.copy()
+        p = var.test_whiteness(r, 0, 20)
+
+        self.assertTrue(np.all(r == r0))    # make sure we don't modify the input
+        self.assertTrue(p>0.05)             # test should be non-significant for white noise
+
+        r[3:,1,:] = r[:-3,0,:]              # create cross-correlation at lag 3
+        p = var.test_whiteness(r, 0, 20)
+        self.assertFalse(p>0.05)            # now test should be significant
+
+
 
 def main():
     unittest.main()

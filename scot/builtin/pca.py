@@ -92,7 +92,7 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim
         order = np.argsort(latent)[::-1]
         w = w[:, order]
         v = v[order, :]
-        latent = latent[:, order]
+        latent = latent[order]
 
     if reducedim and reducedim < 1:
         selected = np.nonzero(np.cumsum(latent) < reducedim)[0]

@@ -8,9 +8,11 @@ import numbers
 from functools import partial
 
 import numpy as np
+import scipy as sp
 
 from . import datatools
 from . import xvschema as xv
+from .utils import acm
 
 
 class Defaults:
@@ -255,6 +257,53 @@ def predict(data, b):
     return y
 
 
+def is_stable(b):
+    """
+    is_stable( b )
+
+    Test if the VAR model is stable.
+
+    Note on the arrangement of model coefficients:
+        b is of shape m, m*p, with sub matrices arranged as follows:
+            b_00 b_01 ... b_0m
+            b_10 b_11 ... b_1m
+            .... ....     ....
+            b_m0 b_m1 ... b_mm
+        Each sub matrix b_ij is a column vector of length p that contains the
+        filter coefficients from channel j (source) to channel i (sink).
+
+    Parameters     Default  Shape   Description
+    --------------------------------------------------------------------------
+    b              :      : m,m*p : Model coefficients
+
+    Output           Shape   Description
+    --------------------------------------------------------------------------
+    stable         :       : True of False if the model is stable/unstable
+
+    References:
+    [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
+    """
+
+    m, mp = b.shape
+    p = mp // m
+    assert(mp == m*p)
+
+    top_block = []
+    for i in range(p):
+        top_block.append(b[:, i::p])
+    top_block = np.hstack(top_block)
+
+    im = np.eye(m)
+    eye_block = im
+    for i in range(p-2):
+        eye_block = sp.linalg.block_diag(im, eye_block)
+    eye_block = np.hstack([eye_block, np.zeros((m*(p-1), m))])
+
+    tmp = np.vstack([top_block, eye_block])
+
+    return np.all(np.abs(np.linalg.eig(tmp)[0]) < 1)
+
+
 def optimize_delta_bisection(data, p, xvschema=lambda t, nt: Defaults.xvschema(t, nt), skipstep=1):
     """
     optimize_delta_bisection( data, p )
@@ -372,6 +421,23 @@ def optimize_delta_gradientdescent(data, p, skipstep=1, xvschema=lambda t, nt: D
         print('%d Gradient Descent: %f' % (nsteps, k))
 
     return np.sqrt(np.exp(delta))
+
+
+def test_whiteness(x, p, h, repeats=100, get_q=False):
+    x = np.atleast_3d(x)
+    (n, m, t) = x.shape
+    nt = (n-p)*t
+
+    q0 = _calc_q_h0(repeats, x, h, nt)[:,2,-1]
+    q = _calc_q_statistic(x, h, nt)[2,-1]
+
+    # probability of observing a result more extreme than q under the null-hypothesis
+    pr = np.sum(q0 >= q) / repeats
+
+    if get_q:
+        return pr, q0, q
+    else:
+        return pr
 
 
     ############################################################################
@@ -507,4 +573,55 @@ def __construct_eqns_rls(data, p, sqrtdelta):
         y[:n, i] = np.reshape(data[p:, i, :], n)
 
     return x, y
-    
+
+
+def _calc_q_statistic(x, h, nt):
+    """ calculate portmanteau statistics up to a lag of h.
+    """
+    (n, m, t) = x.shape
+
+    # covariance matrix of x
+    c0 = acm(x, 0)
+
+    # LU factorization of covariance matrix
+    c0f = sp.linalg.lu_factor(c0, overwrite_a=False, check_finite=True)
+
+    q = np.zeros((3, h+1))
+    for l in range(1, h+1):
+        cl = acm(x, l)
+
+        # calculate tr(cl' * c0^-1 * cl * c0^-1)
+        a = sp.linalg.lu_solve(c0f, cl)
+        b = sp.linalg.lu_solve(c0f, cl.T)
+        tmp = a.dot(b).trace()
+
+        # Box-Pierce
+        q[0, l] = tmp
+
+        # Ljung-Box
+        q[1, l] = tmp / (nt-l)
+
+        # Li-McLeod
+        q[2, l] = tmp
+
+    q *= nt
+    q[1, :] *= (nt+2)
+
+    q = np.cumsum(q, axis=1)
+
+    for l in range(1, h+1):
+        q[2, l] = q[0, l] + m*m*l*(l+1) / (2*nt)
+
+    return q
+
+
+def _calc_q_h0(n, x, h, nt):
+    """ calculate q under the null-hypothesis of whiteness
+    """
+    x = x.copy()
+
+    q = []
+    for i in range(n):
+        np.random.shuffle(x)    # shuffle along time axis
+        q.append(_calc_q_statistic(x, h, nt))
+    return np.array(q)

@@ -6,6 +6,7 @@
 
 import numpy as np
 
+
 def cuthill_mckee(matrix):
     """ Cuthill-McKee algorithm
         Permute a symmetric binary matrix into a band matrix form with a small bandwidth.
@@ -38,3 +39,29 @@ def cuthill_mckee(matrix):
             break
 
     return order
+
+
+def acm(x, l):
+    """ calculate the autocovariance matrix at lag l
+    """
+    x = np.atleast_3d(x)
+
+    if l > x.shape[0]-1:
+        raise AttributeError("lag exceeds data length")
+
+    ## subtract mean from each trial
+    #for t in range(x.shape[2]):
+    #    x[:, :, t] -= np.mean(x[:, :, t], axis=0)
+
+    if l == 0:
+        a, b = x, x
+    else:
+        a = x[l:, :, :]
+        b = x[0:-l, :, :]
+
+    c = np.zeros((x.shape[1], x.shape[1]))
+    for t in range(x.shape[2]):
+        c += a[:, :, t].T.dot(b[:, :, t]) / x.shape[0]
+    c /= x.shape[2]
+
+    return c
