@@ -353,3 +353,5 @@ def plot_whiteness(x, p, h, repeats=1000, axis=None):
     axis.set_ylabel('probability')
 
     axis.legend()
+
+    return pr
