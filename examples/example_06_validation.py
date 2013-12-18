@@ -7,7 +7,6 @@ import scot.backend.sklearn     # use builtin (default) backend
 from scot.varica import mvarica
 from scot.datatools import cut_segments
 import scot.plotting as splot
-from scot.var import is_stable
 import matplotlib.pyplot as plt
 
 # The example data set contains a continuous 45 channel EEG recording of a motor
@@ -40,20 +39,22 @@ for p in [22, 33]:
     i += 1
     print('Model order:', p)
 
-    print('    Performing MVARICA')
-    result = mvarica(data, p, m)
+    var = scot.config.backend['var'](p)
 
-    if is_stable(result.a):
+    print('    Performing MVARICA')
+    result = mvarica(data, var, m)
+
+    if result.a.is_stable():
         s = ''
     else:
         s = '*NOT* '
     print('    VAR model is %sstable.'%s)
 
     # discard the first p residuals
-    r = result.var_residuals[p:, :, :]
+    #r = result.var_residuals[p:, :, :]
 
     print('    Testing VAR residuals for whiteness up to lag', h)
-    pr = splot.plot_whiteness(r, p, h, repeats=100, axis=plt.subplot(2, 1, i))
+    pr = splot.plot_whiteness(result.a, h, repeats=100, axis=plt.subplot(2, 1, i))
 
     if p < 0.05:
         plt.gca().set_title('model order %i: residuals significantly non-white with p=%f'%(p,pr))

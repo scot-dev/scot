@@ -7,8 +7,10 @@ from importlib import import_module
 import numpy as np
 
 import scot.backend
-from scot import var, datatools
+from scot import datatools
 import scot
+
+from scot.builtin.var import VAR
 
 
 class TestMVARICA(unittest.TestCase):
@@ -20,7 +22,7 @@ class TestMVARICA(unittest.TestCase):
 
     def testExceptions(self):
         self.assertRaises(TypeError, scot.Workspace)
-        api = scot.Workspace(var_order=50)
+        api = scot.Workspace({'model_order':50})
         self.assertRaises(RuntimeError, api.do_mvarica)
         self.assertRaises(RuntimeError, api.fit_var)
         self.assertRaises(TypeError, api.get_connectivity)
@@ -40,7 +42,10 @@ class TestMVARICA(unittest.TestCase):
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
-        sources = var.simulate([l, t], b0, noisefunc)
+
+        var = VAR(2)
+        var.coef = b0
+        sources = var.simulate([l, t], noisefunc)
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -52,7 +57,7 @@ class TestMVARICA(unittest.TestCase):
 
         for bm in backend_modules:
 
-            api = scot.Workspace(var_order=2, backend=bm.backend)
+            api = scot.Workspace({'model_order': 2}, backend=bm.backend)
 
             api.set_data(data)
 
@@ -74,7 +79,7 @@ class TestMVARICA(unittest.TestCase):
             best, d = np.inf, None
 
             for perm in permutations:
-                b = api.var_model_[perm[::2] // 2, :]
+                b = api.var_.coef[perm[::2] // 2, :]
                 b = b[:, perm]
                 for sgn in signperms:
                     c = b * np.repeat([sgn], 3, 0) * np.repeat([sgn[::2]], 6, 0).T
@@ -98,7 +103,10 @@ class TestMVARICA(unittest.TestCase):
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
-        sources = var.simulate([l, t], b0, noisefunc)
+
+        var = VAR(2)
+        var.coef = b0
+        sources = var.simulate([l, t], noisefunc)
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -112,7 +120,7 @@ class TestMVARICA(unittest.TestCase):
 
         for bm in backend_modules:
 
-            api = scot.Workspace(var_order=2, reducedim=3, backend=bm.backend)
+            api = scot.Workspace({'model_order': 2}, reducedim=3, backend=bm.backend)
 
             api.set_data(data)
 

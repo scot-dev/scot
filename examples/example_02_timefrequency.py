@@ -24,7 +24,7 @@ locs = midata.locations
 # Set up the analysis object
 #
 # We simply choose a VAR model order of 30, and reduction to 4 components (that's not a lot!).
-ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
+ws = scot.Workspace({'model_order': 30}, reducedim=4, fs=fs, locations=locs)
 
 
 # Prepare the data

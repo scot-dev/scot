@@ -5,10 +5,10 @@
 import numpy as np
 
 from .. import config
-
 from .. import datatools
 
 from ..builtin import binica, pca
+from ..builtin.var import VAR
 
 
 def wrapper_binica(data):
@@ -26,7 +26,8 @@ def wrapper_pca(x, reducedim):
 
 backend = {
     'ica': wrapper_binica,
-    'pca': wrapper_pca
+    'pca': wrapper_pca,
+    'var': VAR
 }
 
 

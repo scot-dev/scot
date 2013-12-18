@@ -39,7 +39,7 @@ data = scot.datatools.cut_segments(raweeg, triggers, 2 * fs, 5 * fs)
 # Set up the analysis object
 #
 # We simply choose a VAR model order of 30, and reduction to 15 components.
-ws = scot.Workspace(30, reducedim=15, fs=fs, locations=locs)
+ws = scot.Workspace({'model_order': 30}, reducedim=15, fs=fs, locations=locs)
 
 
 # Perform MVARICA to obtain
