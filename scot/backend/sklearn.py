@@ -4,6 +4,8 @@
 
 from sklearn.decomposition import FastICA, PCA
 
+from . import builtin
+
 from .. import config
 from .. import datatools
 
@@ -24,11 +26,11 @@ def wrapper_pca(x, reducedim):
     y = datatools.dot_special(x, c)
     return c, d, y
 
-
-backend = {
+backend = builtin.backend.copy()
+backend.update({
     'ica': wrapper_fastica,
     'pca': wrapper_pca
-}
+})
 
 
 def activate():
