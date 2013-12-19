@@ -5,17 +5,17 @@
 """ Object oriented API to SCoT """
 
 import numpy as np
+from . import config
 from .varica import mvarica, cspvarica
 from .plainica import plainica
 from .datatools import dot_special
 from .connectivity import Connectivity
 from . import plotting
-from . import var
 from eegtopo.topoplot import Topoplot
 
 
 class Workspace:
-    def __init__(self, var_order, var_delta=None, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
+    def __init__(self, var, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
         """
         Workspace(var_order, **args)
 
@@ -23,7 +23,9 @@ class Workspace:
 
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
-        var_order      :      :       : Autoregressive model order
+        var            :      :       : Instance of a VAR model class, or dictionary
+                                        with attributes to pass to the backend's
+                                        default VAR constructor.
 
         Opt. Parameters Default  Shape   Description
         --------------------------------------------------------------------------
@@ -42,7 +44,6 @@ class Workspace:
                                         interpreted as the number of components to
                                         keep after applying the PCA.
                                         If set to 'no_pca' the PCA step is skipped.
-        var_delta      : None :       : Regularization parameter for VAR model fitting
         backend        : None :       : Specify backend to use. When set to None
                                         SCoT's default backend (see config.py)
                                         is used.
@@ -54,10 +55,6 @@ class Workspace:
         self.unmixing_ = None
         self.mixing_ = None
         self.activations_ = None
-        self.var_model_ = None
-        self.var_cov_ = None
-        self.var_order_ = var_order
-        self.var_delta_ = var_delta
         self.connectivity_ = None
         self.locations_ = locations
         self.reducedim_ = reducedim
@@ -67,6 +64,17 @@ class Workspace:
         self.topo_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
+
+        self.var_multiclass_ = None
+
+        if self.backend_ is None:
+            self.backend_ = config.backend
+
+        try:
+            self.var_ = self.backend_['var'](**var)
+        except TypeError:
+            self.var_ = var
+
 
     def __str__(self):
         """Information about the Workspace."""
@@ -152,14 +160,11 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_, p=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_,
-                         backend=self.backend_)
+        result = mvarica(x=self.data_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
-        self.var_model_ = result.b
-        self.var_cov_ = result.c
-        self.var_delta_ = result.delta
-        self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
+        self.var_ = result.b
+        self.connectivity_ = Connectivity(result.b.coef, result.b.rescov, self.nfft_)
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
@@ -271,42 +276,30 @@ class Workspace:
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
         if self.cl_ is None:
-            self.var_model_, self.var_cov_ = var.fit(data=self.activations_, p=self.var_order_, delta=self.var_delta_,
-                                                     return_covariance=True)
-            self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
+            self.var_.fit(data=self.activations_)
+            self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
         else:
-            self.var_model_, self.var_cov_ = var.fit_multiclass(data=self.activations_, cl=self.cl_, p=self.var_order_,
-                                                                delta=self.var_delta_, return_covariance=True)
             self.connectivity_ = {}
+            self.var_multiclass_ = {}
             for c in np.unique(self.cl_):
-                self.connectivity_[c] = Connectivity(self.var_model_[c], self.var_cov_[c], self.nfft_)
+                tmp = self.var_.copy()
+                self.var_multiclass_[c] = tmp
+                tmp.fit(data=self.activations_[:, :, c==self.cl_])
+                self.connectivity_[c] = Connectivity(tmp.coef, tmp.rescov, self.nfft_)
 
-    def optimize_regularization(self, xvschema, skipstep=1):
+    def optimize_var(self):
         """
-        Workspace.optimize_regularization(xvschema, skipstep=1)
+        Workspace.optimize_regularization(skipstep=1)
 
-        Attempt to find a close-to-optimal regularization Parameter for the
-        current data set.
-
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        xvschema       :      : func  : Function to generate training and testing set.
-                                        See scot.xvschema module.
-        skipstep       : 1    : 1     : Higher values speed up the calculation but
-                                        cause higher variance in cost function which
-                                        will result in less accurate results.
-
-        Requires: activations
+        Optimize the var model's hyperparameters (such as regularization).
 
         Behaviour of this function is modified by the following attributes:
-            var_order_
-
+            var_
         """
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
 
-        self.var_delta_ = var.optimize_delta_bisection(data=self.activations_, p=self.var_order_, xvschema=xvschema,
-                                                       skipstep=skipstep)
+        self.var_.optimize(self.activations_)
 
 
     def get_connectivity(self, measure):
@@ -370,8 +363,8 @@ class Workspace:
             for j in range(0, n - winlen, winstep):
                 win = np.arange(winlen) + j
                 data = self.activations_[win, :, :]
-                b, c = var.fit(data, p=self.var_order_, delta=self.var_delta_, return_covariance=True)
-                con = Connectivity(b, c, self.nfft_)
+                self.var_.fit(data)
+                con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
                 result[:, :, :, i] = getattr(con, measure)()
                 i += 1
 
@@ -382,11 +375,11 @@ class Workspace:
             i = 0
             for j in range(0, n - winlen, winstep):
                 win = np.arange(winlen) + j
-                data = self.activations_[win, :, :]
-                b, c = var.fit_multiclass(data, cl=self.cl_, p=self.var_order_, delta=self.var_delta_,
-                                          return_covariance=True)
                 for ci in result.keys():
-                    con = Connectivity(b[ci], c[ci], self.nfft_)
+                    data = self.activations_[win, :, :]
+                    data = data[:, :, ci == self.cl_]
+                    self.var_.fit(data)
+                    con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
                     result[ci][:, :, :, i] = getattr(con, measure)()
                 i += 1
         return result

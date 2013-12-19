@@ -332,10 +332,8 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     return axes
 
 
-def plot_whiteness(x, p, h, repeats=1000, axis=None):
-    pr, q0, q = var.test_whiteness(x, p, h, repeats, True)
-
-    (n,m,t) = x.shape
+def plot_whiteness(var, h, repeats=1000, axis=None):
+    pr, q0, q = var.test_whiteness(h, repeats, True)
 
     if axis is None:
         axis = plt.gca()

@@ -3,11 +3,16 @@
 # Copyright (c) 2013 SCoT Development Team
 
 from sklearn.decomposition import FastICA, PCA
+from sklearn import linear_model
+import scipy as sp
+
+from . import builtin
 
 from . import builtin
 
 from .. import config
 from .. import datatools
+from ..var import VARBase
 
 
 def wrapper_fastica(data):
@@ -26,13 +31,41 @@ def wrapper_pca(x, reducedim):
     y = datatools.dot_special(x,c)
     return c, d, y
 
-    
-backend = builtin.backend.copy()    
+
+class VAR(VARBase):
+    def __init__(self, model_order, fitobj=linear_model.LinearRegression()):
+        """ Create a new VAR model instance.
+
+            Parameters     Default  Shape   Description
+            --------------------------------------------------------------------------
+            model_order    :      :       : Autoregressive model order
+            fitobj         :      :       : Instance of a linear regression model.
+                                            Default: sklearn.linear_model.LinearRegression()
+        """
+        VARBase.__init__(self, model_order)
+        self.fitting_model = fitobj
+
+    def fit(self, data):
+        data = sp.atleast_3d(data)
+        (x, y) = self._construct_eqns(data)
+        self.fitting_model.fit(x, y)
+
+        self.coef = self.fitting_model.coef_
+
+        self.residuals = data - self.predict(data)
+        self.rescov = sp.cov(datatools.cat_trials(self.residuals), rowvar=False)
+
+        return self
+
+
+backend = builtin.backend.copy()
 backend.update({
     'ica': wrapper_fastica,
-    'pca': wrapper_pca
-    })
-    
+    'pca': wrapper_pca,
+    'var': VAR
+})
+
+
 def activate():
     config.backend = backend
 

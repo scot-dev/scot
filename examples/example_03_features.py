@@ -30,7 +30,7 @@ locs = midata.locations
 
 # Set up the analysis object
 # We simply choose a VAR model order of 30, and reduction to 4 components.
-ws = scot.Workspace(30, reducedim=4, fs=fs)
+ws = scot.Workspace({'model_order': 30}, reducedim=4, fs=fs)
 freq = np.linspace(0, fs, ws.nfft_)
 
 
@@ -60,7 +60,9 @@ for train, test in kf:
     ws.do_cspvarica()
 
     # Find optimal regularization parameter for single-trial fitting
-    #ws.optimize_regularization(scot.xvschema.singletrial, 30)
+    #ws.var_.xvschema = scot.xvschema.singletrial
+    #ws.optimize_var()
+    ws.var_.delta = 1
 
     # Single-Trial Fitting and feature extraction
     features = np.zeros((len(triggers), 32))

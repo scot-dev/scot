@@ -7,10 +7,9 @@ import numpy as np
 from . import config
 from .datatools import cat_trials, dot_special
 from . import xvschema
-from . import var
 
 
-def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
+def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
     """
     mvarica( x, p )
     mvarica( x, p, retain_variance, delta )
@@ -26,7 +25,6 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     --------------------------------------------------------------------------
     x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
                           : n,m   : 2d data matrix (n samples, m signals)
-    p              :      :       : VAR model order
     reducedim      : 0.99 :       : a number less than 1 is interpreted as the
                                     fraction of variance that should remain in
                                     the data. All components that describe in
@@ -36,8 +34,7 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
                                     interpreted as the number of components to
                                     keep after applying the PCA.
                                     If set to 'no_pca' the PCA step is skipped.
-    delta          : 0    :       : regularization parameter for VAR fitting
-                                    set to 'auto' to determine optimal setting
+    var            :      :       : Instance of class that represents VAR models.
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
@@ -75,8 +72,8 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     else:
         c, d, xpca = backend['pca'](x, reducedim)
 
-    if delta == 'auto':
-        delta = var.optimize_delta_bisection(xpca[:, :, :], p, xvschema=xvschema.multitrial)
+    if optimize_var:
+        var.optimize(xpca)
 
     #r = np.zeros(xpca.shape)
     #for i in range(t):
@@ -87,10 +84,10 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     #    r[:,:,i] = xpca[:,:,i] - var.predict(xpca[:,:,i], a)[:,:,0]
 
     # fit MVAR model
-    a = var.fit(xpca, p, delta)
+    a = var.fit(xpca)
 
     # residuals
-    r = xpca - var.predict(xpca, a)
+    r = xpca - var.predict(xpca)
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(r))
@@ -99,9 +96,9 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
     e = dot_special(r, ux)
 
     # correct AR coefficients
-    b = np.zeros(a.shape)
-    for k in range(0, p):
-        b[:, k::p] = mx.dot(a[:, k::p].transpose()).dot(ux).transpose()
+    b = a.copy()
+    for k in range(0, a.p):
+        b.coef[:, k::a.p] = mx.dot(a.coef[:, k::a.p].transpose()).dot(ux).transpose()
 
     # correct (un)mixing matrix estimatees
     mx = mx.dot(d)
@@ -114,7 +111,6 @@ def mvarica(x, p, reducedim=0.99, delta=0, backend=None):
         var_residuals = r
         c = np.cov(cat_trials(e), rowvar=False)
 
-    Result.delta = delta
     Result.b = b
     Result.a = a
     Result.xpca = xpca
