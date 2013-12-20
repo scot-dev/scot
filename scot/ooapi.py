@@ -189,17 +189,15 @@ class Workspace:
             raise RuntimeError("CSPVARICA requires data to be set")
         if self.cl_ is None:
             raise RuntimeError("CSPVARICA requires class labels")
-        result = cspvarica(x=self.data_, cl=self.cl_, p=self.var_order_, reducedim=self.reducedim_, delta=self.var_delta_, backend=self.backend_)
+        result = cspvarica(x=self.data_, cl=self.cl_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
-        self.var_model_ = result.b
-        self.var_cov_ = result.c
-        self.var_delta_ = result.delta
-        self.connectivity_ = Connectivity(self.var_model_, self.var_cov_, self.nfft_)
+        self.var_ = result.b
+        self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
-        
+
     def do_ica(self):
         """
         Workspace.do_ica()
@@ -275,6 +273,7 @@ class Workspace:
         """
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
+
         if self.cl_ is None:
             self.var_.fit(data=self.activations_)
             self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)

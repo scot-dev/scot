@@ -96,26 +96,42 @@ class TestMVARICA(unittest.TestCase):
             do this for every backend """
 
         # original model coefficients
-        b0 = np.zeros((3, 6))
-        b0[1:3, 2:6] = [[0.4, -0.2, 0.3, 0.0],
+        b01 = np.zeros((3, 6))
+        b02 = np.zeros((3, 6))
+        b01[1:3, 2:6] = [[0.4, -0.2, 0.3, 0.0],
                         [-0.7, 0.0, 0.9, 0.0]]
-        m0 = b0.shape[0]
-        l, t = 1000, 10
+        b02[0:3, 2:6] = [[0.4, 0.0, 0.0, 0.0],
+                        [0.4, 0.0, 0.4, 0.0],
+                        [0.0, 0.0, 0.4, 0.0]]
+        m0 = b01.shape[0]
+        cl = np.array([0, 1, 0, 1, 0, 0, 1, 1, 1, 0])
+        l = 1000
+        t = len(cl)
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
 
         var = VAR(2)
-        var.coef = b0
-        sources = var.simulate([l, t], noisefunc)
+        var.coef = b01
+        sources1 = var.simulate([l, sum(cl==0)], noisefunc)
+        var.coef = b02
+        sources2 = var.simulate([l, sum(cl==1)], noisefunc)
+
+        var.fit(sources1)
+        print(var.coef)
+        var.fit(sources2)
+        print(var.coef)
+
+        sources = np.zeros((l,m0,t))
+
+        sources[:,:,cl==0] = sources1
+        sources[:,:,cl==1] = sources2
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
                [0.0, 0.2, 0.5, 1.0, 0.5, 0.2, 0.0],
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(sources, mix)
-
-        cl = [0, 1, 0, 1, 0, 0, 1, 1, 1, 0]
 
         backend_modules = [import_module('scot.backend.' + b) for b in scot.backend.__all__]
 
@@ -143,9 +159,18 @@ class TestMVARICA(unittest.TestCase):
 
             api.set_data(data, cl)
             
+            self.assertFalse(np.any(np.isnan(api.data_)))
+            self.assertFalse(np.any(np.isinf(api.data_)))
+            
             api.do_cspvarica()
             
+            self.assertFalse(np.any(np.isnan(api.activations_)))
+            self.assertFalse(np.any(np.isinf(api.activations_)))
+            
             self.assertEqual(api.get_connectivity('S').shape, (3,3,512))
+
+            self.assertFalse(np.any(np.isnan(api.activations_)))
+            self.assertFalse(np.any(np.isinf(api.activations_)))
             
             api.fit_var()
             

@@ -11,9 +11,9 @@ from . import xvschema
 
 def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
     """
-    mvarica( x, p )
-    mvarica( x, p, retain_variance, delta )
-    mvarica( x, p, numcomp, delta )
+    mvarica( x, var )
+    mvarica( x, var, retain_variance, optimize_var )
+    mvarica( x, var, numcomp, optimize_var )
 
     Apply MVARICA to the data x. MVARICA performs the following steps:
         1. Optional dimensionality reduction with PCA
@@ -85,6 +85,8 @@ def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
 
     # fit MVAR model
     a = var.fit(xpca)
+    
+    assert(var.is_stable())
 
     # residuals
     r = xpca - var.predict(xpca)
@@ -118,10 +120,10 @@ def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
     return Result
     
     
-def cspvarica(x, cl, p, reducedim=np.inf, delta=0, backend=None):
+def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None):
     """
-    cspvarica( x, cl, p )
-    cspvarica( x, cl, p, reducedim, delta, backend )
+    cspvarica( x, cl, var )
+    cspvarica( x, cl, var, reducedim, optimize_var, backend )
     
     Apply CSPVARICA to the data X. CSPVARICA performs the following steps:
         1. CSP transform of the data (with optional dimensionality reduction)
@@ -133,12 +135,10 @@ def cspvarica(x, cl, p, reducedim=np.inf, delta=0, backend=None):
     --------------------------------------------------------------------------
     x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
                           : n,m   : 2d data matrix (n samples, m signals)
-    p              :      :       : VAR model order
+    var            :      :       : Instance of class that represents VAR models.
     reducedim      :      : 0.99  : An integer number of 1 or greater is
                                     interpreted as the number of components to
                                     keep after applying the CSP.
-    delta          : 0    :       : regularization parameter for VAR fitting
-                                    set to 'auto' to determine optimal setting
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
@@ -172,25 +172,27 @@ def cspvarica(x, cl, p, reducedim=np.inf, delta=0, backend=None):
     c, d, xcsp = backend['csp'](x, cl, reducedim)
     m = c.shape[1]
     
-    if delta == 'auto':
-        delta = var.optimize_delta_bisection( xcsp[:,:,:], p, xvschema=xvschema.multitrial )
-    
+    if optimize_var:
+        var.optimize(xcsp)
+
     # fit MVAR model
-    a = var.fit( xcsp, p, delta )
+    a = var.fit(xcsp)
+
+    assert(var.is_stable())
     
     # residuals
-    r = xcsp - var.predict( xcsp, a )
+    r = xcsp - var.predict(xcsp)
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(r))
-    
+
     # driving process
     e = dot_special(r, ux)
 
     # correct AR coefficients
-    b = np.zeros(a.shape)
-    for k in range(0,p):
-        b[:,k::p] = mx.dot(a[:,k::p].transpose()).dot(ux).transpose()
+    b = a.copy()
+    for k in range(0,a.p):
+        b.coef[:, k::a.p] = mx.dot(a.coef[:, k::a.p].transpose()).dot(ux).transpose()
     
     # correct (un)mixing matrix estimatees
     mx = mx.dot(d)
@@ -202,10 +204,10 @@ def cspvarica(x, cl, p, reducedim=np.inf, delta=0, backend=None):
         residuals = e
         var_residuals = r
         c = np.cov(cat_trials(e), rowvar=False)
-    Result.delta = delta
     Result.b = b
     Result.a = a
     Result.xcsp = xcsp
-    
+
     return Result
+
     
