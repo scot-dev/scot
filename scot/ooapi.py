@@ -139,7 +139,7 @@ class Workspace:
         if self.unmixing_ != None:
             self.activations_ = dot_special(self.data_, self.unmixing_)
 
-    def do_mvarica(self):
+    def do_mvarica(self, varfit='ensemble'):
         """
         Workspace.do_mvarica()
 
@@ -158,7 +158,7 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_)
+        result = mvarica(x=self.data_, cl=self.cl_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
@@ -166,6 +166,7 @@ class Workspace:
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return result
 
     def do_ica(self):
         """
@@ -195,6 +196,7 @@ class Workspace:
         self.connectivity_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return result
 
     def remove_sources(self, sources):
         """

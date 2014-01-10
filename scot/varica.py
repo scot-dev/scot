@@ -9,7 +9,7 @@ from .datatools import cat_trials, dot_special
 from . import xvschema
 
 
-def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
+def mvarica(x, cl, var, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
     """
     mvarica( x, p )
     mvarica( x, p, retain_variance, delta )
@@ -38,6 +38,11 @@ def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
+   varfit          :'ensemble':   : 'ensemble' (default) fits one VAR model to
+                                    the whole data set.
+                                    'class' fits one VAR model for each class.
+                                    'trial' fits one VAR model for each trial.
+    
 
     Output
     --------------------------------------------------------------------------
@@ -75,19 +80,26 @@ def mvarica(x, var, reducedim=0.99, optimize_var=False, backend=None):
     if optimize_var:
         var.optimize(xpca)
 
-    #r = np.zeros(xpca.shape)
-    #for i in range(t):
-    #    # fit MVAR model
-    #    a = var.fit(xpca[:,:,i], p, delta)
-    #
-    #    # residuals
-    #    r[:,:,i] = xpca[:,:,i] - var.predict(xpca[:,:,i], a)[:,:,0]
-
-    # fit MVAR model
-    a = var.fit(xpca)
-
-    # residuals
-    r = xpca - var.predict(xpca)
+    if varfit == 'trial':
+        r = np.zeros(xpca.shape)
+        for i in range(t):
+            # fit MVAR model
+            a = var.fit(xpca[:,:,i])
+            # residuals
+            r[:,:,i] = xpca[:,:,i] - var.predict(xpca[:,:,i])[:,:,0]
+    elif varfit == 'class':
+        r = np.zeros(xpca.shape)
+        for i in np.unique(cl):
+            mask = cl==i
+            a = var.fit(xpca[:,:,mask])
+            r[:,:,mask] = xpca[:,:,mask] - var.predict(xpca[:,:,mask])
+    elif varfit == 'ensemble':
+        # fit MVAR model
+        a = var.fit(xpca)
+        # residuals
+        r = xpca - var.predict(xpca)
+    else:
+        raise InvalidArgument('unknown VAR fitting mode')
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(r))
