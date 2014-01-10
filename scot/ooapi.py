@@ -94,14 +94,12 @@ class Workspace:
         else:
             sourcestr = 'None'
 
-        if self.var_model_ is None:
+        if self.var_ is None:
             varstr = 'None'
-        elif isinstance(self.var_model_, dict):
-            varstr = str(len(self.var_model_))
         else:
-            varstr = '1'
+            varstr = str(self.var_)
 
-        s = 'SCoT(var_order = %d):\n' % self.var_order_
+        s = 'Workspace:\n'
         s += '  Data      : ' + datastr + '\n'
         s += '  Classes   : ' + clstr + '\n'
         s += '  Sources   : ' + sourcestr + '\n'
