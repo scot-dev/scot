@@ -37,7 +37,7 @@ ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
 
 # Perform MVARICA and plot the components
 ws.set_data(data, classes)
-ws.do_mvarica()
+ws.do_cspvarica()
 
 p = ws.var_.test_whiteness(50)
 print('Whiteness:', p)
