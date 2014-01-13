@@ -130,7 +130,7 @@ def mvarica(x, cl, var, reducedim=0.99, optimize_var=False, backend=None, varfit
     return Result
     
     
-def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None):
+def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None, varfit='ensemble'):
     """
     cspvarica( x, cl, var )
     cspvarica( x, cl, var, reducedim, optimize_var, backend )
@@ -152,6 +152,10 @@ def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None):
     backend        : None :       : backend to use for processing (see backend
                                     module for details). If backend==None, the
                                     backend set in config will be used.
+    varfit         :'ensemble':   : 'ensemble' (default) fits one VAR model to
+                                    the whole data set.
+                                    'class' fits one VAR model for each class.
+                                    'trial' fits one VAR model for each trial.
     
     Output
     --------------------------------------------------------------------------
@@ -202,7 +206,7 @@ def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None):
         # fit MVAR model
         a = var.fit(xcsp)
         # residuals
-        r = xcsp - var.predict(csp)
+        r = xcsp - var.predict(xcsp)
     else:
         raise InvalidArgument('unknown VAR fitting mode')
 
