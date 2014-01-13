@@ -94,14 +94,12 @@ class Workspace:
         else:
             sourcestr = 'None'
 
-        if self.var_model_ is None:
+        if self.var_ is None:
             varstr = 'None'
-        elif isinstance(self.var_model_, dict):
-            varstr = str(len(self.var_model_))
         else:
-            varstr = '1'
+            varstr = str(self.var_)
 
-        s = 'SCoT(var_order = %d):\n' % self.var_order_
+        s = 'Workspace:\n'
         s += '  Data      : ' + datastr + '\n'
         s += '  Classes   : ' + clstr + '\n'
         s += '  Sources   : ' + sourcestr + '\n'
@@ -141,7 +139,7 @@ class Workspace:
         if self.unmixing_ != None:
             self.activations_ = dot_special(self.data_, self.unmixing_)
 
-    def do_mvarica(self):
+    def do_mvarica(self, varfit='ensemble'):
         """
         Workspace.do_mvarica()
 
@@ -160,7 +158,7 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_)
+        result = mvarica(x=self.data_, cl=self.cl_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
@@ -168,6 +166,7 @@ class Workspace:
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return result
     
     def do_cspvarica(self):
         """
@@ -197,6 +196,7 @@ class Workspace:
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return result
 
     def do_ica(self):
         """
@@ -227,6 +227,7 @@ class Workspace:
         self.var_delta_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return result
 
     def remove_sources(self, sources):
         """

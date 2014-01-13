@@ -23,8 +23,8 @@ locs = midata.locations
 
 # Set up the analysis object
 #
-# We simply choose a VAR model order of 30, and reduction to 4 components (that's not a lot!).
-ws = scot.Workspace({'model_order': 30}, reducedim=4, fs=fs, locations=locs)
+# We simply choose a VAR model order of 35, and reduction to 4 components (that's not a lot!).
+ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
 
 
 # Prepare the data
@@ -37,6 +37,10 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 # Perform CSPVARICA
 ws.set_data(data, classes)
 ws.do_cspvarica()
+
+p = ws.var_.test_whiteness(50)
+print('Whiteness:', p)
+
 
 
 # Prepare the data

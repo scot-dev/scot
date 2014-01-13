@@ -220,20 +220,8 @@ class VARBase(DocStringInheritor):
             [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
             [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J. Am. Statist. Assoc.
         """
-        res = self.residuals[self.p:, :, :]
-        (n, m, t) = res.shape
-        nt = (n-self.p)*t
 
-        q0 = _calc_q_h0(repeats, res, h, nt)[:,2,-1]
-        q = _calc_q_statistic(res, h, nt)[2,-1]
-
-        # probability of observing a result more extreme than q under the null-hypothesis
-        pr = np.sum(q0 >= q) / repeats
-
-        if get_q:
-            return pr, q0, q
-        else:
-            return pr
+        return test_whiteness(self.residuals, h, self.p, repeats, get_q)
 
     def _construct_eqns(self, data):
         """Construct VAR equation system"""
@@ -333,6 +321,65 @@ def fit_multiclass(data, cl, p, delta=None, return_residuals=False, return_covar
 
 
 ############################################################################
+
+
+def test_whiteness(data, h, p=0, repeats=100, get_q=False):
+    """ Test if signals are white (uncorrelated up to a lag of h).
+
+        This function calculates the Li-McLeod as Portmanteau test statistic Q to
+        test against the null hypothesis H0: "the signals are white" [1].
+        Surrogate data for H0 is created by sampling from random permutations of
+        the signals.
+
+        Usually the returned p-value is compared against a pre-defined type 1 error
+        level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of white
+        signals is rejected.
+
+        Parameters     Default  Shape   Description
+        --------------------------------------------------------------------------
+        data           :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
+                       :      : N,M   : 2d data matrix (N samples, M signals)
+        h              :      :       : The test is performed for all time lags up
+                                        to h. Note that according to [2] h must
+                                        satisfy h = O(n^0.5), where n is the length
+                                        (time samples) of the signals.
+        p              : 0    :       : Model order if data contains residuals of a
+                                        VAR model fit.
+        repeats        : 100  :       : Number of samples to create under the null
+                                        hypothesis. Larger number will give more
+                                        accurate results.
+        get_q          : False:       : If set to False only the p-value is returned.
+                                        Otherwise actual values of the Li-McLeod
+                                        statistic are returned too.
+
+        Output           Shape   Description
+        --------------------------------------------------------------------------
+        pr               :       : Probability of observing a more extreme value of
+                                   Q under the assumption that H0 is true.
+        q0               :       : (optional, see get_q) list of values that created
+                                   as surrogates to estimate the distribution of Q
+                                   under the null-hypothesis.
+        q                :       : (optional, see get_q) Value of Q that corresponds
+                                   to the current residuals.
+
+        References:
+        [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
+        [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J. Am. Statist. Assoc.
+    """
+    res = data[p:, :, :]
+    (n, m, t) = res.shape
+    nt = (n-p)*t
+
+    q0 = _calc_q_h0(repeats, res, h, nt)[:,2,-1]
+    q = _calc_q_statistic(res, h, nt)[2,-1]
+
+    # probability of observing a result more extreme than q under the null-hypothesis
+    pr = np.sum(q0 >= q) / repeats
+
+    if get_q:
+        return pr, q0, q
+    else:
+        return pr
 
 
 def _calc_q_statistic(x, h, nt):

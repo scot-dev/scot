@@ -55,7 +55,7 @@ for p in [22, 33]:
     print('    Testing VAR residuals for whiteness up to lag', h)
     pr = splot.plot_whiteness(result.a, h, repeats=100, axis=plt.subplot(2, 1, i))
 
-    if p < 0.05:
+    if pr < 0.05:
         plt.gca().set_title('model order %i: residuals significantly non-white with p=%f'%(p,pr))
     else:
         plt.gca().set_title('model order %i: residuals white with p=%f'%(p,pr))
