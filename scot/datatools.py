@@ -72,4 +72,12 @@ def dot_special(x, a):
     x = np.atleast_3d(x)
     a = np.atleast_2d(a)
     return np.dstack([x[:, :, i].dot(a) for i in range(x.shape[2])])
-    
+
+
+def randomize_phase(data):
+    """ Randomize phase along the first dimension.
+    """
+    data = np.asarray(data)
+    data_freq = np.fft.rfft(data, axis=0)
+    data_freq = np.abs(data_freq) * np.exp(1j*np.random.random_sample(data_freq.shape)*2*np.pi)
+    return np.fft.irfft(data_freq, data.shape[0], axis=0)
