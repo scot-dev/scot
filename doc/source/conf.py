@@ -38,7 +38,6 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'ipython_console_highlighting',
-    'inheritance_diagram',
     'numpydoc.numpydoc'
 ]
 
