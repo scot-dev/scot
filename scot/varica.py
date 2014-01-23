@@ -9,7 +9,7 @@ from .datatools import cat_trials, dot_special
 from . import xvschema
 
 
-def mvarica(x, cl, var, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
+def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
     """
     mvarica( x, p )
     mvarica( x, p, retain_variance, delta )
