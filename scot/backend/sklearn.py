@@ -7,6 +7,7 @@ from sklearn import linear_model
 import scipy as sp
 
 from . import builtin
+from . import sklearn_utils
 
 from .. import config
 from .. import datatools
@@ -60,7 +61,8 @@ backend = builtin.backend.copy()
 backend.update({
     'ica': wrapper_fastica,
     'pca': wrapper_pca,
-    'var': VAR
+    'var': VAR,
+    'utils': sklearn_utils
 })
 
 
