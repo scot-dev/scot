@@ -2,14 +2,23 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-""" Object oriented API to SCoT """
+"""
+Summary
+-------
+Object oriented API to SCoT.
+
+Extended Summary
+----------------
+The object oriented API provides a the `Workspace` class, which provides high-level functionality and serves as an
+example usage of the low-level API.
+"""
 
 import numpy as np
 from copy import deepcopy
 from . import config
 from .varica import mvarica
 from .plainica import plainica
-from .datatools import dot_special, randomize_phase
+from .datatools import dot_special
 from .connectivity import Connectivity
 from .connectivity_statistics import surrogate_connectivity, bootstrap_connectivity, test_bootstrap_difference, significance_fdr
 from . import plotting
@@ -17,39 +26,45 @@ from eegtopo.topoplot import Topoplot
 
 
 class Workspace:
+    """SCoT Workspace
+
+    This class provides high-level functionality for source identification, connectivity estimation, and visualization.
+
+    Parameters
+    ----------
+    var : {VARBase-like object, dict}
+        Vector autoregressive model (VAR) object that is used for model fitting.
+        This can also be a dictionary that is passed as `**kwargs` to backend['var']() in order to
+        construct a new VAR model object.
+    locations : array_like, optional
+        3D Electrode locations. Each row holds the x, y, and z coordinates of an electrode.
+    reducedim : {int, float, 'no_pca'}, optional
+        A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
+        components that describe in total less than `1-reducedim` of the variance are removed by the PCA step.
+        An integer numer of 1 or greater is interpreted as the number of components to keep after applying the PCA.
+        If set to 'no_pca' the PCA step is skipped.
+    nfft : int, optional
+        Number of frequency bins for connectivity estimation.
+    backend : dict-like, optional
+        Specify backend to use. When set to None the backend configured in config.backend is used.
+
+    Attributes
+    ----------
+    unmixing_ : array
+        Estimated unmixing matrix.
+    mixing_ : array
+        Estimated mixing matrix.
+    plot_diagonal : str
+        Configures what is plotted in the diagonal subplots.
+        **'topo'** (default) plots topoplots on the diagonal,
+        **'S'** plots the spectral density of each component, and
+        **'fill'** plots connectivity on the diagonal.
+    plot_outside_topo : bool
+        Whether to place topoplots in the left column and top row.
+    plot_f_range : (int, int)
+        Lower and upper frequency limits for plotting. Defaults to [0, fs/2].
+    """
     def __init__(self, var, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
-        """
-        Workspace(var_order, **args)
-
-        Create a new Workspace instance.
-
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        var            :      :       : Instance of a VAR model class, or dictionary
-                                        with attributes to pass to the backend's
-                                        default VAR constructor.
-
-        Opt. Parameters Default  Shape   Description
-        --------------------------------------------------------------------------
-        fs             : 2    :       : Sampling rate in 1/s. Defaults to 2 so 1
-                                        corresponds to the Nyquist frequency.
-        locations      : None : [Nx3] : Electrode locations in cartesian coordinates.
-                                        (required for plotting)
-        nfft           : 512  :       : Number of frequency bins for connectivity
-                                        estimation.
-        reducedim      : 0.99 :       : a number less than 1 is interpreted as the
-                                        fraction of variance that should remain in
-                                        the data. All components that describe in
-                                        total less than 1-retain_variance of the
-                                        variance in the data are removed by the PCA.
-                                        An integer number of 1 or greater is
-                                        interpreted as the number of components to
-                                        keep after applying the PCA.
-                                        If set to 'no_pca' the PCA step is skipped.
-        backend        : None :       : Specify backend to use. When set to None
-                                        SCoT's default backend (see config.py)
-                                        is used.
-        """
         self.data_ = None
         self.cl_ = None
         self.fs_ = fs
@@ -85,8 +100,6 @@ class Workspace:
 
 
     def __str__(self):
-        """Information about the Workspace."""
-
         if self.data_ is not None:
             datastr = '%d samples, %d channels, %d trials' % self.data_.shape
         else:
@@ -116,26 +129,19 @@ class Workspace:
         return s
 
     def set_data(self, data, cl=None, time_offset=0):
-        """
-        Workspace.set_data(data, cl=None, time_offset=0)
+        """ Assign data to the workspace.
 
-        Create a new Workspace instance.
+        This function assigns a new data set to the workspace. Doing so invalidates currently fitted VAR models,
+        connectivity estimates, and activations.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        data           :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
-                              : n,m   : 2d data matrix (n samples, m signals)
-        cl             : None : T     : List of class labels associated with
-                                        each trial. a class label can be any
-                                        python type (string, number, ...) that
-                                        can be used as a key in map.
-        time_offset    : 0    :       : Time offset of the trials. Used for
-                                        labelling the x-axis of time/frequency
-                                        plots.
-
-        Provides: data set, class labels
-
-        Invalidates: var model
+        Parameters
+        ----------
+        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+            EEG data set
+        cl : list of valid dict keys
+            Class labels associated with each trial.
+        time_offset : float, optional
+            Trial starting time; used for labelling the x-axis of time/frequency plots.
         """
         self.data_ = np.atleast_3d(data)
         self.cl_ = np.asarray(cl if cl is not None else [None]*self.data_.shape[2])
@@ -150,27 +156,42 @@ class Workspace:
             self.activations_ = dot_special(self.data_, self.unmixing_)
 
     def set_used_labels(self, labels):
+        """ Specify which trials to use in subsequent analysis steps.
+
+        This function masks trials based on their class labels.
+
+        Parameters
+        ----------
+        labels : list of class labels
+            Marks all trials that have a label that is in the `labels` list for further processing.
+        """
         mask = np.zeros((self.cl_.size), dtype=bool)
         for l in labels:
             mask = np.logical_or(mask, self.cl_ == l)
         self.trial_mask_ = mask
 
     def do_mvarica(self, varfit='ensemble'):
-        """
-        Workspace.do_mvarica()
+        """ Perform MVARICA
 
         Perform MVARICA source decomposition and VAR model fitting.
 
-        Requires: data set
+        Parameters
+        ----------
+        varfit : string
+            Determines how to calculate the residuals for source decomposition.
+            'ensemble' (default) fits one model to the whole data set,
+            'class' fits a different model for each class, and
+            'trial' fits a different model for each individual trial.
 
-        Provides: decomposition, activations, var model
+        Returns
+        -------
+        result : class
+            see :func:`mvarica` for a description of the return value.
 
-        Behaviour of this function is modified by the following attributes:
-            var_order_
-            var_delta_
-            reducedim_
-            backend_
-
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain data.
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
@@ -185,21 +206,19 @@ class Workspace:
         return result
 
     def do_ica(self):
-        """
-        Workspace.do_ica()
+        """ Perform ICA
 
         Perform plain ICA source decomposition.
 
-        Requires: data set
+        Returns
+        -------
+        result : class
+            see :func:`plainica` for a description of the return value.
 
-        Provides: decomposition, activations
-
-        Invalidates: var model
-
-        Behaviour of this function is modified by the following attributes:
-            reducedim_
-            backend_
-
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain data.
         """
         if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
@@ -215,20 +234,20 @@ class Workspace:
         return result
 
     def remove_sources(self, sources):
-        """
-        Workspace.remove_sources(sources)
+        """ Remove sources from the decomposition.
 
-        Manually remove sources from the decomposition.
+        This function removes sources from the decomposition. Doing so invalidates currently fitted VAR models and
+        connectivity estimates.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        sources        :      :      : Indicate which components to remove
-                                       (slice, int or array of ints)
+        Parameters
+        ----------
+        sources : {slice, int, array of ints}
+            Indices of components to remove.
 
-        Requires: decomposition
-
-        Invalidates: var model
-
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain a source decomposition.
         """
         if self.unmixing_ is None or self.mixing_ is None:
             raise RuntimeError("No sources available (run do_mvarica first)")
@@ -241,19 +260,12 @@ class Workspace:
         self.connectivity_ = None
 
     def fit_var(self):
-        """
-        Workspace.fit_var()
+        """ Fit a var model to the source activations.
 
-        Fit new VAR model(s).
-
-        Requires: data set
-
-        Provides: var model
-
-        Behaviour of this function is modified by the following attributes:
-            var_order_
-            var_delta_
-
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain source activations.
         """
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
@@ -261,40 +273,45 @@ class Workspace:
         self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
 
     def optimize_var(self):
-        """
-        Workspace.optimize_regularization(skipstep=1)
+        """ Optimize the var model's hyperparameters (such as regularization).
 
-        Optimize the var model's hyperparameters (such as regularization).
-
-        Behaviour of this function is modified by the following attributes:
-            var_
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain source activations.
         """
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
 
         self.var_.optimize(self.activations_[:, :, self.trial_mask_])
 
-    def get_connectivity(self, measure, plot=False):
-        """
-        Workspace.get_connectivity(measure)
+    def get_connectivity(self, measure_name, plot=False):
+        """ Calculate spectral connectivity measure.
 
-        Calculate and return spectral connectivity measure.
+        Parameters
+        ----------
+        measure_name : str
+            Name of the connectivity measure to calculate. See :class:`Connectivity` for supported measures.
+        plot : {False, None, Figure object}, optional
+            Whether and where to plot the connectivity. If set to **False**, nothing is plotted. Otherwise set to the
+            Figure object. If set to **None**, a new figure is created.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measure        :      : str   : Refer to scot.Connectivity for supported
-                                        measures.
+        Returns
+        -------
+        measure : array, shape = [n_channels, n_channels, nfft]
+            Values of the connectivity measure.
+        fig : Figure object
+            Instance of the figure in which was plotted. This is only returned if `plot` is not **False**.
 
-        Requires: var model
-
-        Behaviour of this function is modified by the following attributes:
-            nfft_
-            cl_
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain a fitted VAR model.
         """
         if self.connectivity_ is None:
             raise RuntimeError("Connectivity requires a VAR model (run do_mvarica or fit_var first)")
 
-        cm = getattr(self.connectivity_, measure)()
+        cm = getattr(self.connectivity_, measure_name)()
 
         if plot is None or plot:
             fig = plot
@@ -315,60 +332,58 @@ class Workspace:
 
         return cm
 
-    def get_surrogate_connectivity(self, measures, repeats=100):
-        """ Calculates surrogate connectivity for a multivariate time series by phase randomization.
+    def get_surrogate_connectivity(self, measure_name, repeats=100):
+        """ Calculate spectral connectivity measure under the assumption of no actual connectivity.
 
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            measures       :      :       : String or list of strings. Each string is
-                                            the (case sensitive) name of a connectivity
-                                            measure to calculate. See documentation of
-                                            Connectivity for supported measures.
-                                            The function returns an ndarray if measures
-                                            is a string, otherwise a dict is returned.
-            repeats        : 100  : 1     : Number of surrogates to create.
+        Repeatedly samples connectivity from phase-randomized data. This provides estimates of the connectivity
+        distribution if there was no causal structure in the data.
 
-            Output   Shape               Description
-            --------------------------------------------------------------------------
-            result : repeats, m,m,nfft : An ndarray of shape (repeats, m, m, nfft) is
-                                         returned if measures is a string. If measures
-                                         is a list of strings a dictionary is returned,
-                                         where each key is the name of the measure, and
-                                         the corresponding values are ndarrays of shape
-                                         (repeats, m, m, nfft).
+        Parameters
+        ----------
+        measure_name : str
+            Name of the connectivity measure to calculate. See :class:`Connectivity` for supported measures.
+        repeats : int, optional
+            How many surrogate samples to take.
+
+        Returns
+        -------
+        measure : array, shape = [`repeats`, n_channels, n_channels, nfft]
+            Values of the connectivity measure for each surrogate.
+
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain a fitted VAR model.
         """
-        return surrogate_connectivity(measures, self.activations_[:, :, self.trial_mask_],
+        return surrogate_connectivity(measure_name, self.activations_[:, :, self.trial_mask_],
                                       self.var_, self.nfft_, repeats)
 
-    def get_bootstrap_connectivity(self, measures, repeats=100, num_samples=None, plot=False):
-        """ Calculates Bootstrap estimates of connectivity by randomly sampling trials with replacement.
+    def get_bootstrap_connectivity(self, measure_names, repeats=100, num_samples=None, plot=False):
+        """ Calculate bootstrap estimates of spectral connectivity measures.
 
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            measures       :      :       : String or list of strings. Each string is
-                                            the (case sensitive) name of a connectivity
-                                            measure to calculate. See documentation of
-                                            Connectivity for supported measures.
-                                            The function returns an ndarray if measures
-                                            is a string, otherwise a dict is returned.
-            num_samples    : None : 1     : Number of trials to sample for each estimate. Defaults: t
-            repeats        : 100  : 1     : Number of bootstrap estimates to calculate
+        Bootstrapping is performed on trial level.
 
-            Output   Shape               Description
-            --------------------------------------------------------------------------
-            result : repeats, m,m,nfft : An ndarray of shape (repeats, m, m, nfft) is
-                                         returned if measures is a string. If measures
-                                         is a list of strings a dictionary is returned,
-                                         where each key is the name of the measure, and
-                                         the corresponding values are ndarrays of shape
-                                         (repeats, m, m, nfft).
+        Parameters
+        ----------
+        measure_names : {str, list of str}
+            Name(s) of the connectivity measure(s) to calculate. See :class:`Connectivity` for supported measures.
+        repeats : int, optional
+            How many bootstrap estimates to take.
+        num_samples : int, optional
+            How many samples to take for each bootstrap estimates. Defaults to the same number of trials as present in
+            the data.
 
-        Requires: data set
+        Returns
+        -------
+        measure : array, shape = [`repeats`, n_channels, n_channels, nfft]
+            Values of the connectivity measure for each bootstrap estimate. If `measure_names` is a list of strings a
+            dictionary is returned, where each key is the name of the measure, and the corresponding values are
+            ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
         """
         if num_samples is None:
             num_samples = np.sum(self.trial_mask_)
 
-        cb = bootstrap_connectivity(measures, self.activations_[:, :, self.trial_mask_],
+        cb = bootstrap_connectivity(measure_names, self.activations_[:, :, self.trial_mask_],
                                     self.var_, self.nfft_, repeats, num_samples)
 
         if plot is None or plot:
@@ -394,27 +409,35 @@ class Workspace:
 
         return cb
 
-    def get_tf_connectivity(self, measure, winlen, winstep, plot=False):
-        """
-        Workspace.get_tf_connectivity(measure, winlen, winstep)
+    def get_tf_connectivity(self, measure_name, winlen, winstep, plot=False):
+        """ Calculate estimate of time-varying connectivity.
 
-        Calculate and return time-varying spectral connectivity measure.
+        Connectivity is estimated in a sliding window approach on the current data set. The window is stepped
+        `n_steps` = (`n_samples` - `winlen`) // `winstep` times.
 
-        Connectivity is estimated in a sliding window approach on the current
-        data set.
+        Parameters
+        ----------
+        measure_name : str
+            Name of the connectivity measure to calculate. See :class:`Connectivity` for supported measures.
+        winlen : int
+            Length of the sliding window (in samples).
+        winstep : int
+            Step size for sliding window (in samples).
+        plot : {False, None, Figure object}, optional
+            Whether and where to plot the connectivity. If set to **False**, nothing is plotted. Otherwise set to the
+            Figure object. If set to **None**, a new figure is created.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measure        :      : str   : Refer to scot.Connectivity for supported
-                                        measures.
-        winlen         :      :       : Length of the sliding window (in samples).
-        winstep        :      :       : Step size for sliding window (in sapmles).
+        Returns
+        -------
+        result : array, shape = [n_channels, n_channels, nfft, n_steps]
+            Values of the connectivity measure.
+        fig : Figure object, optional
+            Instance of the figure in which was plotted. This is only returned if `plot` is not **False**.
 
-        Requires: var model
-
-        Behaviour of this function is modified by the following attributes:
-            nfft_
-            cl_
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain a fitted VAR model.
         """
         if self.activations_ is None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
@@ -430,7 +453,7 @@ class Workspace:
             data = data[:, :, self.trial_mask_]
             self.var_.fit(data)
             con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
-            result[:, :, :, i] = getattr(con, measure)()
+            result[:, :, :, i] = getattr(con, measure_name)()
             i += 1
 
         if plot is None or plot:
@@ -448,7 +471,7 @@ class Workspace:
             else:
                 diagonal = -1
 
-            tfc = self._clean_measure(measure, result)
+            tfc = self._clean_measure(measure_name, result)
             if diagonal == -1:
                 for m in range(tfc.shape[0]):
                     tfc[m, m, :, :] = 0
@@ -460,11 +483,43 @@ class Workspace:
 
         return result
 
-    def compare_conditions(self, labels1, labels2, measure, alpha=0.01, repeats=100, num_samples=None, plot=False):
+    def compare_conditions(self, labels1, labels2, measure_name, alpha=0.01, repeats=100, num_samples=None, plot=False):
+        """ Test for significant difference in connectivity of two sets of class labels.
+
+        Connectivity estimates are obtained by bootstrapping. Correction for multiple testing is performed by
+        controlling the false discovery rate (FDR).
+
+        Parameters
+        ----------
+        labels1, labels2 : list of class labels
+            The two sets of class labels to compare. Each set may contain more than one label.
+        measure_name : str
+            Name of the connectivity measure to calculate. See :class:`Connectivity` for supported measures.
+        alpha : float, optional
+            Maximum allowed FDR. The ratio of falsely detected significant differences is guaranteed to be less than
+            `alpha`.
+        repeats : int, optional
+            How many bootstrap estimates to take.
+        num_samples : int, optional
+            How many samples to take for each bootstrap estimates. Defaults to the same number of trials as present in
+            the data.
+        plot : {False, None, Figure object}, optional
+            Whether and where to plot the connectivity. If set to **False**, nothing is plotted. Otherwise set to the
+            Figure object. If set to **None**, a new figure is created.
+
+        Returns
+        -------
+        p : array, shape = [n_channels, n_channels, nfft]
+            Uncorrected p-values.
+        s : array, dtype=bool, shape = [n_channels, n_channels, nfft]
+            FDR corrected significance. True means the difference is significant in this location.
+        fig : Figure object, optional
+            Instance of the figure in which was plotted. This is only returned if `plot` is not **False**.
+        """
         self.set_used_labels(labels1)
-        ca = self.get_bootstrap_connectivity(measure, repeats, num_samples)
+        ca = self.get_bootstrap_connectivity(measure_name, repeats, num_samples)
         self.set_used_labels(labels2)
-        cb = self.get_bootstrap_connectivity(measure, repeats, num_samples)
+        cb = self.get_bootstrap_connectivity(measure_name, repeats, num_samples)
 
         p = test_bootstrap_difference(ca, cb)
         s = significance_fdr(p, alpha)
@@ -524,24 +579,21 @@ class Workspace:
 
     @staticmethod
     def show_plots():
-        """Show current plots."""
+        """Show current plots.
+
+        This is only a convenience wrapper around :func:`matplotlib.pyplot.show_plots`.
+
+        """
         plotting.show_plots()
 
     def plot_source_topos(self, common_scale=None):
-        """
-        Workspace.plot_source_topos(common_scale=None)
+        """ Plot topography of the Source decomposition.
 
-        Plot topography of the Source decomposition.
-
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        common_scale   : None :       : If set to None, each topoplot's color
-                                        axis is scaled individually.
-                                        Otherwise specifies the percentile
-                                        (1-99) of values in all plot. This value
-                                        is taken as the maximum color scale.
-
-        Requires: decomposition
+        Parameters
+        ----------
+        common_scale : float, optional
+            If set to None, each topoplot's color axis is scaled individually. Otherwise specifies the percentile
+            (1-99) of values in all plot. This value is taken as the maximum color scale.
         """
         if self.unmixing_ is None and self.mixing_ is None:
             raise RuntimeError("No sources available (run do_mvarica first)")
@@ -551,6 +603,21 @@ class Workspace:
         plotting.plot_sources(self.topo_, self.mixmaps_, self.unmixmaps_, common_scale)
 
     def plot_connectivity_topos(self, fig=None):
+        """ Plot scalp projections of the sources.
+
+        This function only plots the topos. Use in combination with connectivity plotting.
+
+        Parameters
+        ----------
+        fig : {None, Figure object}, optional
+            Where to plot the topos. f set to **None**, a new figure is created. Otherwise plot into the provided
+            figure object.
+
+        Returns
+        -------
+        fig : Figure object
+            Instance of the figure in which was plotted.
+        """
         self._prepare_plots(True, False)
         if self.plot_outside_topo:
             fig = plotting.plot_connectivity_topos('outside', self.topo_, self.mixmaps_, fig)
@@ -558,28 +625,34 @@ class Workspace:
             fig = plotting.plot_connectivity_topos('diagonal', self.topo_, self.mixmaps_, fig)
         return fig
 
-    def plot_connectivity_surrogate(self, measure, freq_range=(-np.inf, np.inf), repeats=100, fig=None):
+    def plot_connectivity_surrogate(self, measure_name, repeats=100, fig=None):
+        """ Plot spectral connectivity measure under the assumption of no actual connectivity.
+
+        Repeatedly samples connectivity from phase-randomized data. This provides estimates of the connectivity
+        distribution if there was no causal structure in the data.
+
+        Parameters
+        ----------
+        measure_name : str
+            Name of the connectivity measure to calculate. See :class:`Connectivity` for supported measures.
+        repeats : int, optional
+            How many surrogate samples to take.
+        fig : {None, Figure object}, optional
+            Where to plot the topos. f set to **None**, a new figure is created. Otherwise plot into the provided
+            figure object.
+
+        Returns
+        -------
+        fig : Figure object
+            Instance of the figure in which was plotted.
         """
-        Workspace.plot_connectivity_surrogate(measure, freq_range, repeats=100, fig=None)
-
-        Plot spectral connectivity.
-
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measure        :      : str   : Refer to scot.Connectivity for supported
-                                        measures.
-        freq_range     :      : 2     : Restrict plotted frequency range.
-        repeats        : 100  : 1     : Number of surrogates to compute
-
-        Requires: var model
-        """
-        cb = self.get_surrogate_connectivity(measure, repeats)
+        cb = self.get_surrogate_connectivity(measure_name, repeats)
 
         self._prepare_plots(True, False)
 
         cu = np.percentile(cb, 95, axis=0)
 
-        fig = plotting.plot_connectivity_spectrum([cu], self.fs_, freq_range=freq_range, fig=fig)
+        fig = plotting.plot_connectivity_spectrum([cu], self.fs_, freq_range=self.plot_f_range, fig=fig)
 
         return fig
 

@@ -2,7 +2,11 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-"""tools for basic data manipulation"""
+"""
+Summary
+-------
+Tools for basic data manipulation.
+"""
 
 import numpy as np
 

@@ -1,11 +1,16 @@
+"""
+Summary
+-------
+Routines for loading and saving Matlab's .mat files.
+"""
+
 from scipy.io import loadmat as sploadmat
 from scipy.io import savemat as spsavemat
 from scipy.io import matlab
 
 
 def loadmat(filename):
-    """
-    this function should be called instead of direct spio.loadmat
+    """This function should be called instead of direct spio.loadmat
     as it cures the problem of not properly recovering python dictionaries
     from mat files. It calls the function check keys to cure all entries
     which are still mat-objects
