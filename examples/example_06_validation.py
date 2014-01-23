@@ -42,7 +42,7 @@ for p in [22, 33]:
     var = scot.config.backend['var'](p)
 
     print('    Performing MVARICA')
-    result = mvarica(data, var, m)
+    result = mvarica(data, classes, var, m)
 
     if result.a.is_stable():
         s = ''

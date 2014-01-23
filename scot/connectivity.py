@@ -51,6 +51,45 @@ class memoize(object):
         return res
 
 
+def connectivity(measures, b, c=None, nfft=512):
+    """ calculate connectivity measures.
+
+        Usage
+
+        calc_connectivity(measures, B0, C0, nfft)   .
+
+            Parameters     Default  Shape   Description
+            --------------------------------------------------------------------------
+            measures       :      :       : String or list of strings. Each string is
+                                            the (case sensitive) name of a connectivity
+                                            measure to calculate. See documentation of
+                                            Connectivity for supported measures.
+                                            The function returns an ndarray if measures
+                                            is a string, otherwise a dict is returned.
+            B0             :      : m,m*p : VAR model coefficients
+            C0             : None : m,m   : Covariance matrix of the innovation (noise)
+                                            process. Identity matrix is used if set to
+                                            None.
+            nfft           : 512  : 1     : Number of frequency bins to calculate. Note
+                                            that these points cover the range between 0
+                                            and the nyquist frequency.
+
+            Output           Shape      Description
+            --------------------------------------------------------------------------
+            result         : m,m,nfft : An ndarray of shape (m, m, nfft) is returned if
+                                        measures is a string. If measures is a list of
+                                        strings a dictionary is returned, where each key
+                                        is the name of the measure, and the corresponding
+                                        values are ndarrays of shape (m, m, nfft).
+    """
+    con = Connectivity(b, c, nfft)
+    try:
+        return getattr(con, measures)()
+    except TypeError:
+        return {m: getattr(con, m)() for m in measures}
+
+
+
 #noinspection PyPep8Naming
 class Connectivity:
     #TODO: Big optimization potential
@@ -155,6 +194,11 @@ class Connectivity:
     def logS(self):
         """Logarithmic cross spectral density"""
         return np.log10(np.abs(self.S()))
+
+    @memoize
+    def absS(self):
+        """Logarithmic cross spectral density"""
+        return np.abs(self.S())
 
     @memoize
     def G(self):
@@ -288,4 +332,3 @@ def _inv3(x):
     for k in range(x.shape[2]):
         y[:, :, k] = np.linalg.inv(x[:, :, k])
     return y
-    

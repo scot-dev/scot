@@ -11,6 +11,7 @@ try:
     #noinspection PyPep8Naming
     import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
+    import matplotlib.cm as cm
 
     _have_pyplot = True
 except ImportError:
@@ -95,9 +96,77 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
     return fig
 
 
-def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), topo=None, topomaps=None, fig=None):
+def plot_connectivity_topos(layout='diagonal', topo=None, topomaps=None, fig=None):
+
+    m = len(topomaps)
+
+    if fig is None:
+        fig = plt.figure()
+
+    if layout == 'diagonal':
+        for i in range(m):
+            ax = fig.add_subplot(m, m, i*(1+m) + 1)
+            plot_topo(ax, topo, topomaps[i])
+            ax.set_yticks([])
+            ax.set_xticks([])
+            ax.set_frame_on(False)
+    else:
+        for i in range(m):
+            for j in [i+2, (i+1)*(m+1)+1]:
+                ax = fig.add_subplot(m+1, m+1, j)
+                plot_topo(ax, topo, topomaps[i])
+                ax.set_yticks([])
+                ax.set_xticks([])
+                ax.set_frame_on(False)
+
+    return fig
+
+
+# def plot_connectivity_spectrum_hybrid(a, b, fs=2, freq_range=(-np.inf, np.inf), outside=None, fig=None):
+#     b = np.atleast_3d(b)
+#
+#     if b.ndim == 3:
+#         [_, m, f] = b.shape
+#         values = [b[i, i, :] for i in range(m)]
+#     else:
+#         [_, _, m, f] = b.shape
+#         values = [b[:, i, i, :] for i in range(m)]
+#
+#     lowest = np.min(values)
+#     highest = np.max(values)
+#
+#     freq = np.linspace(0, fs / 2, f)
+#
+#     left = max(freq_range[0], freq[0])
+#     right = min(freq_range[1], freq[-1])
+#
+#     if b.ndim == 3:
+#         def diagonalfunc(ax, i):
+#             ax.plot(freq, b[i, i, :])
+#             al = ax.get_ylim()
+#             ax.set_ylim(min(al[0], lowest), max(al[1], highest))
+#             ax.set_xlim(left, right)
+#     else:
+#         def diagonalfunc(ax, i):
+#             baseline,  = ax.plot(freq, b[0, i, i, :])
+#             ax.fill_between(freq, b[1, i, i, :], b[2, i, i, :], facecolor=baseline.get_color(), alpha=0.25)
+#             al = ax.get_ylim()
+#             ax.set_ylim(min(al[0], lowest), max(al[1], highest))
+#             ax.set_xlim(left, right)
+#
+#     fig = plot_connectivity_spectrum(a, fs, freq_range, diagonalfunc, outside, fig)
+#
+#     return fig
+
+
+def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0, border=False, fig=None):
+
     a = np.atleast_3d(a)
-    [n, m, f] = a.shape
+    if a.ndim == 3:
+        [_, m, f] = a.shape
+        l = 0
+    else:
+        [l, _, m, f] = a.shape
     freq = np.linspace(0, fs / 2, f)
 
     lowest, highest = np.inf, -np.inf
@@ -108,44 +177,54 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), topo=None,
         fig = plt.figure()
 
     axes = []
-    for i in range(n):
-        arow = []
-        for j in range(m):
-            ax = fig.add_subplot(n, m, j + i * m + 1)
-            arow.append(ax)
-
-            if i == j:
-                if topo:
-                    plot_topo(ax, topo, topomaps[j])
-                ax.set_yticks([])
-                ax.set_xticks([])
-                ax.set_frame_on(False)
+    for i in range(m):
+        if diagonal == 1:
+            jrange = [i]
+        elif diagonal == 0:
+            jrange = range(m)
+        else:
+            jrange = [j for j in range(m) if j != i]
+        for j in jrange:
+            if border:
+                ax = fig.add_subplot(m+1, m+1, j + (i+1) * (m+1) + 2)
             else:
+                ax = fig.add_subplot(m, m, j + i * m + 1)
+            axes.append((i, j, ax))
+            if l == 0:
                 ax.plot(freq, a[i, j, :])
                 lowest = min(lowest, np.min(a[i, j, :]))
                 highest = max(highest, np.max(a[i, j, :]))
-                ax.set_xlim(0, fs / 2)
-        axes.append(arow)
-
-    for i in range(n):
-        for j in range(m):
-            if i == j:
-                pass
+            elif l == 1:
+                ax.fill_between(freq, 0, a[0, i, j, :], facecolor=[0.25, 0.25, 0.25], alpha=0.25)
+                lowest = min(lowest, np.min(a[0, i, j, :]))
+                highest = max(highest, np.max(a[0, i, j, :]))
             else:
-                axes[i][j].xaxis.set_major_locator(MaxNLocator(max(1, 7 - n)))
-                axes[i][j].yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
-                axes[i][j].set_ylim(lowest, highest)
-                axes[i][j].set_xlim(left, right)
-                if 0 < i < n - 1:
-                    axes[i][j].set_xticks([])
-                if 0 < j < m - 1:
-                    axes[i][j].set_yticks([])
-        axes[i][0].yaxis.tick_left()
-        axes[i][-1].yaxis.tick_right()
+                baseline,  = ax.plot(freq, a[0, i, j, :])
+                ax.fill_between(freq, a[1, i, j, :], a[2, i, j, :], facecolor=baseline.get_color(), alpha=0.25)
+                lowest = min(lowest, np.min(a[:, i, j, :]))
+                highest = max(highest, np.max(a[:, i, j, :]))
 
-    for j in range(m):
-        axes[0][j].xaxis.tick_top()
-        axes[-1][j].xaxis.tick_bottom()
+    for i, j, ax in axes:
+        ax.xaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
+        ax.yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
+        al = ax.get_ylim()
+        ax.set_ylim(min(al[0], lowest), max(al[1], highest))
+        ax.set_xlim(left, right)
+
+        if 0 < i < m - 1:
+            ax.set_xticks([])
+        if 0 < j < m - 1:
+            ax.set_yticks([])
+
+        if i == 0:
+            ax.xaxis.tick_top()
+        if i == m-1:
+            ax.xaxis.tick_bottom()
+
+        if j == 0:
+            ax.yaxis.tick_left()
+        if j == m-1:
+            ax.yaxis.tick_right()
 
     fig.text(0.5, 0.025, 'frequency (Hz)', horizontalalignment='center')
     fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
@@ -153,10 +232,59 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), topo=None,
     return fig
 
 
-def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np.inf), time_range=None, topo=None,
-                                   topomaps=None, fig=None):
+def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagonal=0, border=False, fig=None):
+
+    a = np.atleast_3d(s)
+    [_, m, f] = a.shape
+    freq = np.linspace(0, fs / 2, f)
+
+    left = max(freq_range[0], freq[0])
+    right = min(freq_range[1], freq[-1])
+
+    imext = (freq[0], freq[-1], -1e25, 1e25)
+
+    if fig is None:
+        fig = plt.figure()
+
+    axes = []
+    for i in range(m):
+        if diagonal == 1:
+            jrange = [i]
+        elif diagonal == 0:
+            jrange = range(m)
+        else:
+            jrange = [j for j in range(m) if j != i]
+        for j in jrange:
+            if border:
+                ax = fig.add_subplot(m+1, m+1, j + (i+1) * (m+1) + 2)
+            else:
+                ax = fig.add_subplot(m, m, j + i * m + 1)
+            axes.append((i, j, ax))
+            ax.imshow(s[i, j, np.newaxis], vmin=0, vmax=2, cmap=cm.binary, aspect='auto', extent=imext, zorder=-999)
+
+            ax.xaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
+            ax.yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
+            ax.set_xlim(left, right)
+
+            if 0 < i < m - 1:
+                ax.set_xticks([])
+            if 0 < j < m - 1:
+                ax.set_yticks([])
+
+            if j == 0:
+                ax.yaxis.tick_left()
+            if j == m-1:
+                ax.yaxis.tick_right()
+
+    fig.text(0.5, 0.025, 'frequency (Hz)', horizontalalignment='center')
+    fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
+
+    return fig
+
+
+def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np.inf), time_range=None, diagonal=0, border=False, fig=None):
     a = np.asarray(a)
-    [n, m, _, t] = a.shape
+    [_, m, _, t] = a.shape
 
     if crange is None:
         crange = [np.min(a), np.max(a)]
@@ -177,44 +305,43 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
         fig = plt.figure()
 
     axes = []
-    for i in range(n):
-        arow = []
-        for j in range(m):
-            ax = fig.add_subplot(n, m, j + i * m + 1)
-            arow.append(ax)
+    for i in range(m):
+        if diagonal == 1:
+            jrange = [i]
+        elif diagonal == 0:
+            jrange = range(m)
+        else:
+            jrange = [j for j in range(m) if j != i]
+        for j in jrange:
+            if border:
+                ax = fig.add_subplot(m+1, m+1, j + (i+1) * (m+1) + 2)
+            else:
+                ax = fig.add_subplot(m, m, j + i * m + 1)
+            axes.append(ax)
+            ax.imshow(a[i, j, :, :], vmin=crange[0], vmax=crange[1], aspect='auto', extent=extent)
+            ax.invert_yaxis()
 
-            if i == j:
-                if topo:
-                    plot_topo(ax, topo, topomaps[j])
-                ax.set_yticks([])
+            ax.xaxis.set_major_locator(MaxNLocator(max(1, 9 - m)))
+            ax.yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
+            ax.set_ylim(ymin, ymax)
+
+            if 0 < i < m - 1:
                 ax.set_xticks([])
-                ax.set_frame_on(False)
-            else:
-                ax.imshow(a[i, j, :, :], vmin=crange[0], vmax=crange[1], aspect='auto', extent=extent)
-                ax.invert_yaxis()
-        axes.append(arow)
+            if 0 < j < m - 1:
+                ax.set_yticks([])
 
-    for i in range(n):
-        for j in range(m):
-            if i == j:
-                pass
-            else:
-                axes[i][j].xaxis.set_major_locator(MaxNLocator(max(1, 9 - n)))
-                axes[i][j].yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
-                axes[i][j].set_ylim(ymin, ymax)
-                if 0 < i < n - 1:
-                    axes[i][j].set_xticks([])
-                if 0 < j < m - 1:
-                    axes[i][j].set_yticks([])
-        axes[i][0].yaxis.tick_left()
-        axes[i][-1].yaxis.tick_right()
+            if i == 0:
+                ax.xaxis.tick_top()
+            if i == m-1:
+                ax.xaxis.tick_bottom()
 
-    for j in range(m):
-        axes[0][j].xaxis.tick_top()
-        axes[-1][j].xaxis.tick_bottom()
+            if j == 0:
+                ax.yaxis.tick_left()
+            if j == m-1:
+                ax.yaxis.tick_right()
 
     fig.text(0.5, 0.025, 'time (s)', horizontalalignment='center')
-    fig.text(0.05, 0.5, 'frequency (Hz)' , horizontalalignment='center', rotation='vertical')
+    fig.text(0.05, 0.5, 'frequency (Hz)', horizontalalignment='center', rotation='vertical')
 
     return fig
 

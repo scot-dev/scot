@@ -5,11 +5,13 @@
 """ Object oriented API to SCoT """
 
 import numpy as np
+from copy import deepcopy
 from . import config
 from .varica import mvarica
 from .plainica import plainica
-from .datatools import dot_special
+from .datatools import dot_special, randomize_phase
 from .connectivity import Connectivity
+from .connectivity_statistics import surrogate_connectivity, bootstrap_connectivity, test_bootstrap_difference, significance_fdr
 from . import plotting
 from eegtopo.topoplot import Topoplot
 
@@ -61,11 +63,17 @@ class Workspace:
         self.nfft_ = nfft
         self.backend_ = backend
 
+        self.trial_mask_ = []
+
         self.topo_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
 
         self.var_multiclass_ = None
+
+        self.plot_diagonal = 'topo'
+        self.plot_outside_topo = False
+        self.plot_f_range = [0, fs/2]
 
         if self.backend_ is None:
             self.backend_ = config.backend
@@ -130,14 +138,22 @@ class Workspace:
         Invalidates: var model
         """
         self.data_ = np.atleast_3d(data)
-        self.cl_ = cl
+        self.cl_ = np.asarray(cl if cl is not None else [None]*self.data_.shape[2])
         self.time_offset_ = time_offset
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
 
+        self.trial_mask_ = np.ones(self.cl_.size, dtype=bool)
+
         if self.unmixing_ != None:
             self.activations_ = dot_special(self.data_, self.unmixing_)
+
+    def set_used_labels(self, labels):
+        mask = np.zeros((self.cl_.size), dtype=bool)
+        for l in labels:
+            mask = np.logical_or(mask, self.cl_ == l)
+        self.trial_mask_ = mask
 
     def do_mvarica(self, varfit='ensemble'):
         """
@@ -158,7 +174,7 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_, cl=self.cl_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
+        result = mvarica(x=self.data_[:, :, self.trial_mask_], cl=self.cl_[self.trial_mask_], var=self.var_, reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
@@ -187,7 +203,7 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
-        result = plainica(x=self.data_, reducedim=self.reducedim_, backend=self.backend_)
+        result = plainica(x=self.data_[:,:,self.trial_mask_], reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.activations_ = dot_special(self.data_, self.unmixing_)
@@ -224,7 +240,6 @@ class Workspace:
         self.var_cov_ = None
         self.connectivity_ = None
 
-
     def fit_var(self):
         """
         Workspace.fit_var()
@@ -238,22 +253,12 @@ class Workspace:
         Behaviour of this function is modified by the following attributes:
             var_order_
             var_delta_
-            cl_
 
         """
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
-        if self.cl_ is None:
-            self.var_.fit(data=self.activations_)
-            self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
-        else:
-            self.connectivity_ = {}
-            self.var_multiclass_ = {}
-            for c in np.unique(self.cl_):
-                tmp = self.var_.copy()
-                self.var_multiclass_[c] = tmp
-                tmp.fit(data=self.activations_[:, :, c==self.cl_])
-                self.connectivity_[c] = Connectivity(tmp.coef, tmp.rescov, self.nfft_)
+        self.var_.fit(data=self.activations_[:, :, self.trial_mask_])
+        self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
 
     def optimize_var(self):
         """
@@ -267,10 +272,9 @@ class Workspace:
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
 
-        self.var_.optimize(self.activations_)
+        self.var_.optimize(self.activations_[:, :, self.trial_mask_])
 
-
-    def get_connectivity(self, measure):
+    def get_connectivity(self, measure, plot=False):
         """
         Workspace.get_connectivity(measure)
 
@@ -289,15 +293,108 @@ class Workspace:
         """
         if self.connectivity_ is None:
             raise RuntimeError("Connectivity requires a VAR model (run do_mvarica or fit_var first)")
-        if isinstance(self.connectivity_, dict):
-            result = {}
-            for c in np.unique(self.cl_):
-                result[c] = getattr(self.connectivity_[c], measure)()
-            return result
-        else:
-            return getattr(self.connectivity_, measure)()
 
-    def get_tf_connectivity(self, measure, winlen, winstep):
+        cm = getattr(self.connectivity_, measure)()
+
+        if plot is None or plot:
+            fig = plot
+            if self.plot_diagonal == 'fill':
+                diagonal = 0
+            elif self.plot_diagonal == 'S':
+                diagonal = -1
+                sm = np.abs(self.connectivity_.S())
+                fig = plotting.plot_connectivity_spectrum(sm, fs=self.fs_, freq_range=self.plot_f_range,
+                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+            else:
+                diagonal = -1
+
+            fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=self.plot_f_range,
+                                                      diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+
+            return cm, fig
+
+        return cm
+
+    def get_surrogate_connectivity(self, measures, repeats=100):
+        """ Calculates surrogate connectivity for a multivariate time series by phase randomization.
+
+            Parameters     Default  Shape   Description
+            --------------------------------------------------------------------------
+            measures       :      :       : String or list of strings. Each string is
+                                            the (case sensitive) name of a connectivity
+                                            measure to calculate. See documentation of
+                                            Connectivity for supported measures.
+                                            The function returns an ndarray if measures
+                                            is a string, otherwise a dict is returned.
+            repeats        : 100  : 1     : Number of surrogates to create.
+
+            Output   Shape               Description
+            --------------------------------------------------------------------------
+            result : repeats, m,m,nfft : An ndarray of shape (repeats, m, m, nfft) is
+                                         returned if measures is a string. If measures
+                                         is a list of strings a dictionary is returned,
+                                         where each key is the name of the measure, and
+                                         the corresponding values are ndarrays of shape
+                                         (repeats, m, m, nfft).
+        """
+        return surrogate_connectivity(measures, self.activations_[:, :, self.trial_mask_],
+                                      self.var_, self.nfft_, repeats)
+
+    def get_bootstrap_connectivity(self, measures, repeats=100, num_samples=None, plot=False):
+        """ Calculates Bootstrap estimates of connectivity by randomly sampling trials with replacement.
+
+            Parameters     Default  Shape   Description
+            --------------------------------------------------------------------------
+            measures       :      :       : String or list of strings. Each string is
+                                            the (case sensitive) name of a connectivity
+                                            measure to calculate. See documentation of
+                                            Connectivity for supported measures.
+                                            The function returns an ndarray if measures
+                                            is a string, otherwise a dict is returned.
+            num_samples    : None : 1     : Number of trials to sample for each estimate. Defaults: t
+            repeats        : 100  : 1     : Number of bootstrap estimates to calculate
+
+            Output   Shape               Description
+            --------------------------------------------------------------------------
+            result : repeats, m,m,nfft : An ndarray of shape (repeats, m, m, nfft) is
+                                         returned if measures is a string. If measures
+                                         is a list of strings a dictionary is returned,
+                                         where each key is the name of the measure, and
+                                         the corresponding values are ndarrays of shape
+                                         (repeats, m, m, nfft).
+
+        Requires: data set
+        """
+        if num_samples is None:
+            num_samples = np.sum(self.trial_mask_)
+
+        cb = bootstrap_connectivity(measures, self.activations_[:, :, self.trial_mask_],
+                                    self.var_, self.nfft_, repeats, num_samples)
+
+        if plot is None or plot:
+            fig = plot
+            if self.plot_diagonal == 'fill':
+                diagonal = 0
+            elif self.plot_diagonal == 'S':
+                diagonal = -1
+                sb = self.get_bootstrap_connectivity('absS', repeats, num_samples)
+                sm = np.median(sb, axis=0)
+                sl = np.percentile(sb, 2.5, axis=0)
+                su = np.percentile(sb, 97.5, axis=0)
+                fig = plotting.plot_connectivity_spectrum([sm, sl, su], fs=self.fs_, freq_range=self.plot_f_range,
+                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+            else:
+                diagonal = -1
+            cm = np.median(cb, axis=0)
+            cl = np.percentile(cb, 2.5, axis=0)
+            cu = np.percentile(cb, 97.5, axis=0)
+            fig = plotting.plot_connectivity_spectrum([cm, cl, cu], fs=self.fs_, freq_range=self.plot_f_range,
+                                                      diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+            return cb, fig
+
+        return cb
+
+    def get_tf_connectivity(self, measure, winlen, winstep, plot=False):
         """
         Workspace.get_tf_connectivity(measure, winlen, winstep)
 
@@ -325,32 +422,105 @@ class Workspace:
 
         nstep = (n - winlen) // winstep
 
-        if self.cl_ is None:
-            result = np.zeros((m, m, self.nfft_, nstep), np.complex64)
-            i = 0
-            for j in range(0, n - winlen, winstep):
-                win = np.arange(winlen) + j
-                data = self.activations_[win, :, :]
-                self.var_.fit(data)
-                con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
-                result[:, :, :, i] = getattr(con, measure)()
-                i += 1
+        result = np.zeros((m, m, self.nfft_, nstep), np.complex64)
+        i = 0
+        for j in range(0, n - winlen, winstep):
+            win = np.arange(winlen) + j
+            data = self.activations_[win, :, :]
+            data = data[:, :, self.trial_mask_]
+            self.var_.fit(data)
+            con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
+            result[:, :, :, i] = getattr(con, measure)()
+            i += 1
 
-        else:
-            result = {}
-            for ci in np.unique(self.cl_):
-                result[ci] = np.zeros((m, m, self.nfft_, nstep), np.complex128)
-            i = 0
-            for j in range(0, n - winlen, winstep):
-                win = np.arange(winlen) + j
-                for ci in result.keys():
-                    data = self.activations_[win, :, :]
-                    data = data[:, :, ci == self.cl_]
-                    self.var_.fit(data)
-                    con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
-                    result[ci][:, :, :, i] = getattr(con, measure)()
-                i += 1
+        if plot is None or plot:
+            fig = plot
+            t0 = 0.5 * winlen / self.fs_ + self.time_offset_
+            t1 = self.data_.shape[0] / self.fs_ - 0.5 * winlen / self.fs_ + self.time_offset_
+            if self.plot_diagonal == 'fill':
+                diagonal = 0
+            elif self.plot_diagonal == 'S':
+                diagonal = -1
+                s = np.abs(self.get_tf_connectivity('S', winlen, winstep))
+                fig = plotting.plot_connectivity_timespectrum(s, fs=self.fs_, crange=[np.min(s), np.max(s)],
+                                                          freq_range=self.plot_f_range, time_range=[t0, t1],
+                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+            else:
+                diagonal = -1
+
+            tfc = self._clean_measure(measure, result)
+            if diagonal == -1:
+                for m in range(tfc.shape[0]):
+                    tfc[m, m, :, :] = 0
+            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)],
+                                                          freq_range=self.plot_f_range, time_range=[t0, t1],
+                                                          diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+
+            return result, fig
+
         return result
+
+    def compare_conditions(self, labels1, labels2, measure, alpha=0.01, repeats=100, num_samples=None, plot=False):
+        self.set_used_labels(labels1)
+        ca = self.get_bootstrap_connectivity(measure, repeats, num_samples)
+        self.set_used_labels(labels2)
+        cb = self.get_bootstrap_connectivity(measure, repeats, num_samples)
+
+        p = test_bootstrap_difference(ca, cb)
+        s = significance_fdr(p, alpha)
+
+        if plot is None or plot:
+            fig = plot
+            if self.plot_diagonal == 'topo':
+                diagonal = -1
+            elif self.plot_diagonal == 'fill':
+                diagonal = 0
+            elif self.plot_diagonal is 'S':
+                diagonal = -1
+                self.set_used_labels(labels1)
+                sa = self.get_bootstrap_connectivity('absS', repeats, num_samples)
+                sm = np.median(sa, axis=0)
+                sl = np.percentile(sa, 2.5, axis=0)
+                su = np.percentile(sa, 97.5, axis=0)
+                fig = plotting.plot_connectivity_spectrum([sm, sl, su], fs=self.fs_, freq_range=self.plot_f_range,
+                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+
+                self.set_used_labels(labels2)
+                sb = self.get_bootstrap_connectivity('absS', repeats, num_samples)
+                sm = np.median(sb, axis=0)
+                sl = np.percentile(sb, 2.5, axis=0)
+                su = np.percentile(sb, 97.5, axis=0)
+                fig = plotting.plot_connectivity_spectrum([sm, sl, su], fs=self.fs_, freq_range=self.plot_f_range,
+                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+
+                p_s = test_bootstrap_difference(ca, cb)
+                s_s = significance_fdr(p_s, alpha)
+
+                plotting.plot_connectivity_significance(s_s, fs=self.fs_, freq_range=self.plot_f_range,
+                                                        diagonal=1, border=self.plot_outside_topo, fig=fig)
+            else:
+                diagonal = -1
+
+            cm = np.median(ca, axis=0)
+            cl = np.percentile(ca, 2.5, axis=0)
+            cu = np.percentile(ca, 97.5, axis=0)
+
+            fig = plotting.plot_connectivity_spectrum([cm, cl, cu], fs=self.fs_, freq_range=self.plot_f_range,
+                                                      diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+
+            cm = np.median(cb, axis=0)
+            cl = np.percentile(cb, 2.5, axis=0)
+            cu = np.percentile(cb, 97.5, axis=0)
+
+            fig = plotting.plot_connectivity_spectrum([cm, cl, cu], fs=self.fs_, freq_range=self.plot_f_range,
+                                                      diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+
+            plotting.plot_connectivity_significance(s, fs=self.fs_, freq_range=self.plot_f_range,
+                                                    diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+
+            return p, s, fig
+
+        return p, s
 
     @staticmethod
     def show_plots():
@@ -380,9 +550,17 @@ class Workspace:
 
         plotting.plot_sources(self.topo_, self.mixmaps_, self.unmixmaps_, common_scale)
 
-    def plot_connectivity(self, measure, freq_range=(-np.inf, np.inf)):
+    def plot_connectivity_topos(self, fig=None):
+        self._prepare_plots(True, False)
+        if self.plot_outside_topo:
+            fig = plotting.plot_connectivity_topos('outside', self.topo_, self.mixmaps_, fig)
+        elif self.plot_diagonal == 'topo':
+            fig = plotting.plot_connectivity_topos('diagonal', self.topo_, self.mixmaps_, fig)
+        return fig
+
+    def plot_connectivity_surrogate(self, measure, freq_range=(-np.inf, np.inf), repeats=100, fig=None):
         """
-        Workspace.plot_connectivity(measure, freq_range)
+        Workspace.plot_connectivity_surrogate(measure, freq_range, repeats=100, fig=None)
 
         Plot spectral connectivity.
 
@@ -391,77 +569,75 @@ class Workspace:
         measure        :      : str   : Refer to scot.Connectivity for supported
                                         measures.
         freq_range     :      : 2     : Restrict plotted frequency range.
+        repeats        : 100  : 1     : Number of surrogates to compute
 
         Requires: var model
         """
-        fig = None
-        self._prepare_plots(True, False)
-        if isinstance(self.connectivity_, dict):
-            for c in np.unique(self.cl_):
-                cm = getattr(self.connectivity_[c], measure)()
-                fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_,
-                                                          topomaps=self.mixmaps_, fig=fig)
-        else:
-            cm = getattr(self.connectivity_, measure)()
-            fig = plotting.plot_connectivity_spectrum(cm, fs=self.fs_, freq_range=freq_range, topo=self.topo_,
-                                                      topomaps=self.mixmaps_)
-        return fig
-
-    def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), crange=None, ignore_diagonal=True):
-        """
-        Workspace.plot_tf_connectivity(measure, winlen, winstep, freq_range)
-
-        Calculate and plot time-varying spectral connectivity measure.
-
-        Connectivity is estimated in a sliding window approach on the current
-        data set.
-
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measure        :      : str   : Refer to scot.Connectivity for supported
-                                        measures.
-        winlen         :      :       : Length of the sliding window (in samples).
-        winstep        :      :       : Step size for sliding window (in sapmles).
-        freq_range     :      : 2     : Restrict plotted frequency range.
-
-        Requires: var model
-        """
-        t0 = 0.5 * winlen / self.fs_ + self.time_offset_
-        t1 = self.data_.shape[0] / self.fs_ - 0.5 * winlen / self.fs_ + self.time_offset_
+        cb = self.get_surrogate_connectivity(measure, repeats)
 
         self._prepare_plots(True, False)
-        tfc = self.get_tf_connectivity(measure, winlen, winstep)
 
-        if isinstance(tfc, dict):
-            ncl = np.unique(self.cl_)
-            lowest, highest = np.inf, -np.inf
-            for c in ncl:
-                tfc[c] = self._clean_measure(measure, tfc[c])
-                if ignore_diagonal:
-                    for m in range(tfc[c].shape[0]):
-                        tfc[c][m, m, :, :] = 0
-                highest = max(highest, np.max(tfc[c]))
-                lowest = min(lowest, np.min(tfc[c]))
+        cu = np.percentile(cb, 95, axis=0)
 
-            if crange is None:
-                crange = [lowest, highest]
+        fig = plotting.plot_connectivity_spectrum([cu], self.fs_, freq_range=freq_range, fig=fig)
 
-            fig = {}
-            for c in ncl:
-                fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=crange,
-                                                                 freq_range=freq_range, time_range=[t0, t1],
-                                                                 topo=self.topo_, topomaps=self.mixmaps_)
-                fig[c].suptitle(str(c))
-
-        else:
-            tfc = self._clean_measure(measure, tfc)
-            if ignore_diagonal:
-                for m in range(tfc.shape[0]):
-                    tfc[m, m, :, :] = 0
-            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)],
-                                                          freq_range=freq_range, time_range=[t0, t1], topo=self.topo_,
-                                                          topomaps=self.mixmaps_)
         return fig
+
+    # def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), crange=None, ignore_diagonal=True):
+    #     """
+    #     Workspace.plot_tf_connectivity(measure, winlen, winstep, freq_range)
+    #
+    #     Calculate and plot time-varying spectral connectivity measure.
+    #
+    #     Connectivity is estimated in a sliding window approach on the current
+    #     data set.
+    #
+    #     Parameters     Default  Shape   Description
+    #     --------------------------------------------------------------------------
+    #     measure        :      : str   : Refer to scot.Connectivity for supported
+    #                                     measures.
+    #     winlen         :      :       : Length of the sliding window (in samples).
+    #     winstep        :      :       : Step size for sliding window (in sapmles).
+    #     freq_range     :      : 2     : Restrict plotted frequency range.
+    #
+    #     Requires: var model
+    #     """
+    #     t0 = 0.5 * winlen / self.fs_ + self.time_offset_
+    #     t1 = self.data_.shape[0] / self.fs_ - 0.5 * winlen / self.fs_ + self.time_offset_
+    #
+    #     self._prepare_plots(True, False)
+    #     tfc = self.get_tf_connectivity(measure, winlen, winstep)
+    #
+    #     if isinstance(tfc, dict):
+    #         ncl = np.unique(self.cl_)
+    #         lowest, highest = np.inf, -np.inf
+    #         for c in ncl:
+    #             tfc[c] = self._clean_measure(measure, tfc[c])
+    #             if ignore_diagonal:
+    #                 for m in range(tfc[c].shape[0]):
+    #                     tfc[c][m, m, :, :] = 0
+    #             highest = max(highest, np.max(tfc[c]))
+    #             lowest = min(lowest, np.min(tfc[c]))
+    #
+    #         if crange is None:
+    #             crange = [lowest, highest]
+    #
+    #         fig = {}
+    #         for c in ncl:
+    #             fig[c] = plotting.plot_connectivity_timespectrum(tfc[c], fs=self.fs_, crange=crange,
+    #                                                              freq_range=freq_range, time_range=[t0, t1],
+    #                                                              topo=self.topo_, topomaps=self.mixmaps_)
+    #             fig[c].suptitle(str(c))
+    #
+    #     else:
+    #         tfc = self._clean_measure(measure, tfc)
+    #         if ignore_diagonal:
+    #             for m in range(tfc.shape[0]):
+    #                 tfc[m, m, :, :] = 0
+    #         fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)],
+    #                                                       freq_range=freq_range, time_range=[t0, t1], topo=self.topo_,
+    #                                                       topomaps=self.mixmaps_)
+    #     return fig
 
     def _prepare_plots(self, mixing=False, unmixing=False):
         if self.locations_ is None:
