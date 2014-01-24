@@ -50,18 +50,18 @@ class Workspace:
 
     Attributes
     ----------
-    unmixing_ : array
+    `unmixing_` : array
         Estimated unmixing matrix.
-    mixing_ : array
+    `mixing_` : array
         Estimated mixing matrix.
-    plot_diagonal : str
+    `plot_diagonal` : str
         Configures what is plotted in the diagonal subplots.
         **'topo'** (default) plots topoplots on the diagonal,
         **'S'** plots the spectral density of each component, and
         **'fill'** plots connectivity on the diagonal.
-    plot_outside_topo : bool
+    `plot_outside_topo` : bool
         Whether to place topoplots in the left column and top row.
-    plot_f_range : (int, int)
+    `plot_f_range` : (int, int)
         Lower and upper frequency limits for plotting. Defaults to [0, fs/2].
     """
     def __init__(self, var, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
@@ -354,6 +354,10 @@ class Workspace:
         ------
         RuntimeError
             If the :class:`Workspace` instance does not contain a fitted VAR model.
+
+        See Also
+        --------
+        :func:`scot.connectivity_statistics.surrogate_connectivity` : Calculates surrogate connectivity
         """
         return surrogate_connectivity(measure_name, self.activations_[:, :, self.trial_mask_],
                                       self.var_, self.nfft_, repeats)

@@ -9,8 +9,20 @@ from .connectivity import connectivity
 from . import config
 
 
-def surrogate_connectivity(measures, data, var, nfft=512, repeats=100):
+def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
     """ Calculates surrogate connectivity for a multivariate time series by phase randomization [1].
+
+    .. note:: Parameter `var` will be modified by the function. Treat as undefined after the function returned.
+
+    Parameters
+    ----------
+    measure_names : {str, list of str}
+        Name(s) of the connectivity measure(s) to calculate. See :class:`Connectivity` for supported measures.
+    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
+        Time series data (2D or 3D for multiple trials)
+    var : VARBase-like object
+        Instance of a VAR model.
+
 
         Parameters     Default  Shape   Description
         --------------------------------------------------------------------------
@@ -44,9 +56,9 @@ def surrogate_connectivity(measures, data, var, nfft=512, repeats=100):
     for r in range(repeats):
         surrogate_data = randomize_phase(data)
         var.fit(surrogate_data)
-        c = connectivity(measures, var.coef, var.rescov, nfft)
+        c = connectivity(measure_names, var.coef, var.rescov, nfft)
         output.append(c)
-    return convert_output_(output, measures)
+    return convert_output_(output, measure_names)
 
 
 def jackknife_connectivity(measures, data, var, nfft=512, leaveout=1):
