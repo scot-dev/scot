@@ -109,7 +109,7 @@ class Connectivity:
 
     References
     ----------
-    .. [1] Martin Billinger et al, “Single-trial connectivity estimation for classification of motor imagery data”,
+    .. [1] M. Billinger et al, “Single-trial connectivity estimation for classification of motor imagery data”,
            *J. Neural Eng.* 10, 2013.
     """
 

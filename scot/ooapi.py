@@ -32,7 +32,7 @@ class Workspace:
 
     Parameters
     ----------
-    var : {VARBase-like object, dict}
+    var : {:class:`~scot.var.VARBase`-like object, dict}
         Vector autoregressive model (VAR) object that is used for model fitting.
         This can also be a dictionary that is passed as `**kwargs` to backend['var']() in order to
         construct a new VAR model object.
@@ -383,6 +383,10 @@ class Workspace:
             Values of the connectivity measure for each bootstrap estimate. If `measure_names` is a list of strings a
             dictionary is returned, where each key is the name of the measure, and the corresponding values are
             ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
+
+        See Also
+        --------
+        :func:`scot.connectivity_statistics.bootstrap_connectivity` : Calculates bootstrap connectivity
         """
         if num_samples is None:
             num_samples = np.sum(self.trial_mask_)

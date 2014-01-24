@@ -2,6 +2,9 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013-2014 SCoT Development Team
 
+""" Routines for statistical evaluation of connectivity.
+"""
+
 import numpy as np
 import scipy as sp
 from .datatools import randomize_phase
@@ -10,7 +13,7 @@ from . import config
 
 
 def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
-    """ Calculates surrogate connectivity for a multivariate time series by phase randomization [1].
+    """ Calculates surrogate connectivity for a multivariate time series by phase randomization [1]_.
 
     .. note:: Parameter `var` will be modified by the function. Treat as undefined after the function returned.
 
@@ -22,35 +25,21 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
         Time series data (2D or 3D for multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
+    nfft : int, optional
+        Number of frequency bins to calculate. Note that these points cover the range between 0 and half the
+        sampling rate.
+    repeats : int, optional
+        How many surrogate samples to take.
 
+    Returns
+    -------
+    result : array, shape = [`repeats`, n_channels, n_channels, nfft]
+            Values of the connectivity measure for each surrogate. If `measure_names` is a list of strings a dictionary
+            is returned, where each key is the name of the measure, and the corresponding values are ndarrays of shape
+            [`repeats`, n_channels, n_channels, nfft].
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measures       :      :       : String or list of strings. Each string is
-                                        the (case sensitive) name of a connectivity
-                                        measure to calculate. See documentation of
-                                        Connectivity for supported measures.
-                                        The function returns an ndarray if measures
-                                        is a string, otherwise a dict is returned.
-        data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-                              : n,m   : 2d data matrix (n samples, m signals)
-        var            :      :       : Instance of class that represents VAR models.
-        nfft           : 512  : 1     : Number of frequency bins to calculate. Note
-                                        that these points cover the range between 0
-                                        and the nyquist frequency.
-        repeats        : 100  : 1     : Number of surrogates to create.
-
-        Output   Shape               Description
-        --------------------------------------------------------------------------
-        result : repeats, m,m,nfft : An ndarray of shape (repeats, m, m, nfft) is
-                                     returned if measures is a string. If measures
-                                     is a list of strings a dictionary is returned,
-                                     where each key is the name of the measure, and
-                                     the corresponding values are ndarrays of shape
-                                     (repeats, m, m, nfft).
-
-        [1] J. Theiler et al. "Testing for nonlinearity in time series: the method of surrogate data", Physica D,
-            vol 58, pp. 77-94, 1992
+    .. [1] J. Theiler et al. "Testing for nonlinearity in time series: the method of surrogate data", Physica D,
+           vol 58, pp. 77-94, 1992
     """
     output = []
     for r in range(repeats):
@@ -61,33 +50,35 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
     return convert_output_(output, measure_names)
 
 
-def jackknife_connectivity(measures, data, var, nfft=512, leaveout=1):
-    """ Calculates Jackknife estimates of connectivity by leaving out trials.
+def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1):
+    """ Calculates Jackknife estimates of connectivity.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measures       :      :       : String or list of strings. Each string is
-                                        the (case sensitive) name of a connectivity
-                                        measure to calculate. See documentation of
-                                        Connectivity for supported measures.
-                                        The function returns an ndarray if measures
-                                        is a string, otherwise a dict is returned.
-        data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-        var            :      :       : Instance of class that represents VAR models.
-        nfft           : 512  : 1     : Number of frequency bins to calculate. Note
-                                        that these points cover the range between 0
-                                        and the nyquist frequency.
-        leaveout       : 1    : 1     : Number of trials to leave out in each estimate.
+    For each Jackknife estimate a block of trials is left out. This is repeated until each trial was left out exactly
+    once. The number of estimates depends on the number of trials and the value of `leaveout`. It is calculated by
+    repeats = n_trials // leaveout.
 
-        Output          Shape        Description
-        --------------------------------------------------------------------------
-        result        : r,m,m,nfft : An ndarray of shape (r, m, m, nfft) is returned
-                                     returned (where r is t//leaveout) if measures
-                                     is a string. If measures is a list of strings
-                                     a dictionary is returned, where each key is the
-                                     name of the measure, and the corresponding
-                                     values are ndarrays of shape
-                                     (repeats, m, m, nfft).
+    .. note:: Parameter `var` will be modified by the function. Treat as undefined after the function returned.
+
+    Parameters
+    ----------
+    measure_names : {str, list of str}
+        Name(s) of the connectivity measure(s) to calculate. See :class:`Connectivity` for supported measures.
+    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
+        Time series data (2D or 3D for multiple trials)
+    var : VARBase-like object
+        Instance of a VAR model.
+    nfft : int, optional
+        Number of frequency bins to calculate. Note that these points cover the range between 0 and half the
+        sampling rate.
+    leaveout : int, optional
+        Number of trials to leave out in each estimate.
+
+    Returns
+    -------
+    result : array, shape = [`repeats`, n_channels, n_channels, nfft]
+            Values of the connectivity measure for each surrogate. If `measure_names` is a list of strings a dictionary
+            is returned, where each key is the name of the measure, and the corresponding values are ndarrays of shape
+            [`repeats`, n_channels, n_channels, nfft].
     """
     data = np.atleast_3d(data)
     n, m, t = data.shape
@@ -102,39 +93,38 @@ def jackknife_connectivity(measures, data, var, nfft=512, leaveout=1):
         mask = [i for i in range(t) if i < b*leaveout or i >= (b+1)*leaveout]
         data_used = data[:, :, mask]
         var.fit(data_used)
-        c = connectivity(measures, var.coef, var.rescov, nfft)
+        c = connectivity(measure_names, var.coef, var.rescov, nfft)
         output.append(c)
-    return convert_output_(output, measures)
+    return convert_output_(output, measure_names)
 
 
 def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100, num_samples=None):
-    """ Calculates Bootstrap estimates of connectivity by randomly sampling trials with replacement.
+    """ Calculates Bootstrap estimates of connectivity.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        measures       :      :       : String or list of strings. Each string is
-                                        the (case sensitive) name of a connectivity
-                                        measure to calculate. See documentation of
-                                        Connectivity for supported measures.
-                                        The function returns an ndarray if measures
-                                        is a string, otherwise a dict is returned.
-        data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-                              : n,m   : 2d data matrix (n samples, m signals)
-        var            :      :       : Instance of class that represents VAR models.
-        nfft           : 512  : 1     : Number of frequency bins to calculate. Note
-                                        that these points cover the range between 0
-                                        and the nyquist frequency.
-        num_samples    : None : 1     : Number of trials to sample for each estimate. Default: t
-        repeats        : 100  : 1     : Number of bootstrap estimates to calculate
+    To obtain a bootstrap estimate trials are sampled randomly with replacement from the data set.
 
-        Output   Shape               Description
-        --------------------------------------------------------------------------
-        result : repeats, m,m,nfft : An ndarray of shape (repeats, m, m, nfft) is
-                                     returned if measures is a string. If measures
-                                     is a list of strings a dictionary is returned,
-                                     where each key is the name of the measure, and
-                                     the corresponding values are ndarrays of shape
-                                     (repeats, m, m, nfft).
+    .. note:: Parameter `var` will be modified by the function. Treat as undefined after the function returned.
+
+    Parameters
+    ----------
+    measure_names : {str, list of str}
+        Name(s) of the connectivity measure(s) to calculate. See :class:`Connectivity` for supported measures.
+    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
+        Time series data (2D or 3D for multiple trials)
+    var : VARBase-like object
+        Instance of a VAR model.
+    repeats : int, optional
+        How many bootstrap estimates to take.
+    num_samples : int, optional
+        How many samples to take for each bootstrap estimates. Defaults to the same number of trials as present in
+        the data.
+
+    Returns
+    -------
+    measure : array, shape = [`repeats`, n_channels, n_channels, nfft]
+        Values of the connectivity measure for each bootstrap estimate. If `measure_names` is a list of strings a
+        dictionary is returned, where each key is the name of the measure, and the corresponding values are
+        ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
     """
     data = np.atleast_3d(data)
     n, m, t = data.shape
@@ -153,6 +143,38 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100, num_sampl
 
 
 def test_bootstrap_difference(a, b):
+    """ Test mean difference between two bootstrap estimates.
+
+    This function calculates the probability `p` of observing a more extreme mean difference between `a` and `b` under the
+    null hypothesis that `a` and `b` come from the same distribution.
+
+    If p is smaller than e.g. 0.05 we can reject the null hypothesis at an alpha-level of 0.05 and conclude that `a` and
+    `b` are likely to come from different distributions.
+
+    .. note:: *p*-values are calculated along the first dimension. Thus, n_channels * n_channels * nfft individual
+              *p*-values are obtained. To determine if a difference is significant it is important to correct for
+              multiple testing.
+
+    Parameters
+    ----------
+    a, b : ndarray, shape = [`repeats`, n_channels, n_channels, nfft]
+        Two bootstrap estimates to compare. The number of repetitions (first dimension) does not have be equal.
+
+    Returns
+    -------
+    p : ndarray, shape = [n_channels, n_channels, nfft]
+        *p*-values
+
+    Notes
+    -----
+    The function estimates the distribution of `b[j]` - `a[i]` by calculating the difference for each combination of `i`
+    and `j`. The total number of difference samples available is therefore a.shape[0] * b.shape[0].
+    The *p*-value is calculated as the smallest percentile of that distribution that does not contain 0.
+
+    See also
+    --------
+    :func:`significance_fdr` : Correct for multiple testing by controlling the false discovery rate.
+    """
     old_shape = a.shape[1:]
     a = np.asarray(a).reshape((a.shape[0], -1))
     b = np.asarray(b).reshape((b.shape[0], -1))
@@ -191,11 +213,28 @@ def test_rank_difference_a(a, b):
 
 
 def significance_fdr(p, alpha):
-    """ Get significance by controlling for the False Discovery Rate (FDR).
-        Implemented the Benjamini-Hochberg procedure [1].
+    """ Calculate significance by controlling for the false discovery rate.
 
-        [1] Y. Benjamini, Y. Hochberg, "Controlling the false discovery rate: a practical and powerful approach to
-            multiple testing", Journal of the Royal Statistical Society, Series B 57(1), pp 289-300, 1995
+    This function determines which of the *p*-values in `p` can be considered significant. Correction for multiple
+    comparisons is performed by controlling the false discovery rate (FDR). The FDR is the maximum fraction of
+    *p*-values that are wrongly considered significant [1]_.
+
+    Parameters
+    ----------
+    p : ndarray, shape = [n_channels, n_channels, nfft]
+        *p*-values
+    alpha : float
+        Maximum false discovery rate.
+
+    Returns
+    -------
+    s : ndarray, dtype=bool, shape = [n_channels, n_channels, nfft]
+        Significance of each *p*-value.
+
+    References
+    ----------
+    .. [1] Y. Benjamini, Y. Hochberg, "Controlling the false discovery rate: a practical and powerful approach to
+           multiple testing", Journal of the Royal Statistical Society, Series B 57(1), pp 289-300, 1995
     """
     i = np.argsort(p, axis=None)
     m = i.size - np.sum(np.isnan(p))

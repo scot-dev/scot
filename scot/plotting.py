@@ -2,7 +2,12 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-""" Graphical output with matplotlib """
+""" Graphical output with matplotlib
+
+This module attempts to import matplotlib for plotting functionality.
+If matplotlib is not available no error is raised, but plotting functions will not be available.
+
+"""
 
 import numpy as np
 from . import var
@@ -24,6 +29,22 @@ def show_plots():
 
 
 def prepare_topoplots(topo, values):
+    """ Prepare multiple topo maps for cached plotting.
+
+    .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_values`.
+
+    Parameters
+    ----------
+    topo : :class:`~eegtopo.topoplot.Topoplot`
+        Scalp maps are created with this class
+    values : array, shape = [n_topos, n_channels]
+        Channel values for each topo plot
+
+    Returns
+    -------
+    topomaps : list of array
+        The map for each topo plot
+    """
     values = np.atleast_2d(values)
 
     topomaps = []
@@ -37,6 +58,29 @@ def prepare_topoplots(topo, values):
 
 
 def plot_topo(axis, topo, topomap, crange=None, offset=(0,0)):
+    """ Draw a topoplot in given axis.
+
+    .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
+
+    Parameters
+    ----------
+    axis : axis
+        Axis to draw into.
+    topo : :class:`~eegtopo.topoplot.Topoplot`
+        This object draws the topo plot
+    topomap : array, shape = [w_pixels, h_pixels]
+        Scalp-projected data
+    crange : [int, int], optional
+        Range of values covered by the colormap.
+        If set to None, [-max(abs(topomap)), max(abs(topomap))] is substituted.
+    offset : [float, float], optional
+        Shift the topo plot by [x,y] in axis units.
+
+    Returns
+    -------
+    h : image
+        Image object the map was plotted into
+    """
     topo.set_map(topomap)
     h = topo.plot_map(axis, crange=crange, offset=offset)
     topo.plot_locations(axis, offset=offset)
@@ -45,9 +89,28 @@ def plot_topo(axis, topo, topomap, crange=None, offset=(0,0)):
 
 
 def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
-    """ global_scale:
-           None - scales each topo individually
-           1-99 - percentile of maximum of all plots
+    """ Plot all scalp projections of mixing- and unmixing-maps.
+
+    .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
+
+    Parameters
+    ----------
+    topo : :class:`~eegtopo.topoplot.Topoplot`
+        This object draws the topo plot
+    mixmaps : array, shape = [w_pixels, h_pixels]
+        Scalp-projected mixing matrix
+    unmixmaps : array, shape = [w_pixels, h_pixels]
+        Scalp-projected unmixing matrix
+    global_scale : float, optional
+        Set common color scale as given percentile of all map values to use as the maximum.
+        `None` scales each plot individually (default).
+    fig : Figure object, optional
+        Figure to plot into. If set to `None`, a new figure is created.
+
+    Returns
+    -------
+    fig : Figure object
+        The figure into which was plotted.
     """
     if not _have_pyplot:
         raise ImportError("matplotlib.pyplot is required for plotting")
@@ -97,6 +160,27 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
 
 
 def plot_connectivity_topos(layout='diagonal', topo=None, topomaps=None, fig=None):
+    """ Place topo plots in a figure suitable for connectivity visualization.
+
+    .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
+
+    Parameters
+    ----------
+    layout : str
+        'diagonal' -> place topo plots on diagonal.
+        otherwise -> place topo plots in left column and top row.
+    topo : :class:`~eegtopo.topoplot.Topoplot`
+        This object draws the topo plot
+    topomaps : array, shape = [w_pixels, h_pixels]
+        Scalp-projected map
+    fig : Figure object, optional
+        Figure to plot into. If set to `None`, a new figure is created.
+
+    Returns
+    -------
+    fig : Figure object
+        The figure into which was plotted.
+    """
 
     m = len(topomaps)
 
@@ -122,44 +206,34 @@ def plot_connectivity_topos(layout='diagonal', topo=None, topomaps=None, fig=Non
     return fig
 
 
-# def plot_connectivity_spectrum_hybrid(a, b, fs=2, freq_range=(-np.inf, np.inf), outside=None, fig=None):
-#     b = np.atleast_3d(b)
-#
-#     if b.ndim == 3:
-#         [_, m, f] = b.shape
-#         values = [b[i, i, :] for i in range(m)]
-#     else:
-#         [_, _, m, f] = b.shape
-#         values = [b[:, i, i, :] for i in range(m)]
-#
-#     lowest = np.min(values)
-#     highest = np.max(values)
-#
-#     freq = np.linspace(0, fs / 2, f)
-#
-#     left = max(freq_range[0], freq[0])
-#     right = min(freq_range[1], freq[-1])
-#
-#     if b.ndim == 3:
-#         def diagonalfunc(ax, i):
-#             ax.plot(freq, b[i, i, :])
-#             al = ax.get_ylim()
-#             ax.set_ylim(min(al[0], lowest), max(al[1], highest))
-#             ax.set_xlim(left, right)
-#     else:
-#         def diagonalfunc(ax, i):
-#             baseline,  = ax.plot(freq, b[0, i, i, :])
-#             ax.fill_between(freq, b[1, i, i, :], b[2, i, i, :], facecolor=baseline.get_color(), alpha=0.25)
-#             al = ax.get_ylim()
-#             ax.set_ylim(min(al[0], lowest), max(al[1], highest))
-#             ax.set_xlim(left, right)
-#
-#     fig = plot_connectivity_spectrum(a, fs, freq_range, diagonalfunc, outside, fig)
-#
-#     return fig
-
-
 def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0, border=False, fig=None):
+    """ Draw connectivity plots.
+
+    Parameters
+    ----------
+    a : array, shape = [n_channels, n_channels, n_fft] or [1 or 3, n_channels, n_channels, n_fft]
+        If a.ndim == 3, normal plots are created,
+        If a.ndim == 4 and a.shape[0] == 1, the area between the curve and y=0 is filled transparently,
+        If a.ndim == 4 and a.shape[0] == 3, a[0,:,:,:] is plotted normally and the area between a[1,:,:,:] and
+        a[2,:,:,:] is filled transparently.
+    fs : float
+        Sampling frequency
+    freq_range : (float, float)
+        Frequency range to plot
+    diagonal : {-1, 0, 1}
+        If diagonal == -1 nothing is plotted on the diagonal (a[i,i,:] are not plotted),
+        if diagonal == 0, a is plotted on the diagonal too (all a[i,i,:] are plotted),
+        if diagonal == 1, a is plotted on the diagonal only (only a[i,i,:] are plotted)
+    border : bool
+        If border == true the leftmost column and the topmost row are left blank
+    fig : Figure object, optional
+        Figure to plot into. If set to `None`, a new figure is created.
+
+    Returns
+    -------
+    fig : Figure object
+        The figure into which was plotted.
+    """
 
     a = np.atleast_3d(a)
     if a.ndim == 3:
@@ -233,6 +307,33 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0
 
 
 def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagonal=0, border=False, fig=None):
+    """ Plot significance.
+
+    Significance is drawn as a background image where dark vertical stripes indicate freuquencies where a evaluates to
+    True.
+
+    Parameters
+    ----------
+    a : array, dtype=bool, shape = [n_channels, n_channels, n_fft]
+        Significance
+    fs : float
+        Sampling frequency
+    freq_range : (float, float)
+        Frequency range to plot
+    diagonal : {-1, 0, 1}
+        If diagonal == -1 nothing is plotted on the diagonal (a[i,i,:] are not plotted),
+        if diagonal == 0, a is plotted on the diagonal too (all a[i,i,:] are plotted),
+        if diagonal == 1, a is plotted on the diagonal only (only a[i,i,:] are plotted)
+    border : bool
+        If border == true the leftmost column and the topmost row are left blank
+    fig : Figure object, optional
+        Figure to plot into. If set to `None`, a new figure is created.
+
+    Returns
+    -------
+    fig : Figure object
+        The figure into which was plotted.
+    """
 
     a = np.atleast_3d(s)
     [_, m, f] = a.shape
@@ -283,6 +384,35 @@ def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagon
 
 
 def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np.inf), time_range=None, diagonal=0, border=False, fig=None):
+    """ Draw time/frequency connectivity plots.
+
+    Parameters
+    ----------
+    a : array, shape = [n_channels, n_channels, n_fft, n_timesteps]
+        Values to draw
+    fs : float
+        Sampling frequency
+    crange : [int, int], optional
+        Range of values covered by the colormap.
+        If set to None, [min(a), max(a)] is substituted.
+    freq_range : (float, float)
+        Frequency range to plot
+    time_range : (float, float)
+        Time range covered by `a`
+    diagonal : {-1, 0, 1}
+        If diagonal == -1 nothing is plotted on the diagonal (a[i,i,:] are not plotted),
+        if diagonal == 0, a is plotted on the diagonal too (all a[i,i,:] are plotted),
+        if diagonal == 1, a is plotted on the diagonal only (only a[i,i,:] are plotted)
+    border : bool
+        If border == true the leftmost column and the topmost row are left blank
+    fig : Figure object, optional
+        Figure to plot into. If set to `None`, a new figure is created.
+
+    Returns
+    -------
+    fig : Figure object
+        The figure into which was plotted.
+    """
     a = np.asarray(a)
     [_, m, _, t] = a.shape
 
@@ -347,6 +477,34 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
 
 
 def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=None, axes=None, order=None):
+    """ Circluar connectivity plot
+
+    Topos are arranged in a circle, with arrows indicating connectivity
+
+    Parameters
+    ----------
+    widths : {float or array, shape = [n_channels, n_channels]}
+        Width of each arrow. Can be a scalar to assign the same width to all arrows.
+    colors : array, shape = [n_channels, n_channels, 3] or [3]
+        RGB color values for each arrow or one RGB color value for all arrows.
+    curviness : float, optional
+        Factor that determines how much arrows tend to deviate from a straight line.
+    mask : array, dtype = bool, shape = [n_channels, n_channels]
+        Enable or disable individual arrows
+    topo : :class:`~eegtopo.topoplot.Topoplot`
+        This object draws the topo plot
+    topomaps : array, shape = [w_pixels, h_pixels]
+        Scalp-projected map
+    axes : axis, optional
+        Axis to draw into. A new figure is created by default.
+    order : list of int
+        Rearrange channels.
+
+    Returns
+    -------
+    fig : Figure object
+        The figure into which was plotted.
+    """
     colors = np.asarray(colors)
     widths = np.asarray(widths)
     mask = np.asarray(mask)
@@ -460,6 +618,24 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
 
 
 def plot_whiteness(var, h, repeats=1000, axis=None):
+    """ Draw distribution of the Portmanteu whiteness test.
+
+    Parameters
+    ----------
+    var : :class:`~scot.var.VARBase`-like object
+        Vector autoregressive model (VAR) object whose residuals are tested for whiteness.
+    h : int
+        Maximum lag to include in the test.
+    repeats : int, optional
+        Number of surrogate estimates to draw under the null hypothesis.
+    axis : axis, optional
+        Axis to draw into. By default draws into :func:`matplotlib.pyplot.gca()`.
+
+    Returns
+    -------
+    pr : float
+        *p*-value of whiteness under the null hypothesis
+    """
     pr, q0, q = var.test_whiteness(h, repeats, True)
 
     if axis is None:
