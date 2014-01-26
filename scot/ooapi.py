@@ -192,6 +192,10 @@ class Workspace:
         ------
         RuntimeError
             If the :class:`Workspace` instance does not contain data.
+            
+        See Also
+        --------
+        :func:`mvarica` : MVARICA implementation
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")

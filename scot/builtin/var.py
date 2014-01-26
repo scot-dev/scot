@@ -2,7 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-""" vector autoregressive (VAR) model implementation """
+""" Vector autoregressive (VAR) model implementation
+"""
 
 import numpy as np
 import scipy as sp
@@ -12,23 +13,46 @@ from .. import xvschema as xv
 
 
 class VAR(VARBase):
-    def __init__(self, model_order, delta=0, xvschema=xv.multitrial):
-        """ Create a new VAR model instance.
+    """ Builtin implementation of VARBase.
 
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            model_order    :      :       : Autoregressive model order
-            delta          : 0    :       : Ridge parameter (regularization). If set to
-                                            0, ordinary least squares fitting is performed.
-            xvschema       :      : func  : Function to generate training and testing
-                                            set for cross-validation based parameter
-                                            optimization. See xvschema module.
-        """
+    This class provides least squares VAR model fitting with optional ridge regression.
+    
+    Parameters    
+    ----------
+    model_order : int
+        Autoregressive model order
+    delta : float, optional
+        Ridge penalty parameter
+    xvschema : func, optional
+        Function that creates training and test sets for cross-validation. The function takes two parameters: the current cross-validation run (int) and the numer of trials (int). It returns a tuple of two arrays: the training set and the testing set.
+    
+    Examples
+    --------
+    Bla Test
+    >>> data = np.random.randn(512, 8, 40)
+    >>> v = VAR(5)
+    >>> v.optimize(data).fit(data)
+    >>> print("VAR coefficients: ", v.coef)
+    >>> print('Ridge penalty: ', v.delta)
+    """
+    def __init__(self, model_order, delta=0, xvschema=xv.multitrial):
         VARBase.__init__(self, model_order)
         self.delta = delta
         self.xvschema = xvschema
 
     def fit(self, data):
+        """ Fit VAR model to data.
+        
+        Parameters
+        ----------
+        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+            Continuous or segmented data set.
+            
+        Returns
+        -------
+        self : :class:`VAR`
+            The :class:`VAR` object to facilitate method chaining (see usage example)
+        """
         data = sp.atleast_3d(data)
 
         if self.delta == 0 or self.delta is None:
@@ -47,23 +71,21 @@ class VAR(VARBase):
 
         return self
 
-    def optimize(self, data):
-        self.optimize_delta_bisection(data, 100)
-        return self
-
 
     def optimize_delta_bisection(self, data, skipstep=1):
-        """ Use the bisection method to find optimal regularization parameter delta.
-
-            Behavior of this function depends on the xvschema attribute.
-
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            data           :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-                                  : n,m   : 2d data matrix (n samples, m signals)
-            skipstep       : 1    : 1     : Higher values speed up the calculation but
-                                            cause higher variance in cost function which
-                                            will result in less accurate results.
+        """ Find optimal ridge penalty with bisection search.
+        
+        Parameters
+        ----------
+        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+            Continuous or segmented data set.
+        skipstep : int, optional
+            Speed up calculation by skipping samples during cost function calculation
+            
+        Returns
+        -------
+        self : :class:`VAR`
+            The :class:`VAR` object to facilitate method chaining (see usage example)
         """
         data = sp.atleast_3d(data)
         (l, m, t) = data.shape
@@ -115,9 +137,12 @@ class VAR(VARBase):
         self.delta = transform(a + (b - a) * np.abs(ka) / np.abs(kb - ka))
         print('Final point: %f' % self.delta)
         return self
+        
+    optimize = optimize_delta_bisection
 
     def _construct_eqns_rls(self, data):
-        """Construct VAR equation system with RLS constraint"""
+        """Construct VAR equation system with RLS constraint.
+        """
         (l, m, t) = sp.shape(data)
         n = (l - self.p) * t     # number of linear relations
         # Construct matrix x (predictor variables)
@@ -135,6 +160,8 @@ class VAR(VARBase):
         return x, y
 
     def _msge_with_gradient_underdetermined(self, data, delta, xvschema, skipstep):
+        """ Calculate the mean squared generalization error and it's gradient for underdetermined equation system.
+        """
         (l, m, t) = data.shape
         d = None
         j, k = 0, 0
@@ -163,6 +190,8 @@ class VAR(VARBase):
 
 
     def _msge_with_gradient_overdetermined(self, data, delta, xvschema, skipstep):
+        """ Calculate the mean squared generalization error and it's gradient for overdetermined equation system.
+        """
         (l, m, t) = data.shape
         d = None
         l, k = 0, 0
@@ -189,6 +218,8 @@ class VAR(VARBase):
         return l / (nt * d.size), k / (nt * d.size)
 
     def _get_msge_with_gradient_func(self, shape):
+        """ Select which function to use for MSGE calculation (over- or underdetermined).
+        """
         (l, m, t) = shape
 
         n = (l - self.p) * t

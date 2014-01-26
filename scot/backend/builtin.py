@@ -2,6 +2,9 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+""" Use internally implemented functions as backend.
+"""
+
 import numpy as np
 
 from .. import config
@@ -13,6 +16,8 @@ from ..builtin import utils
 
 
 def wrapper_binica(data):
+    """ Call binica for ICA calculation.
+    """
     w, s = binica.binica(datatools.cat_trials(data))
     u = s.dot(w)
     m = np.linalg.inv(u)
@@ -20,6 +25,8 @@ def wrapper_binica(data):
 
 
 def wrapper_pca(x, reducedim):
+    """ Call SCoT's PCA algorithm.
+    """
     c, d = pca.pca(datatools.cat_trials(x), subtract_mean=False, reducedim=reducedim)
     y = datatools.dot_special(x, c)
     return c, d, y

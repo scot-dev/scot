@@ -10,33 +10,33 @@ import numpy as np
 def cuthill_mckee(matrix):
     """ Cuthill-McKee algorithm
 
-        Permute a symmetric binary matrix into a band matrix form with a small bandwidth.
+    Permute a symmetric binary matrix into a band matrix form with a small bandwidth.
 
-        Parameters
-        ----------
-        matrix : ndarray, dtype=bool, shape = [n, n]
-            The matrix is internally converted to a symmetric matrix by setting each element [i,j] to True if either
-            [i,j] or [j,i] evaluates to true.
+    Parameters
+    ----------
+    matrix : ndarray, dtype=bool, shape = [n, n]
+        The matrix is internally converted to a symmetric matrix by setting each element [i,j] to True if either
+        [i,j] or [j,i] evaluates to true.
 
-        Returns
-        -------
-        order : list of int
-            Permutation intices
+    Returns
+    -------
+    order : list of int
+        Permutation intices
 
-        Example
-        -------
-        >>> A = np.array([[0,0,1,1], [0,0,0,0], [1,0,1,0], [1,0,0,0]])
-        >>> p = cuthill_mckee(A)
-        >>> A
-        array([[0, 0, 1, 1],
-               [0, 0, 0, 0],
-               [1, 0, 1, 0],
-               [1, 0, 0, 0]])
-        >>> A[p,:][:,p]
-        array([[0, 0, 0, 0],
-               [0, 0, 1, 0],
-               [0, 1, 0, 1],
-               [0, 0, 1, 1]])
+    Examples
+    --------
+    >>> A = np.array([[0,0,1,1], [0,0,0,0], [1,0,1,0], [1,0,0,0]])
+    >>> p = cuthill_mckee(A)
+    >>> A
+    array([[0, 0, 1, 1],
+           [0, 0, 0, 0],
+           [1, 0, 1, 0],
+           [1, 0, 0, 0]])
+    >>> A[p,:][:,p]
+    array([[0, 0, 0, 0],
+           [0, 0, 1, 0],
+           [0, 1, 0, 1],
+           [0, 0, 1, 1]])
     """
     matrix = np.atleast_2d(matrix)
     n, m = matrix.shape
@@ -119,12 +119,15 @@ class memoize(object):
 
     If a memoized method is invoked directly on its class the result will not
     be cached. Instead the method will be invoked like a static method:
-    class Obj(object):
-        @memoize
-        def add_to(self, arg):
-            return self + arg
-    Obj.add_to(1) # not enough arguments
-    Obj.add_to(1, 2) # returns 3, result is not cached
+        
+    Examples
+    --------
+    >>> class Obj(object):
+            @memoize
+            def add_to(self, arg):
+                return self + arg
+    >>> Obj.add_to(1) # not enough arguments
+    >>> Obj.add_to(1, 2) # returns 3, result is not cached
     """
 
     def __init__(self, func):
