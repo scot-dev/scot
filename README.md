@@ -4,15 +4,20 @@ SCoT
 EEG Source Connectivity Toolbox in Python
 
 
+Documentation
+-------------
+Documentation is available online at http://scot-dev.github.io/scot-doc/index.html
+
+
 Dependencies
----
+------------
 Required: numpy, scipy
 
 Optional: matplotlib, scikit-learn
 
 
 Examples
----
+--------
 
 To run the examples on Linux invoke the following commands inside the SCoT main directory:
 
