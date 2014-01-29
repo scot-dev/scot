@@ -53,12 +53,14 @@ fig = ws.plot_connectivity_topos()
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and plot them.
+ws.set_used_labels(['foot'])
+ws.fit_var()
+ws.get_connectivity('ffDTF', fig)
+
 ws.set_used_labels(['hand'])
 ws.fit_var()
 ws.get_connectivity('ffDTF', fig)
 
-ws.set_used_labels(['foot'])
-ws.fit_var()
-ws.get_connectivity('ffDTF', fig)
+fig.savefig('ffDTF_CSP.png', dpi=900)
 
 ws.show_plots()
