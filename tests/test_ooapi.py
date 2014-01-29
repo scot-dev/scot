@@ -142,13 +142,15 @@ class TestMVARICA(unittest.TestCase):
 
             api.set_data(data, cl)
 
-            api.fit_var()
+            for c in np.unique(cl):
+                api.set_used_labels([c])
 
-            fc = api.get_connectivity('S')
-            tfc = api.get_tf_connectivity('S', 100, 50)
-            for c in tfc:
-                self.assertEqual(fc[c].shape, (3, 3, 512))
-                self.assertEqual(tfc[c].shape, (3, 3, 512, 18))
+                api.fit_var()
+                fc = api.get_connectivity('S')
+                self.assertEqual(fc.shape, (3, 3, 512))
+
+                tfc = api.get_tf_connectivity('S', 100, 50)
+                self.assertEqual(tfc.shape, (3, 3, 512, 18))
 
             api.set_data(data)
             api.remove_sources([0, 2])

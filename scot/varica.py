@@ -9,58 +9,64 @@ from .datatools import cat_trials, dot_special
 from . import xvschema
 
 
-def mvarica(x, cl, var, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
-    """
-    mvarica( x, p )
-    mvarica( x, p, retain_variance, delta )
-    mvarica( x, p, numcomp, delta )
-
-    Apply MVARICA to the data x. MVARICA performs the following steps:
-        1. Optional dimensionality reduction with PCA
-        2. Fitting a VAR model tho the data
-        3. Decomposing the VAR model residuals with ICA
-        4. Correcting the VAR coefficients
-
-    Parameters     Default  Shape   Description
-    --------------------------------------------------------------------------
-    x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-                          : n,m   : 2d data matrix (n samples, m signals)
-    reducedim      : 0.99 :       : a number less than 1 is interpreted as the
-                                    fraction of variance that should remain in
-                                    the data. All components that describe in
-                                    total less than 1-retain_variance of the
-                                    variance in the data are removed by the PCA.
-                                    An integer number of 1 or greater is
-                                    interpreted as the number of components to
-                                    keep after applying the PCA.
-                                    If set to 'no_pca' the PCA step is skipped.
-    var            :      :       : Instance of class that represents VAR models.
-    backend        : None :       : backend to use for processing (see backend
-                                    module for details). If backend==None, the
-                                    backend set in config will be used.
-   varfit          :'ensemble':   : 'ensemble' (default) fits one VAR model to
-                                    the whole data set.
-                                    'class' fits one VAR model for each class.
-                                    'trial' fits one VAR model for each trial.
+def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
+    """ Performs joint VAR model fitting and ICA source separation.
     
-
-    Output
-    --------------------------------------------------------------------------
-    b   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size m*m
-    U   Unmixing matrix
-    m   Mixing matrix
-    e   Residual process
-    c   Residual covariance matrix
-    delta   Regularization parameter
-
-    Note on the arrangement of model coefficients:
-        b is of shape m, m*p, with sub matrices arranged as follows:
-            b_00 b_01 ... b_0m
-            b_10 b_11 ... b_1m
-            .... ....     ....
-            b_m0 b_m1 ... b_mm
-        Each sub matrix b_ij is a column vector of length p that contains the
-        filter coefficients from channel j (source) to channel i (sink).
+    This function implements the MVARICA procedure [1]_.
+    
+    Parameters
+    ----------
+    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        data set
+    cl : list of valid dict keys
+        Class labels associated with each trial.
+    reducedim : {int, float, 'no_pca'}, optional
+        A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
+        components that describe in total less than `1-reducedim` of the variance are removed by the PCA step.
+        An integer numer of 1 or greater is interpreted as the number of components to keep after applying the PCA.
+        If set to 'no_pca' the PCA step is skipped.
+    optimize_var : bool, optional
+        Whether to call automatic optimization of the VAR fitting routine.
+    backend : dict-like, optional
+        Specify backend to use. When set to None the backend configured in config.backend is used.
+    varfit : string
+        Determines how to calculate the residuals for source decomposition.
+        'ensemble' (default) fits one model to the whole data set,
+        'class' fits a different model for each class, and
+        'trial' fits a different model for each individual trial.
+        
+    Returns
+    -------
+    result : class
+        A class with the following attributes is returned:
+            
+        +---------------+----------------------------------------------------------+
+        | mixing        | Source mixing matrix                                     |
+        +---------------+----------------------------------------------------------+
+        | unmixing      | Source unmixing matrix                                   |
+        +---------------+----------------------------------------------------------+
+        | residuals     | Residuals of the VAR model(s) in source space            |
+        +---------------+----------------------------------------------------------+
+        | var_residuals | Residuals of the VAR model(s) in EEG space (before ICA)  |
+        +---------------+----------------------------------------------------------+
+        | c             | Noise covariance of the VAR model(s) in source space     |
+        +---------------+----------------------------------------------------------+
+        | b             | VAR model coefficients (source space)                    |
+        +---------------+----------------------------------------------------------+
+        | a             | VAR model coefficients (EEG space)                       |
+        +---------------+----------------------------------------------------------+
+        
+    Notes
+    -----
+    MVARICA is performed with the following steps:        
+    1. Optional dimensionality reduction with PCA
+    2. Fitting a VAR model tho the data
+    3. Decomposing the VAR model residuals with ICA
+    4. Correcting the VAR coefficients
+        
+    References
+    ----------
+    .. [1] G. Gomez-Herrero et al. "Measuring directional coupling between EEG sources", NeuroImage, 2008
     """
 
     x = np.atleast_3d(x)
