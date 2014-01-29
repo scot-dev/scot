@@ -6,6 +6,8 @@
 
 import numpy as np
 
+from functools import partial
+
 
 def cuthill_mckee(matrix):
     """ Cuthill-McKee algorithm
