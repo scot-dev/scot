@@ -324,6 +324,7 @@ class Workspace:
             elif self.plot_diagonal == 'S':
                 diagonal = -1
                 sm = np.abs(self.connectivity_.S())
+                sm /= np.max(sm)     # scale to 1 since components are scaled arbitrarily anyway
                 fig = plotting.plot_connectivity_spectrum(sm, fs=self.fs_, freq_range=self.plot_f_range,
                                                           diagonal=1, border=self.plot_outside_topo, fig=fig)
             else:
@@ -405,6 +406,7 @@ class Workspace:
             elif self.plot_diagonal == 'S':
                 diagonal = -1
                 sb = self.get_bootstrap_connectivity('absS', repeats, num_samples)
+                sb /= np.max(sb)     # scale to 1 since components are scaled arbitrarily anyway
                 sm = np.median(sb, axis=0)
                 sl = np.percentile(sb, 2.5, axis=0)
                 su = np.percentile(sb, 97.5, axis=0)
