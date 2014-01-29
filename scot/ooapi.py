@@ -452,7 +452,7 @@ class Workspace:
 
         return cb
 
-    def get_tf_connectivity(self, measure_name, winlen, winstep, plot=False):
+    def get_tf_connectivity(self, measure_name, winlen, winstep, plot=False, crange='default'):
         """ Calculate estimate of time-varying connectivity.
 
         Connectivity is estimated in a sliding window approach on the current data set. The window is stepped
@@ -508,6 +508,8 @@ class Workspace:
             elif self.plot_diagonal == 'S':
                 diagonal = -1
                 s = np.abs(self.get_tf_connectivity('S', winlen, winstep))
+                if crange == 'default':
+                    crange=[np.min(tfc), np.max(tfc)]
                 fig = plotting.plot_connectivity_timespectrum(s, fs=self.fs_, crange=[np.min(s), np.max(s)],
                                                           freq_range=self.plot_f_range, time_range=[t0, t1],
                                                           diagonal=1, border=self.plot_outside_topo, fig=fig)
@@ -515,10 +517,12 @@ class Workspace:
                 diagonal = -1
 
             tfc = self._clean_measure(measure_name, result)
-            if diagonal == -1:
-                for m in range(tfc.shape[0]):
-                    tfc[m, m, :, :] = 0
-            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=[np.min(tfc), np.max(tfc)],
+            if crange == 'default':
+                if diagonal == -1:
+                    for m in range(tfc.shape[0]):
+                        tfc[m, m, :, :] = 0
+                crange=[np.min(tfc), np.max(tfc)]
+            fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=crange,
                                                           freq_range=self.plot_f_range, time_range=[t0, t1],
                                                           diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
 

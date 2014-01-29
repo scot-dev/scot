@@ -64,13 +64,13 @@ ws.set_data(data, classes, time_offset=-1)
 
 fig = ws.plot_connectivity_topos()
 ws.set_used_labels(['hand'])
-ws.get_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), plot=fig)
+ws.get_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), plot=fig, crange=[0,30])
 fig.suptitle('Hand')
 fig.savefig('hand.png', dpi=900)
 
 fig = ws.plot_connectivity_topos()
 ws.set_used_labels(['foot'])
-ws.get_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), plot=fig)
+ws.get_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), plot=fig, crange=[0,30])
 fig.suptitle('Foot')
 fig.savefig('foot.png', dpi=900)
 
