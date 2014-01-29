@@ -23,30 +23,41 @@ class Defaults:
 
 class VARBase(DocStringInheritor):
     """ Represents a vector autoregressive (VAR) model.
-
-        Note on the arrangement of model coefficients:
-            b is of shape m, m*p, with sub matrices arranged as follows:
-                b_00 b_01 ... b_0m
-                b_10 b_11 ... b_1m
-                .... ....     ....
-                b_m0 b_m1 ... b_mm
-            Each sub matrix b_ij is a column vector of length p that contains the
-            filter coefficients from channel j (source) to channel i (sink).
+    
+    .. warning:: `VARBase` is an abstract class that defines the interface for VAR model implementations. Several methods must be implemented by derived classes.
+    
+    Parameters
+    ----------
+    model_order : int
+        Autoregressive model order
+    
+    Notes
+    -----
+    Note on the arrangement of model coefficients:
+    *b* is of shape [m, m*p], with sub matrices arranged as follows:
+        
+    +------+------+------+------+
+    | b_00 | b_01 | ...  | b_0m |
+    +------+------+------+------+
+    | b_10 | b_11 | ...  | b_1m |
+    +------+------+------+------+
+    | ...  | ...  | ...  | ...  |
+    +------+------+------+------+
+    | b_m0 | b_m1 | ...  | b_mm |
+    +------+------+------+------+
+    
+    Each sub matrix b_ij is a column vector of length p that contains the
+    filter coefficients from channel j (source) to channel i (sink).
     """
 
     def __init__(self, model_order):
-        """ Create a new VAR model instance.
-
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            model_order    :      :       : Autoregressive model order
-        """
         self.p = model_order
         self.coef = None
         self.residuals = None
         self.rescov = None
 
     def copy(self):
+        """ Create a copy of the VAR model."""
         other = self.__class__(self.p)
         other.coef = self.coef.copy()
         other.residuals = self.residuals.copy()
@@ -54,42 +65,50 @@ class VARBase(DocStringInheritor):
         return other
 
     def fit(self, data):
-        """ Fit the model to data.
-
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                             :      : N,M   : 2d data matrix (N samples, M signals)
+        """ Fit VAR model to data.
+        
+        .. warning:: This function must be implemented by derived classes.
+        
+        Parameters
+        ----------
+        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+            Continuous or segmented data set.
+            
+        Returns
+        -------
+        self : :class:`VAR`
+            The :class:`VAR` object to facilitate method chaining (see usage example)
         """
         raise NotImplementedError('method fit() is not implemented in ' + str(self))
 
     def optimize(self, data):
-        """ Optimize the var model's hyperparameters (such as regularization).
-
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                             :      : N,M   : 2d data matrix (N samples, M signals)
+        """ Optimize model fitting hyperparameters (such as regularization penalty)
+        
+            .. warning:: This function must be implemented by derived classes.
+        
+            Parameters
+            ----------
+            data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+                Continuous or segmented data set.
         """
         raise NotImplementedError('method optimize() is not implemented in ' + str(self))
         return self
 
     def simulate(self, l, noisefunc=None):
-        """ Simulate vector autoregressive (VAR) model with optional noise generating function.
-
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            l              :      : 1     : Number of samples to generate
-                           :      : 2     : l[0]: number of samples, l[1]: number of trials
-            noisefunc      : None :       : callback function that takes no parameter and returns m values
-                                            This function is used to create the generating
-                                            noise process. if noisefunc==None Gaussian
-                                            white noise with zero mean and unit variance
-                                            is created.
-
-            Output           Shape   Description
-            --------------------------------------------------------------------------
-            data           : L,M,T  : 3D data matrix
+        """ Simulate vector autoregressive (VAR) model
+        
+            This function generates data from the VAR model.
+            
+            Parameters
+            ----------
+            l : {int, [int, int]}
+                Specify number of samples to generate. Can be a tuple or list where l[0] is the number of samples and l[1] is the number of trials.
+            noisefunc : func, optional
+                This function is used to create the generating noise process. If set to None Gaussian white noise with zero mean and unit variance is used.
+                
+            Returns
+            -------
+            data : array, shape = [n_samples, n_channels, n_trials]
         """
         (m, n) = sp.shape(self.coef)
         p = n // m
@@ -125,19 +144,23 @@ class VARBase(DocStringInheritor):
         return y[10 * p:, :, :]
 
     def predict(self, data):
-        """ Predict samples from actual data.
-
-            Note that the model requires p past samples for prediction. Thus, the first
-            p samples are invalid and set to 0, where p is the model order.
-
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            data             :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                             :      : N,M   : 2d data matrix (N samples, M signals)
-
-            Output           Shape   Description
-            --------------------------------------------------------------------------
-            predicted      : L,M,T : 3D data matrix
+        """ Predict samples on actual data.
+        
+        The result of this function is used for calculating the residuals.
+        
+        Parameters
+        ----------
+        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+            Continuous or segmented data set.
+            
+        Returns
+        -------
+        predicted : shape = `data`.shape
+            Data as predicted by the VAR model.
+            
+        Notes
+        -----
+        Residuals are obtained by r = x - var.predict(x)
         """
         data = sp.atleast_3d(data)
         (l, m, t) = data.shape
@@ -153,13 +176,17 @@ class VARBase(DocStringInheritor):
 
     def is_stable(self):
         """ Test if the VAR model is stable.
-
-            Output           Shape   Description
-            --------------------------------------------------------------------------
-            stable         :       : True of False if the model is stable/unstable
-
-            References:
-            [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
+        
+        This function tests stability of the VAR model as described in [1]_.
+        
+        Returns
+        -------
+        out : bool
+            True if the model is stable.
+        
+        References
+        ----------
+        .. [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
         """
         m, mp = self.coef.shape
         p = mp // m
@@ -183,48 +210,49 @@ class VARBase(DocStringInheritor):
     def test_whiteness(self, h, repeats=100, get_q=False):
         """ Test if the VAR model residuals are white (uncorrelated up to a lag of h).
 
-            This function calculates the Li-McLeod as Portmanteau test statistic Q to
-            test against the null hypothesis H0: "the residuals are white" [1].
-            Surrogate data for H0 is created by sampling from random permutations of
-            the residuals.
+        This function calculates the Li-McLeod as Portmanteau test statistic Q to
+        test against the null hypothesis H0: "the residuals are white" [1]_.
+        Surrogate data for H0 is created by sampling from random permutations of
+        the residuals.
 
-            Usually the returned p-value is compared against a pre-defined type 1 error
-            level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of white
-            residuals is rejected, which indicates that the VAR model does not properly
-            describe the data.
+        Usually the returned p-value is compared against a pre-defined type 1 error
+        level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of white
+        residuals is rejected, which indicates that the VAR model does not properly
+        describe the data.
+        
+        Parameters
+        ----------
+        h : int
+            Maximum lag that is included in the test statistic.
+        repeats : int, optional
+            Number of samples to create under the null hypothesis.
+        get_q : bool, optional
+            Return Q statistic along with *p*-value
+            
+        Returns
+        -------
+        pr : float
+            Probability of observing a more extreme value of Q under the assumption that H0 is true.
+        q0 : list of float, optional (`get_q`)
+            Individual surrogate estimates that were used for estimating the distribution of Q under H0.
+        q : float, optional (`get_q`)
+            Value of the Q statistic of the residuals
+        
+        Notes
+        -----
+        According to [2]_ h must satisfy h = O(n^0.5), where n is the length (time samples) of the residuals.
 
-            Parameters     Default  Shape   Description
-            --------------------------------------------------------------------------
-            h              :      :       : The test is performed for all time lags up
-                                            to h. Note that according to [2] h must
-                                            satisfy h = O(n^0.5), where n is the length
-                                            (time samples) of the residuals.
-            repeats        : 100  :       : Number of samples to create under the null
-                                            hypothesis. Larger number will give more
-                                            accurate results.
-            get_q          : False:       : If set to False only the p-value is returned.
-                                            Otherwise actual values of the Li-McLeod
-                                            statistic are returned too.
-
-            Output           Shape   Description
-            --------------------------------------------------------------------------
-            pr               :       : Probability of observing a more extreme value of
-                                       Q under the assumption that H0 is true.
-            q0               :       : (optional, see get_q) list of values that created
-                                       as surrogates to estimate the distribution of Q
-                                       under the null-hypothesis.
-            q                :       : (optional, see get_q) Value of Q that corresponds
-                                       to the current residuals.
-
-            References:
-            [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
-            [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J. Am. Statist. Assoc.
+        References
+        ----------
+        .. [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
+        .. [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J. Am. Statist. Assoc.
         """
 
         return test_whiteness(self.residuals, h, self.p, repeats, get_q)
 
     def _construct_eqns(self, data):
-        """Construct VAR equation system"""
+        """ Construct VAR equation system
+        """
         (l, m, t) = np.shape(data)
         n = (l - self.p) * t     # number of linear relations
         # Construct matrix x (predictor variables)
@@ -241,130 +269,52 @@ class VARBase(DocStringInheritor):
         return x, y
 
 
-def fit_multiclass(data, cl, p, delta=None, return_residuals=False, return_covariance=False):
-    """
-    fit_multiclass( data, cl, p )
-    fit_multiclass( data, cl, p, delta )
-
-    Fits a separate autoregressive model for each class.
-
-    If sqrtdelta is provited and nonzero, the least squares estimation is
-    regularized with ridge regression.
-
-    Parameters     Default  Shape   Description
-    --------------------------------------------------------------------------
-    data             :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
-    cl               :      : T     : class label for each trial
-    p                :      :       : Model order can be scalar (same model order for each class)
-                                      or a dictionary that contains a key for each unique class label
-                                      to specify the model order for each class individually.
-    delta            : None :       : regularization parameter
-    return_residuals : False :      : if True, also return model residuals
-    return_covariance: False :      : if True, also return dictionary of covariances
-
-    Output
-    --------------------------------------------------------------------------
-    bcl   dictionary of model coefficients for each class
-    res   (optional) Model residuals: (same shape as data), note that
-          the first p (depending on the class) residuals are invalid.
-    ccl   (optional) dictionary of residual covariances for each class
-    """
-
-    data = np.atleast_3d(data)
-    cl = np.asarray(cl)
-
-    labels = np.unique(cl)
-
-    if cl.size != data.shape[2]:
-        raise AttributeError(
-            'cl must contain a class label for each trial (expected size %d, but got %d).' % (data.shape[2], cl.size))
-
-    if isinstance(p, numbers.Number):
-        p = dict.fromkeys(labels, p)
-    else:
-        try:
-            assert (set(labels) == set(p.keys()))
-        except:
-            raise AttributeError(
-                'Model order p must be either a scalar number, or a dictionary containing a key for each unique label in cl.')
-
-    bcl, ccl = {}, {}
-    res = np.zeros(data.shape)
-    for c in labels:
-        x = data[:, :, cl == c]
-        b = fit(x, p[c], delta)
-        bcl[c] = b
-
-        if return_residuals or return_covariance:
-            r = x - predict(x, b)
-
-        if return_residuals:
-            res[:, :, cl == c] = r
-
-        if return_covariance:
-            ccl[c] = np.cov(datatools.cat_trials(r), rowvar=False)
-
-    result = []
-
-    if return_residuals or return_covariance:
-        result.append(bcl)
-    else:
-        return bcl
-
-    if return_residuals:
-        result.append(res)
-
-    if return_covariance:
-        result.append(ccl)
-
-    return tuple(result)
-
-
 ############################################################################
 
 
 def test_whiteness(data, h, p=0, repeats=100, get_q=False):
-    """ Test if signals are white (uncorrelated up to a lag of h).
+    """ Test if signals are white (serially uncorrelated up to a lag of h).
 
-        This function calculates the Li-McLeod as Portmanteau test statistic Q to
-        test against the null hypothesis H0: "the signals are white" [1].
-        Surrogate data for H0 is created by sampling from random permutations of
-        the signals.
+    This function calculates the Li-McLeod as Portmanteau test statistic Q to
+    test against the null hypothesis H0: "the residuals are white" [1]_.
+    Surrogate data for H0 is created by sampling from random permutations of
+    the residuals.
 
-        Usually the returned p-value is compared against a pre-defined type 1 error
-        level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of white
-        signals is rejected.
+    Usually the returned p-value is compared against a pre-defined type 1 error
+    level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of white
+    residuals is rejected, which indicates that the VAR model does not properly
+    describe the data.
+    
+    Parameters
+    ----------
+    signals : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        Continuous or segmented data set.
+    h : int
+        Maximum lag that is included in the test statistic.
+    p : int, optional
+        Model order if the `signals` are the residuals resulting from fitting a VAR model
+    repeats : int, optional
+        Number of samples to create under the null hypothesis.
+    get_q : bool, optional
+        Return Q statistic along with *p*-value
+        
+    Returns
+    -------
+    pr : float
+        Probability of observing a more extreme value of Q under the assumption that H0 is true.
+    q0 : list of float, optional (`get_q`)
+        Individual surrogate estimates that were used for estimating the distribution of Q under H0.
+    q : float, optional (`get_q`)
+        Value of the Q statistic of the residuals
+    
+    Notes
+    -----
+    According to [2]_ h must satisfy h = O(n^0.5), where n is the length (time samples) of the residuals.
 
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        data           :      : N,M,T : 3d data matrix (N samples, M signals, T trials)
-                       :      : N,M   : 2d data matrix (N samples, M signals)
-        h              :      :       : The test is performed for all time lags up
-                                        to h. Note that according to [2] h must
-                                        satisfy h = O(n^0.5), where n is the length
-                                        (time samples) of the signals.
-        p              : 0    :       : Model order if data contains residuals of a
-                                        VAR model fit.
-        repeats        : 100  :       : Number of samples to create under the null
-                                        hypothesis. Larger number will give more
-                                        accurate results.
-        get_q          : False:       : If set to False only the p-value is returned.
-                                        Otherwise actual values of the Li-McLeod
-                                        statistic are returned too.
-
-        Output           Shape   Description
-        --------------------------------------------------------------------------
-        pr               :       : Probability of observing a more extreme value of
-                                   Q under the assumption that H0 is true.
-        q0               :       : (optional, see get_q) list of values that created
-                                   as surrogates to estimate the distribution of Q
-                                   under the null-hypothesis.
-        q                :       : (optional, see get_q) Value of Q that corresponds
-                                   to the current residuals.
-
-        References:
-        [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
-        [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J. Am. Statist. Assoc.
+    References
+    ----------
+    .. [1] H. Lütkepohl, "New Introduction to Multiple Time Series Analysis", 2005, Springer, Berlin, Germany
+    .. [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J. Am. Statist. Assoc.
     """
     res = data[p:, :, :]
     (n, m, t) = res.shape
@@ -383,7 +333,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
 
 
 def _calc_q_statistic(x, h, nt):
-    """ calculate portmanteau statistics up to a lag of h.
+    """ Calculate portmanteau statistics up to a lag of h.
     """
     (n, m, t) = x.shape
 
@@ -423,7 +373,7 @@ def _calc_q_statistic(x, h, nt):
 
 
 def _calc_q_h0(n, x, h, nt):
-    """ calculate q under the null-hypothesis of whiteness
+    """ Calculate q under the null-hypothesis of whiteness.
     """
     x = x.copy()
 

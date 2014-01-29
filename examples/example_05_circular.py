@@ -51,12 +51,14 @@ ws.do_cspvarica()
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and calculate the average value over the alpha band (8-12Hz).
-ws.fit_var()
-con = ws.get_connectivity('ffDTF')
+
 freq = np.linspace(0, fs, ws.nfft_)
 alpha, beta = {}, {}
-for c in con.keys():
-    alpha[c] = np.mean(con[c][:, :, np.logical_and(8 < freq, freq < 12)], axis=2)
+for c in np.unique(classes):
+    ws.set_used_labels([c])
+    ws.fit_var()
+    con = ws.get_connectivity('ffDTF')
+    alpha[c] = np.mean(con[:, :, np.logical_and(8 < freq, freq < 12)], axis=2)
 
 # Prepare topography plots
 topo = Topoplot()

@@ -9,7 +9,20 @@ from ..datatools import cat_trials
 
 
 def pca_svd(data):
-    """calculate PCA from SVD (observations in rows)"""
+    """calculate PCA using SVD
+    
+    Parameters
+    ----------
+    data : array, shape = [n_samples, n_channels]
+        Two dimensional data array.
+        
+    Returns
+    -------
+    w : array
+        Eigenvectors
+    s : array
+        Eigenvalues
+    """
 
     (w, s, v) = np.linalg.svd(data.transpose())
 
@@ -17,47 +30,52 @@ def pca_svd(data):
 
 
 def pca_eig(x):
-    """calculate PCA as eigenvalues of the covariance (observations in rows)"""
+    """calculate PCA using Eigenvalue decomposition
+    
+    Parameters
+    ----------
+    data : array, shape = [n_samples, n_channels]
+        Two dimensional data array.
+        
+    Returns
+    -------
+    w : array
+        Eigenvectors
+    s : array
+        Eigenvalues
+    """
 
-    [w, v] = np.linalg.eigh(x.transpose().dot(x))
+    [s, w] = np.linalg.eigh(x.transpose().dot(x))
 
-    return v, w
+    return w, s
 
 
 def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim=None, algorithm=pca_eig):
-    """
-    pca( x, subtract_mean=False,
-            normalize=False,
-            sort_components=True,
-            retain_variance=None,
-            algorithm=pcaEIG ):
-
-    calculate principal component analysis (PCA).
-
-    Parameters     Default  Shape   Description
-    --------------------------------------------------------------------------
-    x              :      : n,m,T : 3d data matrix (n samples, m signals, T trials)
-                          : n,m   : 2d data matrix (n samples, m signals)
-    subtract_mean  : False:       : If True, the sample mean is subtracted from x
-    normalize      : False:       : If True, the data is normalized to unit variance
-    sort_components: True :       : If True, components are sorted by decreasing variance
-    reducedim      : None :       : a number less than 1 is interpreted as the
-                                    fraction of variance that should remain in
-                                    the data. All components that describe in
-                                    total less than 1-retain_variance of the
-                                    variance in the data are removed by the PCA.
-                                    An integer number of 1 or greater is
-                                    interpreted as the number of components to
-                                    keep after applying the PCA.
-                                    None or a number greater than m does not
-                                    remove components.
-    numcomp        : None :       : Select numcomp components wtih highest variance
-    algorithm      : pcaEIG :     : which function to call for eigenvector estimation
-
-    Output
-    --------------------------------------------------------------------------
-    w   PCA weights      y = x * w
-    v   inverse weights  x = y * v
+    """ Calculate principal component analysis (PCA)
+    
+    Parameters
+    ----------
+    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        EEG data set
+    subtract_mean : bool, optional
+        Subtract sample mean from x.
+    normalize : bool, optional
+        Normalize variances to 1 before applying PCA.
+    sort_components : bool, optional
+        Sort principal components in order of decreasing eigenvalues.
+    reducedim : {float, int}, optional
+        A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
+        components that describe in total less than `1-reducedim` of the variance are removed by the PCA step.
+        An integer numer of 1 or greater is interpreted as the number of components to keep after applying the PCA.
+    algorithm : func, optional
+        Specify function to use for eigenvalue decomposition (:func:`pca_eig` or :func:`pca_svd`)
+        
+    Returns
+    -------
+    w : array, shape = [n_channels, n_components]
+        PCA transformation matrix
+    v : array, shape = [n_components, n_channels]
+        PCA backtransformation matrix
     """
 
     x = cat_trials(np.atleast_3d(x))

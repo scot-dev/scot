@@ -2,7 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
-""" SCoT: The Source Connectivity Toolbox """
+""" SCoT: The Source Connectivity Toolbox
+"""
 
 __all__ = ['connectivity', 'datatools', 'matfiles', 'ooapi', 'plainica', 'plotting', 'var', 'varica', 'xvschema']
 

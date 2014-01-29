@@ -42,13 +42,23 @@ ws.do_cspvarica()
 p = ws.var_.test_whiteness(50)
 print('Whiteness:', p)
 
-ws.plot_source_topos()
+# Configure plotting options
+ws.plot_f_range = [0, 30]       # Only show 0 - 30 Hz
+ws.plot_diagonal = 'S'          # Put spectral density plots on the diagonal
+ws.plot_outside_topo = True     # Plot topos above and to the left
 
+fig = ws.plot_connectivity_topos()
 
 # Connectivity Analysis
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
-# activations of each class and plot them with matplotlib.
+# activations of each class and plot them.
+ws.set_used_labels(['hand'])
 ws.fit_var()
-ws.plot_connectivity('ffDTF', freq_range=[0, 30])
+ws.get_connectivity('ffDTF', fig)
+
+ws.set_used_labels(['foot'])
+ws.fit_var()
+ws.get_connectivity('ffDTF', fig)
+
 ws.show_plots()

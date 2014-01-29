@@ -50,15 +50,28 @@ print('Whiteness:', p)
 data = scot.datatools.cut_segments(raweeg, triggers, -2 * fs, 8 * fs)
 
 
+# Configure plotting options
+ws.plot_f_range = [0, 30]       # Only show 0 - 30 Hz
+ws.plot_diagonal = 'topo'       # Put topo plots on the diagonal
+ws.plot_outside_topo = False    # no topo plots above and to the left
+
+
 # Connectivity Analysis
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and plot them with matplotlib.
-ws.set_data(data, classes, time_offset=-2)
-figs = ws.plot_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), freq_range=[0, 30], crange=[0,30])
+ws.set_data(data, classes, time_offset=-1)
 
-figs['hand'].savefig('hand.png', dpi=900)
-figs['foot'].savefig('foot.png', dpi=900)
+fig = ws.plot_connectivity_topos()
+ws.set_used_labels(['hand'])
+ws.get_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), plot=fig)
+fig.suptitle('Hand')
+fig.savefig('hand.png', dpi=900)
 
+fig = ws.plot_connectivity_topos()
+ws.set_used_labels(['foot'])
+ws.get_tf_connectivity('ffDTF', 1 * fs, int(0.2 * fs), plot=fig)
+fig.suptitle('Foot')
+fig.savefig('foot.png', dpi=900)
 
 ws.show_plots()
