@@ -61,4 +61,7 @@ ws.set_used_labels(['foot'])
 ws.fit_var()
 ws.get_connectivity('ffDTF', fig)
 
+fig.suptitle('MVARICA')
+fig.savefig('ffDTF_PCA.png', dpi=900)
+
 ws.show_plots()
