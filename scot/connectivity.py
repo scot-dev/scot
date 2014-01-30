@@ -32,7 +32,7 @@ def connectivity(measure_names, b, c=None, nfft=512):
 
     Notes
     -----
-    It is more efficients to use this function to get more measures at once than calling the function multiple times.
+    When using this function it is more efficient to get several measures at once than calling the function multiple times.
 
     Examples
     --------
@@ -143,18 +143,24 @@ class Connectivity:
     @memoize
     def A(self):
         """ Spectral VAR coefficients
+
+        .. math:: \mathbf{A}(f) = \mathbf{I} - \sum_{k=1}^{p} \mathbf{a}^{(k)} \mathrm{e}^{-2\pi f}
         """
         return np.fft.rfft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)
 
     @memoize
     def H(self):
         """ VAR transfer function
+
+        .. math:: \mathbf{H}(f) = \mathbf{A}(f)^{-1}
         """
         return _inv3(self.A())
 
     @memoize
     def S(self):
         """ Cross spectral density
+
+        .. math:: \mathbf{S}(f) = \mathbf{H}(f) \mathbf{C} \mathbf{H}'(f)
         """
         if self.c is None:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
@@ -164,18 +170,24 @@ class Connectivity:
     @memoize
     def logS(self):
         """ Logarithmic cross spectral density
+
+        .. math:: \mathrm{logS}(f) = \log | \mathbf{S}(f) |
         """
         return np.log10(np.abs(self.S()))
 
     @memoize
     def absS(self):
-        """ Logarithmic cross spectral density
+        """ Absolute cross spectral density
+
+        .. math:: \mathrm{absS}(f) = | \mathbf{S}(f) |
         """
         return np.abs(self.S())
 
     @memoize
     def G(self):
         """ Inverse cross spectral density
+
+        .. math:: \mathbf{G}(f) = \mathbf{A}(f) \mathbf{C}^{-1} \mathbf{A}'(f)
         """
         if self.c is None:
             raise RuntimeError('Inverse cross spectral density requires invertible noise covariance matrix c.')
@@ -185,12 +197,16 @@ class Connectivity:
     @memoize
     def logG(self):
         """ Logarithmic inverse cross spectral density
+
+        .. math:: \mathrm{logG}(f) = \log | \mathbf{G}(f) |
         """
         return np.log10(np.abs(self.G()))
 
     @memoize
     def COH(self):
         """ Coherence
+
+        .. math:: \mathrm{COH}_{ij}(f) = \\frac{S_{ij}(f)}{\sqrt{S_{ii}(f) S_{jj}(f)}}
         """
         S = self.S()
         COH = np.zeros(S.shape, np.complex)
@@ -202,12 +218,16 @@ class Connectivity:
     @memoize
     def PHI(self):
         """ Phase angle
+
+        Returns the phase angle of complex :func:`S`.
         """
         return np.angle(self.S())
 
     @memoize
     def pCOH(self):
         """ Partial coherence
+
+        .. math:: \mathrm{pCOH}_{ij}(f) = \\frac{G_{ij}(f)}{\sqrt{G_{ii}(f) G_{jj}(f)}}
         """
         G = self.G()
         pCOH = np.zeros(G.shape, np.complex)
@@ -219,6 +239,8 @@ class Connectivity:
     @memoize
     def PDC(self):
         """ Partial directed coherence
+
+        .. math:: \mathrm{PDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) A_{:j}(f)}}
         """
         A = self.A()
         PDC = np.zeros(A.shape, np.complex)
@@ -231,6 +253,8 @@ class Connectivity:
     @memoize
     def ffPDC(self):
         """ Full frequency partial directed coherence
+
+        .. math:: \mathrm{ffPDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{\sum_f A_{:j}'(f) A_{:j}(f)}}
         """
         A = self.A()
         PDC = np.zeros(A.shape, np.complex)
@@ -244,6 +268,8 @@ class Connectivity:
     @memoize
     def PDCF(self):
         """ Partial directed coherence factor
+
+        .. math:: \mathrm{PDCF}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) \mathbf{C}^{-1} A_{:j}(f)}}
         """
         A = self.A()
         PDCF = np.zeros(A.shape, np.complex)
@@ -256,6 +282,9 @@ class Connectivity:
     @memoize
     def GPDC(self):
         """ Generalized partial directed coherence
+
+        .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{|A_{ij}(f)|}
+            {\sigma_i \sqrt{A_{:j}'(f) \mathrm{diag}(\mathbf{C})^{-1} A_{:j}(f)}}
         """
         A = self.A()
         DC = np.diag(1 / np.diag(self.c))
@@ -270,6 +299,8 @@ class Connectivity:
     @memoize
     def DTF(self):
         """ Directed transfer function
+
+        .. math:: \mathrm{DTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{H_{i:}(f) H_{i:}'(f)}}
         """
         H = self.H()
         DTF = np.zeros(H.shape, np.complex)
@@ -282,6 +313,8 @@ class Connectivity:
     @memoize
     def ffDTF(self):
         """ Full frequency directed transfer function
+
+        .. math:: \mathrm{ffDTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{\sum_f H_{i:}(f) H_{i:}'(f)}}
         """
         H = self.H()
         DTF = np.zeros(H.shape, np.complex)
@@ -295,12 +328,17 @@ class Connectivity:
     @memoize
     def dDTF(self):
         """" Direct" directed transfer function
+
+        .. math:: \mathrm{dDTF}_{ij}(f) = |\mathrm{pCOH}_{ij}(f)| \mathrm{ffDTF}_{ij}(f)
         """
         return np.abs(self.pCOH()) * self.ffDTF()
 
     @memoize
     def GDTF(self):
         """ Generalized directed transfer function
+
+        .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{\sigma_j |H_{ij}(f)|}
+            {\sqrt{H_{i:}(f) \mathrm{diag}(\mathbf{C}) H_{i:}'(f)}}
         """
         H = self.H()
         DC = np.diag(np.diag(self.c))
