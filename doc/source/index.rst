@@ -22,7 +22,7 @@ Contents:
    info.rst
    manual.rst
    api_reference.rst
-   mytest.rst
+   misc.rst
 
 
 Indices and tables
