@@ -3,10 +3,8 @@
 About SCoT
 ***********
 
-Introduction
-============
-To be done...
+.. toctree::
+   :maxdepth: 2
 
-Screenshots
-===========
-To be done...
+   introduction.rst
+   screenshots.rst
