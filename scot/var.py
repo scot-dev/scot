@@ -168,10 +168,17 @@ class VARBase(DocStringInheritor):
         p = int(sp.shape(self.coef)[1] / m)
 
         y = sp.zeros(data.shape)
-        for k in range(1, p + 1):
-            bp = self.coef[:, (k - 1)::p]
-            for n in range(p, l):
-                y[n, :, :] += bp.dot(data[n - k, :, :])
+        if t > l-p:  # which takes less loop iterations
+            for k in range(1, p + 1):
+                bp = self.coef[:, (k - 1)::p]
+                for n in range(p, l):
+                    y[n, :, :] += bp.dot(data[n - k, :, :])
+        else:
+            for k in range(1, p + 1):
+                bp = self.coef[:, (k - 1)::p]
+                for s in range(t):
+                    y[p:, :, s] += data[(p-k):(l-k), :, s].dot(bp.T)
+
         return y
 
     def is_stable(self):
