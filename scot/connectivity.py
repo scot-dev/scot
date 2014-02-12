@@ -47,7 +47,6 @@ def connectivity(measure_names, b, c=None, nfft=512):
 
 #noinspection PyPep8Naming
 class Connectivity:
-    #TODO: Big optimization potential
     """ Calculation of connectivity measures
     
     This class calculates various spectral connectivity measures from a vector autoregressive (VAR) model.
@@ -165,7 +164,10 @@ class Connectivity:
         if self.c is None:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
         H = self.H()
-        return np.dstack([H[:, :, k].dot(self.c).dot(H[:, :, k].transpose().conj()) for k in range(self.nfft)])
+        #TODO can we do that more efficiently?
+        S = np.einsum('ij..., jk... ->ik...', H, self.c)
+        S = np.einsum('ij..., kj... ->ik...', S, H.conj())
+        return S
 
     @memoize
     def logS(self):
@@ -192,7 +194,10 @@ class Connectivity:
         if self.c is None:
             raise RuntimeError('Inverse cross spectral density requires invertible noise covariance matrix c.')
         A = self.A()
-        return np.dstack([A[:, :, k].transpose().conj().dot(self.Cinv()).dot(A[:, :, k]) for k in range(self.nfft)])
+        #TODO can we do that more efficiently?
+        G = np.einsum('ji..., jk... ->ik...', A.conj(), self.Cinv())
+        G = np.einsum('ij..., jk... ->ik...', G, A)
+        return G
 
     @memoize
     def logG(self):
@@ -209,11 +214,8 @@ class Connectivity:
         .. math:: \mathrm{COH}_{ij}(f) = \\frac{S_{ij}(f)}{\sqrt{S_{ii}(f) S_{jj}(f)}}
         """
         S = self.S()
-        COH = np.zeros(S.shape, np.complex)
-        for k in range(self.nfft):
-            DS = S[:, :, k].diagonal()[np.newaxis]
-            COH[:, :, k] = S[:, :, k] / np.sqrt(DS.transpose().dot(DS))
-        return COH
+        #TODO can we do that more efficiently?
+        return S / np.sqrt(np.einsum('ii..., jj... ->ij...', S, S))
 
     @memoize
     def PHI(self):
@@ -230,11 +232,8 @@ class Connectivity:
         .. math:: \mathrm{pCOH}_{ij}(f) = \\frac{G_{ij}(f)}{\sqrt{G_{ii}(f) G_{jj}(f)}}
         """
         G = self.G()
-        pCOH = np.zeros(G.shape, np.complex)
-        for k in range(self.nfft):
-            DG = G[:, :, k].diagonal()[np.newaxis]
-            pCOH[:, :, k] = G[:, :, k] / np.sqrt(DG.transpose().dot(DG))
-        return pCOH
+        #TODO can we do that more efficiently?
+        return G / np.sqrt(np.einsum('ii..., jj... ->ij...', G, G))
 
     @memoize
     def PDC(self):
@@ -243,12 +242,7 @@ class Connectivity:
         .. math:: \mathrm{PDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) A_{:j}(f)}}
         """
         A = self.A()
-        PDC = np.zeros(A.shape, np.complex)
-        for k in range(self.nfft):
-            for j in range(self.m):
-                den = np.sqrt(A[:, j, k].transpose().conj().dot(A[:, j, k]))
-                PDC[:, j, k] = A[:, j, k] / den
-        return np.abs(PDC)
+        return np.abs(A / np.sqrt(np.sum(A.conj() * A, axis=0, keepdims=True)))
 
     @memoize
     def ffPDC(self):
@@ -257,13 +251,7 @@ class Connectivity:
         .. math:: \mathrm{ffPDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{\sum_f A_{:j}'(f) A_{:j}(f)}}
         """
         A = self.A()
-        PDC = np.zeros(A.shape, np.complex)
-        for j in range(self.m):
-            den = 0
-            for k in range(self.nfft):
-                den += A[:, j, k].transpose().conj().dot(A[:, j, k])
-            PDC[:, j, :] = A[:, j, :] * self.nfft / np.sqrt(den)
-        return np.abs(PDC)
+        return np.abs(A * self.nfft / np.sqrt(np.sum(A.conj() * A, axis=(0, 2), keepdims=True)))
 
     @memoize
     def PDCF(self):
@@ -272,12 +260,8 @@ class Connectivity:
         .. math:: \mathrm{PDCF}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) \mathbf{C}^{-1} A_{:j}(f)}}
         """
         A = self.A()
-        PDCF = np.zeros(A.shape, np.complex)
-        for k in range(self.nfft):
-            for j in range(self.m):
-                den = np.sqrt(A[:, j, k].transpose().conj().dot(self.Cinv()).dot(A[:, j, k]))
-                PDCF[:, j, k] = A[:, j, k] / den
-        return np.abs(PDCF)
+        #TODO can we do that more efficiently?
+        return np.abs(A / np.sqrt(np.einsum('aj..., ab..., bj... ->j...', A.conj(), self.Cinv(), A)))
 
     @memoize
     def GPDC(self):
@@ -287,14 +271,7 @@ class Connectivity:
             {\sigma_i \sqrt{A_{:j}'(f) \mathrm{diag}(\mathbf{C})^{-1} A_{:j}(f)}}
         """
         A = self.A()
-        DC = np.diag(1 / np.diag(self.c))
-        DS = np.sqrt(1 / np.diag(self.c))
-        PDC = np.zeros(A.shape, np.complex)
-        for k in range(self.nfft):
-            for j in range(self.m):
-                den = np.sqrt(A[:, j, k].transpose().conj().dot(DC).dot(A[:, j, k]))
-                PDC[:, j, k] = A[:, j, k] * DS / den
-        return np.abs(PDC)
+        return np.abs(A / np.sqrt(np.einsum('aj..., a..., aj..., ii... ->ij...', A.conj(), 1/np.diag(self.c), A, self.c)))
 
     @memoize
     def DTF(self):
@@ -303,12 +280,7 @@ class Connectivity:
         .. math:: \mathrm{DTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{H_{i:}(f) H_{i:}'(f)}}
         """
         H = self.H()
-        DTF = np.zeros(H.shape, np.complex)
-        for k in range(self.nfft):
-            for i in range(self.m):
-                den = np.sqrt(H[i, :, k].transpose().conj().dot(H[i, :, k]))
-                DTF[i, :, k] = H[i, :, k] / den
-        return np.abs(DTF)
+        return np.abs(H / np.sqrt(np.sum(H * H.conj(), axis=1, keepdims=True)))
 
     @memoize
     def ffDTF(self):
@@ -317,13 +289,7 @@ class Connectivity:
         .. math:: \mathrm{ffDTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{\sum_f H_{i:}(f) H_{i:}'(f)}}
         """
         H = self.H()
-        DTF = np.zeros(H.shape, np.complex)
-        for i in range(self.m):
-            den = 0
-            for k in range(self.nfft):
-                den += H[i, :, k].transpose().conj().dot(H[i, :, k])
-            DTF[i, :, :] = H[i, :, :] * self.nfft / np.sqrt(den)
-        return np.abs(DTF)
+        return np.abs(H * self.nfft / np.sqrt(np.sum(H * H.conj(), axis=(1, 2), keepdims=True)))
 
     @memoize
     def dDTF(self):
@@ -341,18 +307,9 @@ class Connectivity:
             {\sqrt{H_{i:}(f) \mathrm{diag}(\mathbf{C}) H_{i:}'(f)}}
         """
         H = self.H()
-        DC = np.diag(np.diag(self.c))
-        DS = np.sqrt(np.diag(self.c))
-        DTF = np.zeros(H.shape, np.complex)
-        for k in range(self.nfft):
-            for i in range(self.m):
-                den = np.sqrt(H[i, :, k].transpose().conj().dot(DC).dot(H[i, :, k]))
-                DTF[i, :, k] = H[i, :, k] * DS / den
-        return np.abs(DTF)
+        return np.abs(H / np.sqrt(np.einsum('ia..., aa..., ia..., j... ->ij...', H.conj(), self.c, H, 1/self.c.diagonal())))
 
 
 def _inv3(x):
-    y = np.zeros(x.shape, np.complex)
-    for k in range(x.shape[2]):
-        y[:, :, k] = np.linalg.inv(x[:, :, k])
-    return y
+    identity = np.eye(x.shape[0])[np.newaxis, :, :]
+    return np.linalg.solve(x.T, identity).T
