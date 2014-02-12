@@ -122,7 +122,7 @@ class Connectivity:
         if c is None:
             self.c = None
         else:
-            self.c = np.asarray(c)
+            self.c = np.atleast_2d(c)
 
         self.b = np.reshape(b, (m, m, p), 'c')
         self.m = m
@@ -165,8 +165,7 @@ class Connectivity:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
         H = self.H()
         #TODO can we do that more efficiently?
-        S = np.einsum('ij..., jk... ->ik...', H, self.c)
-        S = np.einsum('ij..., kj... ->ik...', S, H.conj())
+        S = np.einsum('ia..., ab..., jb... ->ij...', H, self.c, H.conj())
         return S
 
     @memoize
