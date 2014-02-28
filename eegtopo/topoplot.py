@@ -18,11 +18,13 @@ from .geometry.euclidean import Vector
 class Topoplot:
     """ Creates 2D scalp maps. """
 
-    def __init__(self, m=4, num_lterms=10):
+    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1]):
         self.interprange = np.pi * 3 / 4
         self.head_radius = self.interprange
         self.nose_angle = 15
         self.nose_length = 0.12
+
+        self.headcolor = headcolor
 
         verts = np.array([
             (1, 0),
@@ -133,8 +135,8 @@ class Topoplot:
         nose = self.path_nose.deepcopy()
         head.vertices += offset
         nose.vertices += offset
-        axes.add_patch(patches.PathPatch(head, facecolor='none', lw=2))
-        axes.add_patch(patches.PathPatch(nose, facecolor='none', lw=2))
+        axes.add_patch(patches.PathPatch(head, facecolor='none', edgecolor=self.headcolor, lw=2))
+        axes.add_patch(patches.PathPatch(nose, facecolor='none', edgecolor=self.headcolor, lw=2))
 
     def plot_circles(self, radius, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
@@ -146,8 +148,8 @@ class Topoplot:
             axes.add_patch(circ)
 
 
-def topoplot(values, locations, axes=None, offset=(0,0)):
-    topo = Topoplot()
+def topoplot(values, locations, headcolor=[0, 0, 0, 1], axes=None, offset=(0, 0)):
+    topo = Topoplot(headcolor=headcolor)
     topo.set_locations(locations)
     topo.set_values(values)
     topo.create_map()

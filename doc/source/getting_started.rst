@@ -5,4 +5,8 @@
 Getting started
 ***************
 
-To be done...
+Obtaining SCoT
+--------------
+
+The SCoT source repository is available at github: https://github.com/SCoT-dev/SCoT
+
