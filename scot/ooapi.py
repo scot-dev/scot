@@ -361,6 +361,8 @@ class Workspace:
 
         cm = getattr(self.connectivity_, measure_name)()
 
+        cm = np.abs(cm) if np.any(np.iscomplex(cm)) else cm
+
         if plot is None or plot:
             fig = plot
             if self.plot_diagonal == 'fill':
