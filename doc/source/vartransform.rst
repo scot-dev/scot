@@ -70,8 +70,8 @@ By substituting the transformations into the VAR model equations we obtain
 Thus, each model can be transformed into the other by
 
 .. math::
-    \mathbf{A}^{(k)} &= \mathbf{S}\mathbf{B}^{(k)}\mathbf{R},\; \vec{e}_n &= \mathbf{S} \vec{r}_n \\
-    \mathbf{B}^{(k)} &= \mathbf{R}\mathbf{A}^{(k)}\mathbf{S},\; \vec{r}_n &= \mathbf{R} \vec{e}_n
+    \mathbf{A}^{(k)} &= \mathbf{S}\mathbf{B}^{(k)}\mathbf{R},\; \vec{e}_n = \mathbf{S} \vec{r}_n \\
+    \mathbf{B}^{(k)} &= \mathbf{R}\mathbf{A}^{(k)}\mathbf{S},\; \vec{r}_n = \mathbf{R} \vec{e}_n
 
 Conclusion: We can equivalently formulate VAR models for vector signals, if these signals are related by linear
 transformations that satisfy :math:`\mathbf{S} \mathbf{R} = \mathbf{I}` and :math:`\mathbf{R} \mathbf{S} = \mathbf{I}`.
