@@ -18,7 +18,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     ----------
     x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
         data set
-    cl : list of valid dict keys
+    cl : list of valid dict keys, optional
         Class labels associated with each trial.
     reducedim : {int, float, 'no_pca'}, optional
         A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
@@ -90,15 +90,15 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         r = np.zeros(xpca.shape)
         for i in range(t):
             # fit MVAR model
-            a = var.fit(xpca[:,:,i])
+            a = var.fit(xpca[:, :, i])
             # residuals
-            r[:,:,i] = xpca[:,:,i] - var.predict(xpca[:,:,i])[:,:,0]
+            r[:, :, i] = xpca[:, :, i] - var.predict(xpca[:, :, i])[:, :, 0]
     elif varfit == 'class':
         r = np.zeros(xpca.shape)
         for i in np.unique(cl):
-            mask = cl==i
-            a = var.fit(xpca[:,:,mask])
-            r[:,:,mask] = xpca[:,:,mask] - var.predict(xpca[:,:,mask])
+            mask = cl == i
+            a = var.fit(xpca[:, :, mask])
+            r[:, :, mask] = xpca[:, :, mask] - var.predict(xpca[:, :, mask])
     elif varfit == 'ensemble':
         # fit MVAR model
         a = var.fit(xpca)
@@ -136,61 +136,71 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     return Result
     
     
-def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None, varfit='ensemble'):
-    """
-    cspvarica( x, cl, var )
-    cspvarica( x, cl, var, reducedim, optimize_var, backend )
-    
-    Apply CSPVARICA to the data X. CSPVARICA performs the following steps:
-        1. CSP transform of the data (with optional dimensionality reduction)
-        2. Fitting a VAR model tho the data
-        3. Decomposing the VAR model residuals with ICA
-        4. Correcting the VAR coefficients
-    
-    Parameters     Default  Shape   Description
-    --------------------------------------------------------------------------
-    x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-                          : n,m   : 2d data matrix (n samples, m signals)
-    var            :      :       : Instance of class that represents VAR models.
-    reducedim      :      : 0.99  : An integer number of 1 or greater is
-                                    interpreted as the number of components to
-                                    keep after applying the CSP.
-    backend        : None :       : backend to use for processing (see backend
-                                    module for details). If backend==None, the
-                                    backend set in config will be used.
-    varfit         :'ensemble':   : 'ensemble' (default) fits one VAR model to
-                                    the whole data set.
-                                    'class' fits one VAR model for each class.
-                                    'trial' fits one VAR model for each trial.
-    
-    Output
-    --------------------------------------------------------------------------
-    b   Model coefficients: [B_0, B_1, ... B_P], each sub matrix B_k is of size M*M
-    u   Unmixing matrix
-    m   Mixing matrix
-    e   Residual process
-    c   Residual covariance matrix
-    delta   Regularization parameter
-    
-    Note on the arrangement of model coefficients:
-        B is of shape M, M*P, with sub matrices arranged as follows:
-            b_00 b_01 ... b_0M
-            b_10 b_11 ... b_1M
-            .... ....     ....
-            b_M0 b_M1 ... b_MM
-        Each sub matrix b_ij is a column vector of length P that contains the
-        filter coefficients from channel j (source) to channel i (sink).
+def cspvarica(x, var, cl, reducedim=np.inf, optimize_var=False, backend=None, varfit='ensemble'):
+    """ Performs joint VAR model fitting and ICA source separation.
+
+    This function implements the CSPVARICA procedure [1]_.
+
+    Parameters
+    ----------
+    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        data set
+    cl : list of valid dict keys
+        Class labels associated with each trial.
+    reducedim : {int}, optional
+        Number of (most discriminative) components to keep after applying the CSP.
+    optimize_var : bool, optional
+        Whether to call automatic optimization of the VAR fitting routine.
+    backend : dict-like, optional
+        Specify backend to use. When set to None the backend configured in config.backend is used.
+    varfit : string
+        Determines how to calculate the residuals for source decomposition.
+        'ensemble' (default) fits one model to the whole data set,
+        'class' fits a different model for each class, and
+        'trial' fits a different model for each individual trial.
+
+    Returns
+    -------
+    Result : class
+        A class with the following attributes is returned:
+
+        +---------------+----------------------------------------------------------+
+        | mixing        | Source mixing matrix                                     |
+        +---------------+----------------------------------------------------------+
+        | unmixing      | Source unmixing matrix                                   |
+        +---------------+----------------------------------------------------------+
+        | residuals     | Residuals of the VAR model(s) in source space            |
+        +---------------+----------------------------------------------------------+
+        | var_residuals | Residuals of the VAR model(s) in EEG space (before ICA)  |
+        +---------------+----------------------------------------------------------+
+        | c             | Noise covariance of the VAR model(s) in source space     |
+        +---------------+----------------------------------------------------------+
+        | b             | VAR model coefficients (source space)                    |
+        +---------------+----------------------------------------------------------+
+        | a             | VAR model coefficients (EEG space)                       |
+        +---------------+----------------------------------------------------------+
+
+    Notes
+    -----
+    CSPVARICA is performed with the following steps:
+    1. Dimensionality reduction with CSP
+    2. Fitting a VAR model tho the data
+    3. Decomposing the VAR model residuals with ICA
+    4. Correcting the VAR coefficients
+
+    References
+    ----------
+    .. [1] M. Billinger et al. "SCoT: A Python Toolbox for EEG Source Connectivity", Frontiers in Neuroinformatics, 2014
     """
     
     x = np.atleast_3d(x)
     l, m, t = np.shape(x)
     
-    if backend == None:
+    if backend is None:
         backend = config.backend
     
     # pre-transform the data with CSP
     c, d, xcsp = backend['csp'](x, cl, reducedim)
-    m = c.shape[1]
     
     if optimize_var:
         var.optimize(xcsp)
@@ -199,15 +209,15 @@ def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None, va
         r = np.zeros(xcsp.shape)
         for i in range(t):
             # fit MVAR model
-            a = var.fit(xcsp[:,:,i])
+            a = var.fit(xcsp[:, :, i])
             # residuals
-            r[:,:,i] = xcsp[:,:,i] - var.predict(xcsp[:,:,i])[:,:,0]
+            r[:, :, i] = xcsp[:, :, i] - var.predict(xcsp[:, :, i])[:, :, 0]
     elif varfit == 'class':
         r = np.zeros(xcsp.shape)
         for i in np.unique(cl):
-            mask = cl==i
-            a = var.fit(xcsp[:,:,mask])
-            r[:,:,mask] = xcsp[:,:,mask] - var.predict(xcsp[:,:,mask])
+            mask = cl == i
+            a = var.fit(xcsp[:, :, mask])
+            r[:, :, mask] = xcsp[:, :, mask] - var.predict(xcsp[:, :, mask])
     elif varfit == 'ensemble':
         # fit MVAR model
         a = var.fit(xcsp)
@@ -224,7 +234,7 @@ def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None, va
 
     # correct AR coefficients
     b = a.copy()
-    for k in range(0,a.p):
+    for k in range(0, a.p):
         b.coef[:, k::a.p] = mx.dot(a.coef[:, k::a.p].transpose()).dot(ux).transpose()
     
     # correct (un)mixing matrix estimatees
@@ -242,5 +252,3 @@ def cspvarica(x, cl, var, reducedim=np.inf, optimize_var=False, backend=None, va
     Result.xcsp = xcsp
 
     return Result
-
-    
