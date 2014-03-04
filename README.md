@@ -26,3 +26,6 @@ PYTHONPATH=. python examples/example_01_connectivity.py
 PYTHONPATH=. python examples/example_02_timefrequency.py
 
 etc.
+
+
+Note that as of March 3 2014 you need to get the example data from https://github.com/SCoT-dev/scot-data. The scotdata package must be on Python's search path.

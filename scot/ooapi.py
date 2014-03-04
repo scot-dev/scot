@@ -14,13 +14,13 @@ example usage of the low-level API.
 """
 
 import numpy as np
-from copy import deepcopy
 from . import config
 from .varica import mvarica, cspvarica
 from .plainica import plainica
 from .datatools import dot_special
 from .connectivity import Connectivity
-from .connectivity_statistics import surrogate_connectivity, bootstrap_connectivity, test_bootstrap_difference, significance_fdr
+from .connectivity_statistics import surrogate_connectivity, bootstrap_connectivity, test_bootstrap_difference
+from .connectivity_statistics import significance_fdr
 from . import plotting
 from eegtopo.topoplot import Topoplot
 
@@ -85,6 +85,8 @@ class Workspace:
         self.unmixmaps_ = []
 
         self.var_multiclass_ = None
+        self.var_model_ = None
+        self.var_cov_ = None
 
         self.plot_diagonal = 'topo'
         self.plot_outside_topo = False
@@ -97,7 +99,6 @@ class Workspace:
             self.var_ = self.backend_['var'](**var)
         except TypeError:
             self.var_ = var
-
 
     def __str__(self):
         if self.data_ is not None:
@@ -152,7 +153,7 @@ class Workspace:
 
         self.trial_mask_ = np.ones(self.cl_.size, dtype=bool)
 
-        if self.unmixing_ != None:
+        if self.unmixing_ is not None:
             self.activations_ = dot_special(self.data_, self.unmixing_)
 
     def set_used_labels(self, labels):
@@ -165,7 +166,7 @@ class Workspace:
         labels : list of class labels
             Marks all trials that have a label that is in the `labels` list for further processing.
         """
-        mask = np.zeros((self.cl_.size), dtype=bool)
+        mask = np.zeros(self.cl_.size, dtype=bool)
         for l in labels:
             mask = np.logical_or(mask, self.cl_ == l)
         self.trial_mask_ = mask
@@ -199,7 +200,8 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_[:, :, self.trial_mask_], cl=self.cl_[self.trial_mask_], var=self.var_, reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
+        result = mvarica(x=self.data_[:, :, self.trial_mask_], cl=self.cl_[self.trial_mask_], var=self.var_,
+                         reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
@@ -209,27 +211,39 @@ class Workspace:
         self.unmixmaps_ = []
         return result
     
-    def do_cspvarica(self):
-        """
-        Workspace.doCSPVARICA()
-        
-        Perform CSPVARICA source decomposition and VAR model fitting.
-        
-        Requires: data set, class labels
+    def do_cspvarica(self, varfit='ensemble'):
+        """ Perform CSPVARICA
 
-        Provides: decomposition, activations, var model
-        
-        Behaviour of this function is modified by the following attributes:
-            var_order_
-            var_delta_
-            reducedim_
-            backend_        
+        Perform CSPVARICA source decomposition and VAR model fitting.
+
+        Parameters
+        ----------
+        varfit : string
+            Determines how to calculate the residuals for source decomposition.
+            'ensemble' (default) fits one model to the whole data set,
+            'class' fits a different model for each class, and
+            'trial' fits a different model for each individual trial.
+
+        Returns
+        -------
+        result : class
+            see :func:`cspvarica` for a description of the return value.
+
+        Raises
+        ------
+        RuntimeError
+            If the :class:`Workspace` instance does not contain data.
+
+        See Also
+        --------
+        :func:`cspvarica` : CSPVARICA implementation
         """
-        if self.data_ == None:
+        if self.data_ is None:
             raise RuntimeError("CSPVARICA requires data to be set")
         if self.cl_ is None:
             raise RuntimeError("CSPVARICA requires class labels")
-        result = cspvarica(x=self.data_, cl=self.cl_, var=self.var_, reducedim=self.reducedim_, backend=self.backend_)
+        result = cspvarica(x=self.data_, var=self.var_, cl=self.cl_,
+                           reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
@@ -256,14 +270,13 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
-        result = plainica(x=self.data_[:,:,self.trial_mask_], reducedim=self.reducedim_, backend=self.backend_)
+        result = plainica(x=self.data_[:, :, self.trial_mask_], reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.activations_ = dot_special(self.data_, self.unmixing_)
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
-        self.var_delta_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return result
@@ -288,7 +301,7 @@ class Workspace:
             raise RuntimeError("No sources available (run do_mvarica first)")
         self.mixing_ = np.delete(self.mixing_, sources, 0)
         self.unmixing_ = np.delete(self.unmixing_, sources, 1)
-        if self.activations_ != None:
+        if self.activations_ is not None:
             self.activations_ = np.delete(self.activations_, sources, 1)
         self.var_model_ = None
         self.var_cov_ = None
@@ -511,10 +524,10 @@ class Workspace:
                 diagonal = -1
                 s = np.abs(self.get_tf_connectivity('S', winlen, winstep))
                 if crange == 'default':
-                    crange=[np.min(tfc), np.max(tfc)]
+                    crange = [np.min(s), np.max(s)]
                 fig = plotting.plot_connectivity_timespectrum(s, fs=self.fs_, crange=[np.min(s), np.max(s)],
-                                                          freq_range=self.plot_f_range, time_range=[t0, t1],
-                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+                                                              freq_range=self.plot_f_range, time_range=[t0, t1],
+                                                              diagonal=1, border=self.plot_outside_topo, fig=fig)
             else:
                 diagonal = -1
 
@@ -523,7 +536,7 @@ class Workspace:
                 if diagonal == -1:
                     for m in range(tfc.shape[0]):
                         tfc[m, m, :, :] = 0
-                crange=[np.min(tfc), np.max(tfc)]
+                crange = [np.min(tfc), np.max(tfc)]
             fig = plotting.plot_connectivity_timespectrum(tfc, fs=self.fs_, crange=crange,
                                                           freq_range=self.plot_f_range, time_range=[t0, t1],
                                                           diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
@@ -705,7 +718,8 @@ class Workspace:
 
         return fig
 
-    # def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), crange=None, ignore_diagonal=True):
+    # def plot_tf_connectivity(self, measure, winlen, winstep, freq_range=(-np.inf, np.inf), crange=None,
+    #                          ignore_diagonal=True):
     #     """
     #     Workspace.plot_tf_connectivity(measure, winlen, winstep, freq_range)
     #
