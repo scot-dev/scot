@@ -614,7 +614,7 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
             y = np.concatenate([y, [y1, y[-1], y2]])
             axes.plot(x, y, lw=width, color=colors[order[i], order[j]], solid_capstyle='round', solid_joinstyle='round')
 
-    return axes
+    return fig
 
 
 def plot_whiteness(var, h, repeats=1000, axis=None):
