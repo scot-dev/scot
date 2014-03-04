@@ -383,7 +383,7 @@ class Workspace:
 
         return cm
 
-    def get_surrogate_connectivity(self, measure_name, repeats=100):
+    def get_surrogate_connectivity(self, measure_name, repeats=100, plot=False):
         """ Calculate spectral connectivity measure under the assumption of no actual connectivity.
 
         Repeatedly samples connectivity from phase-randomized data. This provides estimates of the connectivity
@@ -410,8 +410,28 @@ class Workspace:
         --------
         :func:`scot.connectivity_statistics.surrogate_connectivity` : Calculates surrogate connectivity
         """
-        return surrogate_connectivity(measure_name, self.activations_[:, :, self.trial_mask_],
-                                      self.var_, self.nfft_, repeats)
+        cs = surrogate_connectivity(measure_name, self.activations_[:, :, self.trial_mask_],
+                                    self.var_, self.nfft_, repeats)
+
+        if plot is None or plot:
+            fig = plot
+            if self.plot_diagonal == 'fill':
+                diagonal = 0
+            elif self.plot_diagonal == 'S':
+                diagonal = -1
+                sb = self.get_surrogate_connectivity('absS', repeats)
+                sb /= np.max(sb)     # scale to 1 since components are scaled arbitrarily anyway
+                su = np.percentile(sb, 95, axis=0)
+                fig = plotting.plot_connectivity_spectrum([su], fs=self.fs_, freq_range=self.plot_f_range,
+                                                          diagonal=1, border=self.plot_outside_topo, fig=fig)
+            else:
+                diagonal = -1
+            cu = np.percentile(cs, 95, axis=0)
+            fig = plotting.plot_connectivity_spectrum([cu], fs=self.fs_, freq_range=self.plot_f_range,
+                                                      diagonal=diagonal, border=self.plot_outside_topo, fig=fig)
+            return cs, fig
+
+        return cs
 
     def get_bootstrap_connectivity(self, measure_names, repeats=100, num_samples=None, plot=False):
         """ Calculate bootstrap estimates of spectral connectivity measures.
