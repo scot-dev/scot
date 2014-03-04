@@ -401,11 +401,6 @@ class Workspace:
         measure : array, shape = [`repeats`, n_channels, n_channels, nfft]
             Values of the connectivity measure for each surrogate.
 
-        Raises
-        ------
-        RuntimeError
-            If the :class:`Workspace` instance does not contain a fitted VAR model.
-
         See Also
         --------
         :func:`scot.connectivity_statistics.surrogate_connectivity` : Calculates surrogate connectivity
