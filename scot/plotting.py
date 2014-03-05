@@ -300,8 +300,9 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0
         if j == m-1:
             ax.yaxis.tick_right()
 
-    fig.text(0.5, 0.025, 'frequency (Hz)', horizontalalignment='center')
-    fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
+    _plot_labels(fig,
+                 {'x': 0.5, 'y': 0.025, 's': 'frequency (Hz)', 'horizontalalignment': 'center'},
+                 {'x': 0.05, 'y': 0.5, 's': 'magnitude', 'horizontalalignment': 'center', 'rotation': 'vertical'})
 
     return fig
 
@@ -377,8 +378,9 @@ def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagon
             if j == m-1:
                 ax.yaxis.tick_right()
 
-    fig.text(0.5, 0.025, 'frequency (Hz)', horizontalalignment='center')
-    fig.text(0.05, 0.5, 'magnitude', horizontalalignment='center', rotation='vertical')
+    _plot_labels(fig,
+                 {'x': 0.5, 'y': 0.025, 's': 'frequency (Hz)', 'horizontalalignment': 'center'},
+                 {'x': 0.05, 'y': 0.5, 's': 'magnitude', 'horizontalalignment': 'center', 'rotation': 'vertical'})
 
     return fig
 
@@ -470,8 +472,9 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
             if j == m-1:
                 ax.yaxis.tick_right()
 
-    fig.text(0.5, 0.025, 'time (s)', horizontalalignment='center')
-    fig.text(0.05, 0.5, 'frequency (Hz)', horizontalalignment='center', rotation='vertical')
+    _plot_labels(fig,
+                 {'x': 0.5, 'y': 0.025, 's': 'time (s)', 'horizontalalignment': 'center'},
+                 {'x': 0.05, 'y': 0.5, 's': 'frequency (Hz)', 'horizontalalignment': 'center', 'rotation': 'vertical'})
 
     return fig
 
@@ -656,3 +659,17 @@ def plot_whiteness(var, h, repeats=1000, axis=None):
     axis.legend()
 
     return pr
+
+
+def _plot_labels(target, *labels):
+    for l in labels:
+        have_label = False
+        for child in target.get_children():
+            try:
+                if child.get_text() == l['s'] and child.get_position() == (l['x'], l['y']):
+                    have_label = True
+                    break
+            except AttributeError:
+                pass
+        if not have_label:
+            target.text(**l)
