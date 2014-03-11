@@ -306,6 +306,8 @@ class Workspace:
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
+        self.mixmaps_ = []
+        self.unmixmaps_ = []
 
     def fit_var(self):
         """ Fit a var model to the source activations.
