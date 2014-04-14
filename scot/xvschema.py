@@ -8,7 +8,24 @@ from numpy import sort
 
 
 def singletrial(t, num_trials):
-    """Single-trial cross-validation schema: use one trial for training, all others for testing."""
+    """ Single-trial cross-validation schema
+    
+    Use one trial for training, all others for testing.
+
+    Parameters
+    ----------
+    t : int
+        Current cross-validation run
+    num_trials : int
+        Total number of trials
+        
+    Returns
+    -------
+    trainset : list of int
+        trials in the training set
+    testset : list of int
+        trials in the testing set
+    """
     trainset = [t]
     testset = [i for i in range(trainset[0])] + [i for i in range(trainset[-1] + 1, num_trials)]
 
@@ -18,7 +35,24 @@ def singletrial(t, num_trials):
 
 
 def multitrial(t, num_trials):
-    """Multi-trial cross-validation schema: use one trial for testing, all others for training."""
+    """ Single-trial cross-validation schema
+    
+    Use one trial for testing, all others for training.
+
+    Parameters
+    ----------
+    t : int
+        Current cross-validation run
+    num_trials : int
+        Total number of trials
+        
+    Returns
+    -------
+    trainset : list of int
+        trials in the training set
+    testset : list of int
+        trials in the testing set
+    """
     testset = [t]
     trainset = [i for i in range(testset[0])] + [i for i in range(testset[-1] + 1, num_trials)]
 

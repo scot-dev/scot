@@ -15,31 +15,38 @@ binica_binary = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
 
 #noinspection PyNoneFunctionAssignment,PyTypeChecker
 def binica( data, binary = binica_binary ):
-    """
-    binica( data )
-
-    Simple wrapper for the binica program.
+    """ Simple wrapper for the BINICA binary.
+    
+    This function calculates the ICA transformation using the Infomax algorithm implemented in BINICA.
 
     BINICA is bundled with EEGLAB, or can be downloaded from here:
         http://sccn.ucsd.edu/eeglab/binica/
-
-    Parameters     Default  Shape   Description
-    --------------------------------------------------------------------------
-    data                  : n,m   : 2d data matrix (n samples, m signals)
-    binary         : *    :       : path to the binica binary
-
-    Output
-    --------------------------------------------------------------------------
-    w   weights matrix
-    S   sphering matrix
-
-    The unmixing matrix is obtained by multiplying U = np.dot(S,w)
-
-    * by default the binary is expected to be "binica/ica_linux" relative
-      to the directory where this module lies (typically scot/binica/ica_linux)
+        
+    This function attempts to automatically download and extract the BINICA binary.
+    
+    By default the binary is expected to be "binica/ica_linux" relative
+    to the directory where this module lies (typically scot/binica/ica_linux)
+    
+    Parameters
+    ----------
+    data : array-like, shape = [n_samples, n_channels]
+        EEG data set
+    binary : str
+        Full path to the binica binary
+        
+    Returns
+    -------
+    w : array, shape = [n_channels, n_channels]
+        ICA weights matrix
+    s : array, shape = [n_channels, n_channels]
+        Sphering matrix
+        
+    Notes
+    -----
+    The unmixing matrix is obtained by multiplying U = dot(s, w)
     """
     
-    check_binary(binary)
+    check_binary_(binary)
     
     data = np.array( data, dtype=np.float32 )
     
@@ -102,8 +109,8 @@ def binica( data, binary = binica_binary ):
     return weights, sphere
     
 
-def check_binary(binary):
-    """check if binary is available, and try to obtain it if not"""
+def check_binary_(binary):
+    """check if binary is available, and try to download it if not"""
     
     if os.path.exists(binary):
         return

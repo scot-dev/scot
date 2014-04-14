@@ -7,7 +7,9 @@ from importlib import import_module
 import numpy as np
 
 import scot.backend
-from scot import plainica, var, datatools
+from scot import plainica, datatools
+
+from scot.builtin.var import VAR
 
 
 class TestICA(unittest.TestCase):
@@ -28,7 +30,10 @@ class TestICA(unittest.TestCase):
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
-        sources = var.simulate([l, t], b0, noisefunc)
+
+        var = VAR(1)
+        var.coef = b0
+        sources = var.simulate([l, t], noisefunc)
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],

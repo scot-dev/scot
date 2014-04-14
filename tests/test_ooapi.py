@@ -7,8 +7,10 @@ from importlib import import_module
 import numpy as np
 
 import scot.backend
-from scot import var, datatools
+from scot import datatools
 import scot
+
+from scot.builtin.var import VAR
 
 
 class TestMVARICA(unittest.TestCase):
@@ -20,13 +22,14 @@ class TestMVARICA(unittest.TestCase):
 
     def testExceptions(self):
         self.assertRaises(TypeError, scot.Workspace)
-        api = scot.Workspace(var_order=50)
+        api = scot.Workspace({'model_order':50})
         self.assertRaises(RuntimeError, api.do_mvarica)
+        self.assertRaises(RuntimeError, api.do_cspvarica)
         self.assertRaises(RuntimeError, api.fit_var)
         self.assertRaises(TypeError, api.get_connectivity)
         self.assertRaises(RuntimeError, api.get_connectivity, 'S')
         self.assertRaises(RuntimeError, api.get_tf_connectivity, 'PDC', 10, 1)
-
+        
     def testModelIdentification(self):
         """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
             do this for every backend """
@@ -40,7 +43,10 @@ class TestMVARICA(unittest.TestCase):
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
-        sources = var.simulate([l, t], b0, noisefunc)
+
+        var = VAR(2)
+        var.coef = b0
+        sources = var.simulate([l, t], noisefunc)
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -52,7 +58,7 @@ class TestMVARICA(unittest.TestCase):
 
         for bm in backend_modules:
 
-            api = scot.Workspace(var_order=2, backend=bm.backend)
+            api = scot.Workspace({'model_order': 2}, backend=bm.backend)
 
             api.set_data(data)
 
@@ -74,7 +80,7 @@ class TestMVARICA(unittest.TestCase):
             best, d = np.inf, None
 
             for perm in permutations:
-                b = api.var_model_[perm[::2] // 2, :]
+                b = api.var_.coef[perm[::2] // 2, :]
                 b = b[:, perm]
                 for sgn in signperms:
                     c = b * np.repeat([sgn], 3, 0) * np.repeat([sgn[::2]], 6, 0).T
@@ -90,15 +96,36 @@ class TestMVARICA(unittest.TestCase):
             do this for every backend """
 
         # original model coefficients
-        b0 = np.zeros((3, 6))
-        b0[1:3, 2:6] = [[0.4, -0.2, 0.3, 0.0],
+        b01 = np.zeros((3, 6))
+        b02 = np.zeros((3, 6))
+        b01[1:3, 2:6] = [[0.4, -0.2, 0.3, 0.0],
                         [-0.7, 0.0, 0.9, 0.0]]
-        m0 = b0.shape[0]
-        l, t = 1000, 10
+        b02[0:3, 2:6] = [[0.4, 0.0, 0.0, 0.0],
+                        [0.4, 0.0, 0.4, 0.0],
+                        [0.0, 0.0, 0.4, 0.0]]
+        m0 = b01.shape[0]
+        cl = np.array([0, 1, 0, 1, 0, 0, 1, 1, 1, 0])
+        l = 1000
+        t = len(cl)
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
-        sources = var.simulate([l, t], b0, noisefunc)
+
+        var = VAR(2)
+        var.coef = b01
+        sources1 = var.simulate([l, sum(cl==0)], noisefunc)
+        var.coef = b02
+        sources2 = var.simulate([l, sum(cl==1)], noisefunc)
+
+        var.fit(sources1)
+        print(var.coef)
+        var.fit(sources2)
+        print(var.coef)
+
+        sources = np.zeros((l,m0,t))
+
+        sources[:,:,cl==0] = sources1
+        sources[:,:,cl==1] = sources2
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -106,13 +133,11 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(sources, mix)
 
-        cl = [0, 1, 0, 1, 0, 0, 1, 1, 1, 0]
-
         backend_modules = [import_module('scot.backend.' + b) for b in scot.backend.__all__]
 
         for bm in backend_modules:
 
-            api = scot.Workspace(var_order=2, reducedim=3, backend=bm.backend)
+            api = scot.Workspace({'model_order': 2}, reducedim=3, backend=bm.backend)
 
             api.set_data(data)
 
@@ -133,14 +158,29 @@ class TestMVARICA(unittest.TestCase):
             self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (3, 3, 512, 18))
 
             api.set_data(data, cl)
+            
+            self.assertFalse(np.any(np.isnan(api.data_)))
+            self.assertFalse(np.any(np.isinf(api.data_)))
+            
+            api.do_cspvarica()
+            
+            self.assertFalse(np.any(np.isnan(api.activations_)))
+            self.assertFalse(np.any(np.isinf(api.activations_)))
+            
+            self.assertEqual(api.get_connectivity('S').shape, (3,3,512))
 
-            api.fit_var()
+            self.assertFalse(np.any(np.isnan(api.activations_)))
+            self.assertFalse(np.any(np.isinf(api.activations_)))
+            
+            for c in np.unique(cl):
+                api.set_used_labels([c])
 
-            fc = api.get_connectivity('S')
-            tfc = api.get_tf_connectivity('S', 100, 50)
-            for c in tfc:
-                self.assertEqual(fc[c].shape, (3, 3, 512))
-                self.assertEqual(tfc[c].shape, (3, 3, 512, 18))
+                api.fit_var()
+                fc = api.get_connectivity('S')
+                self.assertEqual(fc.shape, (3, 3, 512))
+
+                tfc = api.get_tf_connectivity('S', 100, 50)
+                self.assertEqual(tfc.shape, (3, 3, 512, 18))
 
             api.set_data(data)
             api.remove_sources([0, 2])

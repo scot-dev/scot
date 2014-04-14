@@ -7,7 +7,9 @@ from importlib import import_module
 import numpy as np
 
 import scot.backend
-from scot import varica, var, datatools
+from scot import varica, datatools
+
+from scot.builtin.var import VAR
 
 
 class TestMVARICA(unittest.TestCase):
@@ -30,7 +32,10 @@ class TestMVARICA(unittest.TestCase):
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
         noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
-        sources = var.simulate([l, t], b0, noisefunc)
+
+        var = VAR(2)
+        var.coef = b0
+        sources = var.simulate([l, t], noisefunc)
 
         # simulate volume conduction... 3 sources measured with 7 channels
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
@@ -45,7 +50,7 @@ class TestMVARICA(unittest.TestCase):
             # apply MVARICA
             #  - default setting of 0.99 variance should reduce to 3 channels with this data
             #  - automatically determine delta (enough data, so it should most likely be 0)
-            result = varica.mvarica(data, 2, delta='auto', backend=bm.backend)
+            result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
 
             # ICA does not define the ordering and sign of components
             # so wee need to test all combinations to find if one of them fits the original coefficients
@@ -59,7 +64,7 @@ class TestMVARICA(unittest.TestCase):
             best, d = np.inf, None
 
             for perm in permutations:
-                b = result.b[perm[::2] // 2, :]
+                b = result.b.coef[perm[::2] // 2, :]
                 b = b[:, perm]
                 for sgn in signperms:
                     c = b * np.repeat([sgn], 3, 0) * np.repeat([sgn[::2]], 6, 0).T

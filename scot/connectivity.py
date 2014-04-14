@@ -4,107 +4,112 @@
 
 """ Connectivity Analysis """
 
-from functools import partial
-
 import numpy as np
+from .utils import memoize
 
 
-#noinspection PyPep8Naming
-class memoize(object):
-    """cache the return value of a method
+def connectivity(measure_names, b, c=None, nfft=512):
+    """ calculate connectivity measures.
 
-    This class is meant to be used as a decorator of methods. The return value
-    from a given method invocation will be cached on the instance whose method
-    was invoked. All arguments passed to a method decorated with memoize must
-    be hashable.
+    Parameters
+    ----------
+    measure_names : {str, list of str}
+        Name(s) of the connectivity measure(s) to calculate. See :class:`Connectivity` for supported measures.
+    b : ndarray, shape = [n_channels, n_channels*model_order]
+        VAR model coefficients. See :ref:`var-model-coefficients` for details about the arrangement of coefficients.
+    c : ndarray, shape = [n_channels, n_channels], optional
+        Covariance matrix of the driving noise process. Identity matrix is used if set to None.
+    nfft : int, optional
+        Number of frequency bins to calculate. Note that these points cover the range between 0 and half the
+        sampling rate.
 
-    If a memoized method is invoked directly on its class the result will not
-    be cached. Instead the method will be invoked like a static method:
-    class Obj(object):
-        @memoize
-        def add_to(self, arg):
-            return self + arg
-    Obj.add_to(1) # not enough arguments
-    Obj.add_to(1, 2) # returns 3, result is not cached
+    Returns
+    -------
+    result : ndarray, shape = [n_channels, n_channels, `nfft`]
+        An ndarray of shape [m, m, nfft] is returned if measures is a string. If measures is a list of strings a
+        dictionary is returned, where each key is the name of the measure, and the corresponding values are ndarrays
+        of shape [m, m, nfft].
+
+    Notes
+    -----
+    When using this function it is more efficient to get several measures at once than calling the function multiple times.
+
+    Examples
+    --------
+    >>> c = connectivity(['DTF', 'PDC'], [[0.3, 0.6], [0.0, 0.9]])
     """
-
-    def __init__(self, func):
-        self.func = func
-
-    #noinspection PyUnusedLocal
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self.func
-        return partial(self, obj)
-
-    def __call__(self, *args, **kw):
-        obj = args[0]
-        try:
-            cache = obj.__cache
-        except AttributeError:
-            cache = obj.__cache = {}
-        key = (self.func, args[1:], frozenset(kw.items()))
-        try:
-            res = cache[key]
-        except KeyError:
-            res = cache[key] = self.func(*args, **kw)
-        return res
+    con = Connectivity(b, c, nfft)
+    try:
+        return getattr(con, measure_names)()
+    except TypeError:
+        return {m: getattr(con, m)() for m in measure_names}
 
 
 #noinspection PyPep8Naming
 class Connectivity:
-    #TODO: Big optimization potential
-    """
-    Class Connectivity
+    """ Calculation of connectivity measures
     
-    Class for calculating various spectral connectivity measures from a
-    vector autoregressive (VAR) model.
-    
-    Usage
-        
-    Connectivity(B0, C0, nfft)
-        
-        Cunstructs a new Connectivity Object        .
-    
-        Parameters     Default  Shape   Description
-        --------------------------------------------------------------------------
-        B0             :      : m,m*p : VAR model coefficients
-        C0             : None : m,m   : Covariance matrix of the innovation (noise)
-                                        process. Identity matrix is used if set to
-                                        None.
-        nfft           : 512  : 1     : Number of frequency bins to calculate. Note
-                                        that these points cover the range between 0
-                                        and the nyquist frequency.
-    
-    Connectivity measures are returned by member functions that take no arguments
-    and return a matrix of shape [m,m,nfft]. The first dimension is the sink,
-    the second dimension is the source, and the third dimension is the frequency.
-    
-    The following member functions return connectivity measures:
+    This class calculates various spectral connectivity measures from a vector autoregressive (VAR) model.
 
-    a       Spectral representation of the VAR coefficients
-    H       Transfer function that turns the innovation process into the VAR process
-    S       Cross spectral density
-    logS    Logarithm of the cross spectral density (S), for convenience.
-    g       Inverse cross spectral density
-    logG    Logarithm of the inverse cross spectral density
-    PHI     Phase angle
-    COH     Coherence
-    pCOH    Partial coherence
-    PDC     Partial directed coherence
-    ffPDC   Full frequency partial directed coherence
-    PDCF    PDC factor
-    GPDC    Generalized partial directed coherence
-    DTF     Directed transfer function
-    ffDTF   Full frequency directed transfer function
-    dDTF    Direct directed transfer function
-    GDTF    Generalized directed transfer function
+    Parameters
+    ----------
+    b : ndarray, shape = [n_channels, n_channels*model_order]
+        VAR model coefficients. See :ref:`var-model-coefficients` for details about the arrangement of coefficients.
+    c : ndarray, shape = [n_channels, n_channels], optional
+        Covariance matrix of the driving noise process. Identity matrix is used if set to None.
+    nfft : int, optional
+        Number of frequency bins to calculate. Note that these points cover the range between 0 and half the
+        sampling rate.
 
-    a summary of these measures can be found in [1]
-    
-    [1] Billinger et al 2013,  "Single-trial connectivity estimation for
-        classification of motor imagery data", J. Neural Eng. 10, 2013
-    
+    Methods
+    -------
+    :func:`A`
+       Spectral representation of the VAR coefficients
+    :func:`H`
+        Transfer function that turns the innovation process into the VAR process
+    :func:`S`
+        Cross spectral density
+    :func:`logS`
+        Logarithm of the cross spectral density (S), for convenience.
+    :func:`G`
+        Inverse cross spectral density
+    :func:`logG`
+        Logarithm of the inverse cross spectral density
+    :func:`PHI`
+        Phase angle
+    :func:`COH`
+        Coherence
+    :func:`pCOH`
+        Partial coherence
+    :func:`PDC`
+        Partial directed coherence
+    :func:`ffPDC`
+        Full frequency partial directed coherence
+    :func:`PDCF`
+        PDC factor
+    :func:`GPDC`
+        Generalized partial directed coherence
+    :func:`DTF`
+        Directed transfer function
+    :func:`ffDTF`
+        Full frequency directed transfer function
+    :func:`dDTF`
+        Direct directed transfer function
+    :func:`GDTF`
+        Generalized directed transfer function
+
+    Notes
+    -----
+    Connectivity measures are returned by member functions that take no arguments and return a matrix of
+    shape [m,m,nfft]. The first dimension is the sink, the second dimension is the source, and the third dimension is
+    the frequency.
+
+    A summary of most supported measures can be found in [1]_.
+
+    References
+    ----------
+    .. [1] M. Billinger et al, “Single-trial connectivity estimation for classification of motor imagery data”,
+           *J. Neural Eng.* 10, 2013.
     """
 
     def __init__(self, b, c=None, nfft=512):
@@ -117,7 +122,7 @@ class Connectivity:
         if c is None:
             self.c = None
         else:
-            self.c = np.asarray(c)
+            self.c = np.atleast_2d(c)
 
         self.b = np.reshape(b, (m, m, p), 'c')
         self.m = m
@@ -126,7 +131,8 @@ class Connectivity:
 
     @memoize
     def Cinv(self):
-        """Inverse of the noise covariance"""
+        """ Inverse of the noise covariance
+        """
         try:
             return np.linalg.inv(self.c)
         except np.linalg.linalg.LinAlgError:
@@ -135,157 +141,174 @@ class Connectivity:
 
     @memoize
     def A(self):
-        """Spectral VAR coefficients"""
+        """ Spectral VAR coefficients
+
+        .. math:: \mathbf{A}(f) = \mathbf{I} - \sum_{k=1}^{p} \mathbf{a}^{(k)} \mathrm{e}^{-2\pi f}
+        """
         return np.fft.rfft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)
 
     @memoize
     def H(self):
-        """VAR transfer function"""
+        """ VAR transfer function
+
+        .. math:: \mathbf{H}(f) = \mathbf{A}(f)^{-1}
+        """
         return _inv3(self.A())
 
     @memoize
     def S(self):
-        """Cross spectral density"""
-        if self.c == None:
+        """ Cross spectral density
+
+        .. math:: \mathbf{S}(f) = \mathbf{H}(f) \mathbf{C} \mathbf{H}'(f)
+        """
+        if self.c is None:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
         H = self.H()
-        return np.dstack([H[:, :, k].dot(self.c).dot(H[:, :, k].transpose().conj()) for k in range(self.nfft)])
+        #TODO can we do that more efficiently?
+        S = np.einsum('ia..., ab..., jb... ->ij...', H, self.c, H.conj())
+        return S
 
     @memoize
     def logS(self):
-        """Logarithmic cross spectral density"""
+        """ Logarithmic cross spectral density
+
+        .. math:: \mathrm{logS}(f) = \log | \mathbf{S}(f) |
+        """
         return np.log10(np.abs(self.S()))
 
     @memoize
+    def absS(self):
+        """ Absolute cross spectral density
+
+        .. math:: \mathrm{absS}(f) = | \mathbf{S}(f) |
+        """
+        return np.abs(self.S())
+
+    @memoize
     def G(self):
-        """Inverse cross spectral density"""
-        if self.c == None:
+        """ Inverse cross spectral density
+
+        .. math:: \mathbf{G}(f) = \mathbf{A}(f) \mathbf{C}^{-1} \mathbf{A}'(f)
+        """
+        if self.c is None:
             raise RuntimeError('Inverse cross spectral density requires invertible noise covariance matrix c.')
         A = self.A()
-        return np.dstack([A[:, :, k].transpose().conj().dot(self.Cinv()).dot(A[:, :, k]) for k in range(self.nfft)])
+        #TODO can we do that more efficiently?
+        G = np.einsum('ji..., jk... ->ik...', A.conj(), self.Cinv())
+        G = np.einsum('ij..., jk... ->ik...', G, A)
+        return G
 
     @memoize
     def logG(self):
-        """Logarithmic inverse cross spectral density"""
+        """ Logarithmic inverse cross spectral density
+
+        .. math:: \mathrm{logG}(f) = \log | \mathbf{G}(f) |
+        """
         return np.log10(np.abs(self.G()))
 
     @memoize
     def COH(self):
-        """Coherence"""
+        """ Coherence
+
+        .. math:: \mathrm{COH}_{ij}(f) = \\frac{S_{ij}(f)}{\sqrt{S_{ii}(f) S_{jj}(f)}}
+        """
         S = self.S()
-        COH = np.zeros(S.shape, np.complex)
-        for k in range(self.nfft):
-            DS = S[:, :, k].diagonal()[np.newaxis]
-            COH[:, :, k] = S[:, :, k] / np.sqrt(DS.transpose().dot(DS))
-        return COH
+        #TODO can we do that more efficiently?
+        return S / np.sqrt(np.einsum('ii..., jj... ->ij...', S, S))
 
     @memoize
     def PHI(self):
-        """Phase angle"""
+        """ Phase angle
+
+        Returns the phase angle of complex :func:`S`.
+        """
         return np.angle(self.S())
 
     @memoize
     def pCOH(self):
-        """Partial coherence"""
+        """ Partial coherence
+
+        .. math:: \mathrm{pCOH}_{ij}(f) = \\frac{G_{ij}(f)}{\sqrt{G_{ii}(f) G_{jj}(f)}}
+        """
         G = self.G()
-        pCOH = np.zeros(G.shape, np.complex)
-        for k in range(self.nfft):
-            DG = G[:, :, k].diagonal()[np.newaxis]
-            pCOH[:, :, k] = G[:, :, k] / np.sqrt(DG.transpose().dot(DG))
-        return pCOH
+        #TODO can we do that more efficiently?
+        return G / np.sqrt(np.einsum('ii..., jj... ->ij...', G, G))
 
     @memoize
     def PDC(self):
-        """Partial directed coherence"""
+        """ Partial directed coherence
+
+        .. math:: \mathrm{PDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) A_{:j}(f)}}
+        """
         A = self.A()
-        PDC = np.zeros(A.shape, np.complex)
-        for k in range(self.nfft):
-            for j in range(self.m):
-                den = np.sqrt(A[:, j, k].transpose().conj().dot(A[:, j, k]))
-                PDC[:, j, k] = A[:, j, k] / den
-        return np.abs(PDC)
+        return np.abs(A / np.sqrt(np.sum(A.conj() * A, axis=0, keepdims=True)))
 
     @memoize
     def ffPDC(self):
-        """Full frequency partial directed coherence"""
+        """ Full frequency partial directed coherence
+
+        .. math:: \mathrm{ffPDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{\sum_f A_{:j}'(f) A_{:j}(f)}}
+        """
         A = self.A()
-        PDC = np.zeros(A.shape, np.complex)
-        for j in range(self.m):
-            den = 0
-            for k in range(self.nfft):
-                den += A[:, j, k].transpose().conj().dot(A[:, j, k])
-            PDC[:, j, :] = A[:, j, :] * self.nfft / np.sqrt(den)
-        return np.abs(PDC)
+        return np.abs(A * self.nfft / np.sqrt(np.sum(A.conj() * A, axis=(0, 2), keepdims=True)))
 
     @memoize
     def PDCF(self):
-        """Partial directed coherence factor"""
+        """ Partial directed coherence factor
+
+        .. math:: \mathrm{PDCF}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) \mathbf{C}^{-1} A_{:j}(f)}}
+        """
         A = self.A()
-        PDCF = np.zeros(A.shape, np.complex)
-        for k in range(self.nfft):
-            for j in range(self.m):
-                den = np.sqrt(A[:, j, k].transpose().conj().dot(self.Cinv()).dot(A[:, j, k]))
-                PDCF[:, j, k] = A[:, j, k] / den
-        return np.abs(PDCF)
+        #TODO can we do that more efficiently?
+        return np.abs(A / np.sqrt(np.einsum('aj..., ab..., bj... ->j...', A.conj(), self.Cinv(), A)))
 
     @memoize
     def GPDC(self):
-        """Generalized partial directed coherence"""
+        """ Generalized partial directed coherence
+
+        .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{|A_{ij}(f)|}
+            {\sigma_i \sqrt{A_{:j}'(f) \mathrm{diag}(\mathbf{C})^{-1} A_{:j}(f)}}
+        """
         A = self.A()
-        DC = np.diag(1 / np.diag(self.c))
-        DS = np.sqrt(1 / np.diag(self.c))
-        PDC = np.zeros(A.shape, np.complex)
-        for k in range(self.nfft):
-            for j in range(self.m):
-                den = np.sqrt(A[:, j, k].transpose().conj().dot(DC).dot(A[:, j, k]))
-                PDC[:, j, k] = A[:, j, k] * DS / den
-        return np.abs(PDC)
+        return np.abs(A / np.sqrt(np.einsum('aj..., a..., aj..., ii... ->ij...', A.conj(), 1/np.diag(self.c), A, self.c)))
 
     @memoize
     def DTF(self):
-        """Directed transfer function"""
+        """ Directed transfer function
+
+        .. math:: \mathrm{DTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{H_{i:}(f) H_{i:}'(f)}}
+        """
         H = self.H()
-        DTF = np.zeros(H.shape, np.complex)
-        for k in range(self.nfft):
-            for i in range(self.m):
-                den = np.sqrt(H[i, :, k].transpose().conj().dot(H[i, :, k]))
-                DTF[i, :, k] = H[i, :, k] / den
-        return np.abs(DTF)
+        return np.abs(H / np.sqrt(np.sum(H * H.conj(), axis=1, keepdims=True)))
 
     @memoize
     def ffDTF(self):
-        """Full frequency directed transfer function"""
+        """ Full frequency directed transfer function
+
+        .. math:: \mathrm{ffDTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{\sum_f H_{i:}(f) H_{i:}'(f)}}
+        """
         H = self.H()
-        DTF = np.zeros(H.shape, np.complex)
-        for i in range(self.m):
-            den = 0
-            for k in range(self.nfft):
-                den += H[i, :, k].transpose().conj().dot(H[i, :, k])
-            DTF[i, :, :] = H[i, :, :] * self.nfft / np.sqrt(den)
-        return np.abs(DTF)
+        return np.abs(H * self.nfft / np.sqrt(np.sum(H * H.conj(), axis=(1, 2), keepdims=True)))
 
     @memoize
     def dDTF(self):
-        """"Direct" dirrected transfer function"""
+        """" Direct" directed transfer function
+
+        .. math:: \mathrm{dDTF}_{ij}(f) = |\mathrm{pCOH}_{ij}(f)| \mathrm{ffDTF}_{ij}(f)
+        """
         return np.abs(self.pCOH()) * self.ffDTF()
 
     @memoize
     def GDTF(self):
-        """Generalized directed transfer function"""
+        """ Generalized directed transfer function
+
+        .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{\sigma_j |H_{ij}(f)|}
+            {\sqrt{H_{i:}(f) \mathrm{diag}(\mathbf{C}) H_{i:}'(f)}}
+        """
         H = self.H()
-        DC = np.diag(np.diag(self.c))
-        DS = np.sqrt(np.diag(self.c))
-        DTF = np.zeros(H.shape, np.complex)
-        for k in range(self.nfft):
-            for i in range(self.m):
-                den = np.sqrt(H[i, :, k].transpose().conj().dot(DC).dot(H[i, :, k]))
-                DTF[i, :, k] = H[i, :, k] * DS / den
-        return np.abs(DTF)
+        return np.abs(H / np.sqrt(np.einsum('ia..., aa..., ia..., j... ->ij...', H.conj(), self.c, H, 1/self.c.diagonal())))
 
 
 def _inv3(x):
-    y = np.zeros(x.shape, np.complex)
-    for k in range(x.shape[2]):
-        y[:, :, k] = np.linalg.inv(x[:, :, k])
-    return y
-    
+    identity = np.eye(x.shape[0])[np.newaxis, :, :]
+    return np.linalg.solve(x.T, identity).T

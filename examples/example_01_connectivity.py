@@ -13,7 +13,7 @@ import scot
 # motor imagery. The the trigger time points of the cues are stored in 'tr', and
 # 'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor
 # imagery period was approximately 6 seconds.
-from motorimagery import data as midata
+import scotdata.motorimagery as midata
 
 raweeg = midata.eeg
 triggers = midata.triggers
@@ -31,20 +31,37 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 # Set up the analysis object
 #
-# We simply choose a VAR model order of 30, and reduction to 4 components (that's not a lot!).
-ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
+# We simply choose a VAR model order of 35, and reduction to 4 components (that's not a lot!).
+ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
 
 
 # Perform MVARICA and plot the components
 ws.set_data(data, classes)
-ws.do_mvarica()
-ws.plot_source_topos()
+ws.do_cspvarica()
 
+p = ws.var_.test_whiteness(50)
+print('Whiteness:', p)
+
+# Configure plotting options
+ws.plot_f_range = [0, 30]       # Only show 0 - 30 Hz
+ws.plot_diagonal = 'S'          # Put spectral density plots on the diagonal
+ws.plot_outside_topo = True     # Plot topos above and to the left
+
+fig = ws.plot_connectivity_topos()
 
 # Connectivity Analysis
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
-# activations of each class and plot them with matplotlib.
+# activations of each class and plot them.
+ws.set_used_labels(['foot'])
 ws.fit_var()
-ws.plot_connectivity('ffDTF', freq_range=[0, 30])
+ws.get_connectivity('ffDTF', fig)
+
+ws.set_used_labels(['hand'])
+ws.fit_var()
+ws.get_connectivity('ffDTF', fig)
+
+fig.suptitle('CSPVARICA')
+fig.savefig('ffDTF_CSP.png', dpi=900)
+
 ws.show_plots()

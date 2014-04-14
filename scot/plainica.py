@@ -2,40 +2,51 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+""" Source decomposition with ICA.
+"""
+
 import numpy as np
 
 from . import config
 from .datatools import cat_trials
 
 
-def plainica(x, reducedim=0.99, backend=None):
+class ResultICA:
+    """ Result of :func:`plainica`
+
+    Attributes
+    ----------
+    `mixing` : array
+        estimate of the mixing matrix
+    `unmixing` : array
+        estimate of the unmixing matrix
     """
-    plainica( x )
-    plainica( x, reducedim, backend )
+    def __init__(self, mx, ux):
+        self.mixing = mx
+        self.unmixing = ux
+
+
+def plainica(x, reducedim=0.99, backend=None):
+    """ Source decomposition with ICA.
 
     Apply ICA to the data x, with optional PCA dimensionality reduction.
 
-    Parameters     Default  Shape   Description
-    --------------------------------------------------------------------------
-    x              :      : n,m,t : 3d data matrix (n samples, m signals, t trials)
-                          : n,m   : 2d data matrix (n samples, m signals)
-    reducedim      :      : 0.99  : a number less than 1 is interpreted as the
-                                    fraction of variance that should remain in
-                                    the data. All components that describe in
-                                    total less than 1-retain_variance of the
-                                    variance in the data are removed by the PCA.
-                                    An integer number of 1 or greater is
-                                    interpreted as the number of components to
-                                    keep after applying the PCA.
-                                    If set to 'no_pca' the PCA step is skipped.
-    backend        : None :       : backend to use for processing (see backend
-                                    module for details). If backend==None, the
-                                    backend set in config will be used.
+    Parameters
+    ----------
+    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        data set
+    reducedim : {int, float, 'no_pca'}, optional
+        A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
+        components that describe in total less than `1-reducedim` of the variance are removed by the PCA step.
+        An integer numer of 1 or greater is interpreted as the number of components to keep after applying the PCA.
+        If set to 'no_pca' the PCA step is skipped.
+    backend : dict-like, optional
+        Specify backend to use. When set to None the backend configured in config.backend is used.
 
-    Output
-    --------------------------------------------------------------------------
-    U   Unmixing matrix
-    m   Mixing matrix
+    Returns
+    -------
+    result : ResultICA
+        Source decomposition
     """
 
     x = np.atleast_3d(x)
