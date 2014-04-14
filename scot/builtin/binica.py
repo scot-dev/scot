@@ -14,7 +14,7 @@ import numpy as np
 binica_binary = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
 
 #noinspection PyNoneFunctionAssignment,PyTypeChecker
-def binica( data, binary = binica_binary ):
+def binica(data, binary=binica_binary):
     """ Simple wrapper for the BINICA binary.
     
     This function calculates the ICA transformation using the Infomax algorithm implemented in BINICA.
@@ -48,17 +48,17 @@ def binica( data, binary = binica_binary ):
     
     check_binary_(binary)
     
-    data = np.array( data, dtype=np.float32 )
+    data = np.array(data, dtype=np.float32)
     
     nframes, nchans = data.shape
     
     uid = uuid4()
 
-    scriptfile = 'binica-%s.sc'%uid
-    datafile = 'binica-%s.fdt'%uid
-    weightsfile = 'binica-%s.wts'%uid
-    #weightstmpfile = 'binicatmp-%s.wts'%uid
-    spherefile = 'binica-%s.sph'%uid
+    scriptfile = 'binica-%s.sc' % uid
+    datafile = 'binica-%s.fdt' % uid
+    weightsfile = 'binica-%s.wts' % uid
+    #weightstmpfile = 'binicatmp-%s.wts' % uid
+    spherefile = 'binica-%s.sph' % uid
     
     config = {'DataFile': datafile,
               'WeightsOutFile': weightsfile,
@@ -69,12 +69,12 @@ def binica( data, binary = binica_binary ):
     #    config['WeightsTempFile'] = weightstmpfile
 
     # create data file
-    f = open( datafile, 'wb' )
+    f = open(datafile, 'wb')
     data.tofile(f)
     f.close()
 
     # create script file        
-    f = open( scriptfile, 'wt' )
+    f = open(scriptfile, 'wt')
     for h in config:
         print(h, config[h], file=f)
     f.close()
@@ -90,8 +90,8 @@ def binica( data, binary = binica_binary ):
     os.remove(datafile)    
     
     # read weights
-    f = open( weightsfile, 'rb' )
-    weights = np.fromfile( f, dtype=np.float32 )
+    f = open(weightsfile, 'rb')
+    weights = np.fromfile(f, dtype=np.float32)
     f.close()
     weights = np.reshape(weights, (nchans,nchans))
     
@@ -100,7 +100,7 @@ def binica( data, binary = binica_binary ):
     
     # read sphering matrix
     f = open( spherefile, 'rb' )
-    sphere = np.fromfile( f, dtype=np.float32 )
+    sphere = np.fromfile(f, dtype=np.float32)
     f.close()
     sphere = np.reshape(sphere, (nchans,nchans))    
     
