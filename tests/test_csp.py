@@ -62,7 +62,7 @@ class TestDefaults(unittest.TestCase):
         self.X = np.random.randn(100,5,10)
         self.C = [0,0,0,0,0,1,1,1,1,1]
         self.Y = self.X.copy()
-        self.D = self.C.copy()
+        self.D = list(self.C)
         self.N, self.M, self.T = self.X.shape
         self.W, self.V = csp(self.X, self.C)
 
@@ -100,7 +100,7 @@ class TestDimensionalityReduction(unittest.TestCase):
         self.X = np.random.rand(100,15,10)
         self.C = [0,0,0,0,0,1,1,1,1,1]
         self.Y = self.X.copy()
-        self.D = self.C.copy()
+        self.D = list(self.C)
         self.N, self.M, self.T = self.X.shape
         self.W, self.V = csp(self.X, self.C, numcomp=5)
 

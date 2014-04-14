@@ -5,6 +5,8 @@
 """ SCoT: The Source Connectivity Toolbox
 """
 
+from __future__ import absolute_import
+
 __all__ = ['connectivity', 'datatools', 'matfiles', 'ooapi', 'plainica', 'plotting', 'var', 'varica', 'xvschema']
 
 from . import config

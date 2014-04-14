@@ -122,12 +122,17 @@ def check_binary_(binary):
         
     if not os.path.exists(path):
         os.makedirs(path)
-    
-    import urllib.request
+   
+    try: 
+        # Python 3
+        from urllib.request import urlretrieve as urlretrieve
+    except ImportError:
+        # Python 2.7
+        from urllib import urlretrieve as urlretrieve
     import zipfile
     import stat
 
-    urllib.request.urlretrieve(url, path + '/binica.zip')
+    urlretrieve(url, path + '/binica.zip')
 
     with zipfile.ZipFile(path + '/binica.zip') as tgz:
         tgz.extractall(path + '/..')
