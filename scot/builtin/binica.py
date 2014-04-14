@@ -2,6 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+from __future__ import print_function
+
 from uuid import uuid4
 import os
 import sys
@@ -43,21 +45,21 @@ def binica(data, binary=binica_binary):
     -----
     The unmixing matrix is obtained by multiplying U = dot(s, w)
     """
-
+    
     check_binary_(binary)
-
+    
     data = np.array(data, dtype=np.float32)
-
+    
     nframes, nchans = data.shape
-
+    
     uid = uuid4()
 
     scriptfile = 'binica-%s.sc' % uid
     datafile = 'binica-%s.fdt' % uid
     weightsfile = 'binica-%s.wts' % uid
-    #weightstmpfile = 'binicatmp-%s.wts'%uid
+    #weightstmpfile = 'binicatmp-%s.wts' % uid
     spherefile = 'binica-%s.sph' % uid
-
+    
     config = {'DataFile': datafile,
               'WeightsOutFile': weightsfile,
               'SphereFile': spherefile,
@@ -76,56 +78,61 @@ def binica(data, binary=binica_binary):
     for h in config:
         print(h, config[h], file=f)
     f.close()
-
+    
     # flush output streams otherwise things printed before might appear after the ICA output.
     sys.stdout.flush()
     sys.stderr.flush()
-
+    
     # run ICA    
     os.system(binary + ' < ' + scriptfile)
-
+    
     os.remove(scriptfile)
-    os.remove(datafile)
-
+    os.remove(datafile)    
+    
     # read weights
     f = open(weightsfile, 'rb')
     weights = np.fromfile(f, dtype=np.float32)
     f.close()
-    weights = np.reshape(weights, (nchans, nchans))
-
-    #    os.remove(weightstmpfile)
+    weights = np.reshape(weights, (nchans,nchans))
+    
+#    os.remove(weightstmpfile)
     os.remove(weightsfile)
-
+    
     # read sphering matrix
-    f = open(spherefile, 'rb')
+    f = open( spherefile, 'rb' )
     sphere = np.fromfile(f, dtype=np.float32)
     f.close()
-    sphere = np.reshape(sphere, (nchans, nchans))
-
+    sphere = np.reshape(sphere, (nchans,nchans))    
+    
     os.remove(spherefile)
-
+    
     return weights, sphere
-
+    
 
 def check_binary_(binary):
     """check if binary is available, and try to download it if not"""
-
+    
     if os.path.exists(binary):
         return
 
     url = 'http://sccn.ucsd.edu/eeglab/binica/binica.zip'
-    print(binary + ' not found. Trying to download from ' + url)
+    print(binary+' not found. Trying to download from '+url)
 
     path = os.path.dirname(binary)
-
+        
     if not os.path.exists(path):
         os.makedirs(path)
-
-    import urllib.request
+   
+    try: 
+        # Python 3
+        from urllib.request import urlretrieve as urlretrieve
+    except ImportError:
+        # Python 2.7
+        from urllib import urlretrieve as urlretrieve
     import zipfile
     import stat
 
-    urllib.request.urlretrieve(url, path + '/binica.zip')
+    urlretrieve(url, path + '/binica.zip')
 
     with zipfile.ZipFile(path + '/binica.zip') as tgz:
         tgz.extractall(path + '/..')

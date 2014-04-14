@@ -5,6 +5,8 @@
 """ Use scikit-learn routines as backend.
 """
 
+from __future__ import absolute_import
+
 from sklearn.decomposition import FastICA, PCA
 from sklearn import linear_model
 import scipy as sp

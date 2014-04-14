@@ -1,8 +1,12 @@
+# coding=utf-8
+
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
 """ vector autoregressive (VAR) model """
+
+from __future__ import division
 
 import numbers
 from functools import partial

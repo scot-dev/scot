@@ -4,6 +4,8 @@
 
 """Euclidean geometry support module"""
 
+from __future__ import division
+
 import math
 
 

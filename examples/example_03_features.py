@@ -1,6 +1,9 @@
 """
 This example shows how to decompose EEG signals into source activations with MVARICA, and subsequently extract single-trial connectivity as features for LDA.
 """
+
+from __future__ import print_function
+
 import numpy as np
 from sklearn.lda import LDA
 from sklearn.cross_validation import KFold
