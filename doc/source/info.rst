@@ -7,4 +7,4 @@ About SCoT
    :maxdepth: 2
 
    introduction.rst
-   screenshots.rst
+   examples/index.rst
