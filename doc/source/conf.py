@@ -33,12 +33,14 @@ extensions = [
 #    'matplotlib.sphinxext.mathmpl',
     'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
-    'matplotlib.sphinxext.ipython_directive',
+#    'matplotlib.sphinxext.ipython_directive',
     'sphinx.ext.autosummary',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
     'ipython_console_highlighting',
+    'gen_rst',
+    'gen_gallery',
     'numpydoc.numpydoc'
 ]
 
@@ -101,6 +103,16 @@ pygments_style = 'sphinx'
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
 
+plot_formats = [('png', 80), ('hires.png', 200), ('pdf', 50)]
+
+
+# Subdirectories in 'examples/' directory of package and titles for gallery
+mpl_example_sections = (('misc', 'Miscellaneous Examples'),
+                        ('test', 'Example Tests'),
+                        )
+
+
+
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -150,7 +162,7 @@ html_static_path = ['_static']
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+html_additional_pages = {'gallery': 'gallery.html'}
 
 # If false, no module index is generated.
 #html_domain_indices = True

@@ -65,7 +65,7 @@ def gen_gallery(app, doctree):
         return
 
     outdir = app.builder.outdir
-    rootdir = 'plot_directive/mpl_examples'
+    rootdir = 'plot_directive/scot_examples'
 
     example_sections = list(app.builder.config.mpl_example_sections)
     for i, (subdir, title) in enumerate(example_sections):
@@ -90,7 +90,7 @@ def gen_gallery(app, doctree):
         rows.append(header_template.format(title=title, section=subdir))
         toc_rows.append(toc_template.format(title=title, section=subdir))
 
-        origdir = os.path.join('build', rootdir, subdir)
+        origdir = os.path.join('../build', rootdir, subdir)
         thumbdir = os.path.join(outdir, rootdir, subdir, 'thumbnails')
         if not os.path.exists(thumbdir):
             os.makedirs(thumbdir)

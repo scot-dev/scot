@@ -27,7 +27,8 @@ def out_of_date(original, derived):
             os.stat(derived).st_mtime < os.stat(original).st_mtime)
 
 def generate_example_rst(app):
-    rootdir = os.path.join(app.builder.srcdir, '../../examples')
+    rootdir = os.path.join(app.builder.srcdir, 'scot_examples')
+    rootdir = os.path.abspath(rootdir)
     exampledir = os.path.join(app.builder.srcdir, 'examples')
     if not os.path.exists(exampledir):
         os.makedirs(exampledir)
