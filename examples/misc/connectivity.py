@@ -62,6 +62,5 @@ ws.fit_var()
 ws.get_connectivity('ffDTF', fig)
 
 fig.suptitle('CSPVARICA')
-fig.savefig('ffDTF_CSP.png', dpi=900)
 
 ws.show_plots()
