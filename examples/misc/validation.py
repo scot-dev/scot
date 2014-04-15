@@ -41,7 +41,7 @@ for p in [22, 33]:
 
     print('    Performing CSPVARICA')
     var = scot.config.backend['var'](p)
-    result = cspvarica(data, classes, var, m)
+    result = cspvarica(data, var, classes, m)
 
     if result.a.is_stable():
         s = ''

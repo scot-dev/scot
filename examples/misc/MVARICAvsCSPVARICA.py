@@ -43,15 +43,25 @@ Set up the analysis object
 
 We simply choose a VAR model order of 30, and reduction to 4 components (that's not a lot!).
 """
-ws = scot.Workspace(30, reducedim=4, fs=fs, locations=locs)
+ws = scot.Workspace({'model_order': 30}, reducedim=4, fs=fs, locations=locs)
+
+# Configure plotting options
+ws.plot_f_range = [0, 30]       # Only show 0 - 30 Hz
+ws.plot_diagonal = 'S'          # Put spectral density plots on the diagonal
+ws.plot_outside_topo = True     # Plot topos above and to the left
 
 """
 Perform MVARICA
 """
 ws.set_data(data, classes)
 ws.do_mvarica()
+fig1 = ws.plot_connectivity_topos()
+ws.set_used_labels(['foot'])
 ws.fit_var()
-fig1 = ws.plot_connectivity('ffDTF', freq_range=[0,30])
+ws.get_connectivity('ffDTF', fig1)
+ws.set_used_labels(['hand'])
+ws.fit_var()
+ws.get_connectivity('ffDTF', fig1)
 fig1.suptitle('MVARICA')
 
 """
@@ -59,11 +69,13 @@ Perform CSPVARICA
 """
 ws.set_data(data, classes)
 ws.do_cspvarica()
+fig2 = ws.plot_connectivity_topos()
+ws.set_used_labels(['foot'])
 ws.fit_var()
-fig2 = ws.plot_connectivity('ffDTF', freq_range=[0,30])
+ws.get_connectivity('ffDTF', fig2)
+ws.set_used_labels(['hand'])
+ws.fit_var()
+ws.get_connectivity('ffDTF', fig2)
 fig2.suptitle('CSPVARICA')
-
-fig1.savefig('mvarica.png', dpi=900)
-fig2.savefig('cspvarica.png', dpi=900)
 
 ws.show_plots()

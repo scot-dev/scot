@@ -1,5 +1,0 @@
-***********
-Screenshots
-***********
-
-To be done...

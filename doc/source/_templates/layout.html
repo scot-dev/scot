@@ -3,6 +3,8 @@
 
 {% block rootrellink %}
         <li><a href="{{ pathto('index') }}">home</a>|&nbsp;</li>
+        <li><a href="{{ pathto('examples/index') }}">examples</a>|&nbsp;</li>
+        <li><a href="{{ pathto('gallery') }}">gallery</a>|&nbsp;</li>
         <li><a href="{{ pathto('search') }}">search</a>|&nbsp;</li>
 {% endblock %}
 
@@ -16,7 +18,4 @@ pathto("_static/logo.png", 1) }}" border="0" alt="py4sci"/></a>
 {{ super() }}
 {% endblock %}
 
-{# put the sidebar before the body #}
-{% block sidebar1 %}{{ sidebar() }}{% endblock %}
-{% block sidebar2 %}{% endblock %}
 
