@@ -61,7 +61,7 @@ def generate_example_rst(app):
 .. _examples-index:
 
 ####################
-Matplotlib Examples
+SCoT Examples
 ####################
 
 .. htmlonly::
