@@ -41,10 +41,7 @@ header_template = """\
 </h4>"""
 
 link_template = """\
-<figure>
-  <a href="{link}"><img src="{thumb}" border="0" alt="{basename}"/></a><br>
-  <figcaption><a href="{link}">{title}</a></figcaption>
-</figure>
+  <a href="{link}"><img src="{thumb}" border="0" alt="{basename}"/></a>
 """
 
 toc_template = """\
