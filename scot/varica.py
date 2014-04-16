@@ -105,7 +105,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         # residuals
         r = xpca - var.predict(xpca)
     else:
-        raise InvalidArgument('unknown VAR fitting mode')
+        raise ValueError('unknown VAR fitting mode: {}'.format(varfit))
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(r))
@@ -224,7 +224,7 @@ def cspvarica(x, var, cl, reducedim=np.inf, optimize_var=False, backend=None, va
         # residuals
         r = xcsp - var.predict(xcsp)
     else:
-        raise InvalidArgument('unknown VAR fitting mode')
+        raise ValueError('unknown VAR fitting mode: {}'.format(varfit))
 
     # run on residuals ICA to estimate volume conduction    
     mx, ux = backend['ica'](cat_trials(r))
