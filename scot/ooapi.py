@@ -71,6 +71,7 @@ class Workspace:
         self.time_offset_ = 0
         self.unmixing_ = None
         self.mixing_ = None
+        self.premixing_ = None
         self.activations_ = None
         self.connectivity_ = None
         self.locations_ = locations
@@ -128,6 +129,30 @@ class Workspace:
         s += '  VAR models: ' + varstr + '\n'
 
         return s
+
+    def set_locations(self, locations):
+        """ Set sensor locations.
+
+        Parameters
+        ----------
+        locations : array_like
+            3D Electrode locations. Each row holds the x, y, and z coordinates of an electrode.
+        """
+        self.locations_ = locations
+
+    def set_premixing(self, premixing):
+        """ Set premixing matrix.
+
+        The premixing matrix maps data to physical channels. If the data is actual channel data,
+        the premixing matrix can be set to identity. Use this functionality if the data was pre-
+        transformed with e.g. PCA.
+
+        Parameters
+        ----------
+        premixing : array_like, shape = [n_signals, n_channels]
+            Matrix that maps data signals to physical channels.
+        """
+        self.premixing_ = premixing
 
     def set_data(self, data, cl=None, time_offset=0):
         """ Assign data to the workspace.
@@ -803,10 +828,14 @@ class Workspace:
             self.topo_.set_locations(self.locations_)
 
         if mixing and not self.mixmaps_:
-            self.mixmaps_ = plotting.prepare_topoplots(self.topo_, self.mixing_)
+            premix = self.premixing_ if self.premixing_ is not None else np.eye(self.mixing_.shape[1])
+            self.mixmaps_ = plotting.prepare_topoplots(self.topo_, np.dot(self.mixing_, premix))
+            #self.mixmaps_ = plotting.prepare_topoplots(self.topo_, self.mixing_)
 
         if unmixing and not self.unmixmaps_:
-            self.unmixmaps_ = plotting.prepare_topoplots(self.topo_, self.unmixing_.transpose())
+            preinv = np.linalg.pinv(self.premixing_) if self.premixing_ is not None else np.eye(self.unmixing_.shape[0])
+            self.unmixmaps_ = plotting.prepare_topoplots(self.topo_, np.dot(preinv, self.unmixing_).T)
+            #self.unmixmaps_ = plotting.prepare_topoplots(self.topo_, self.unmixing_.transpose())
 
     @staticmethod
     def _clean_measure(measure, a):
