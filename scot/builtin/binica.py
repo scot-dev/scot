@@ -91,6 +91,9 @@ def binica(data, binary=binica_binary):
         # print path to all filenames.
         for filename in sorted(filenames):
             print(os.path.join(dirname, filename))
+
+    if not os.path.exists(scriptfile):
+        raise RuntimeError(scriptfile + ' does not exist!')
     
     # run ICA
     print('running binica:', binary)
