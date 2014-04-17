@@ -1,0 +1,8 @@
+language: python
+
+env:
+  - PYTHON=2.7
+  - PYTHON=3
+
+script:
+  - nosetests --with-coverage --cover-package=scot,eegtopo --cover-erase --cover-inclusive --cover-branches
