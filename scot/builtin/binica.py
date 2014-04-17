@@ -11,7 +11,7 @@ import sys
 import numpy as np
 
 
-binica_binary = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
+binica_binary = os.path.dirname(os.path.abspath(__file__)) + '/binica/ica_linux'
 
 #noinspection PyNoneFunctionAssignment,PyTypeChecker
 def binica(data, binary=binica_binary):
