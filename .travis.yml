@@ -2,18 +2,24 @@ language: python
 
 virtualenv:
   system_site_packages: true
-
-python:
-  - "2.7"
-  - "3.3"
   
-before_install:
- - sudo apt-get install -qq python-numpy python-scipy
-
-install:
-  - pip install coverage
-  - pip install scikit-learn
-#  - pip install numpy scipy scikit-learn coverage
+env:
+  matrix:
+    - DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
+      COVERAGE="true"
+    # This environment tests the oldest supported anaconda env
+    - DISTRIB="conda" PYTHON_VERSION="2.6" INSTALL_MKL="false"
+      NUMPY_VERSION="1.6.2" SCIPY_VERSION="0.11.0"
+    # This environment tests the newest supported anaconda env
+    - DISTRIB="conda" PYTHON_VERSION="3.4" INSTALL_MKL="true"
+      NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
+      
+install: source tools/ci/install.sh
 
 script:
-  - nosetests --with-coverage --cover-package=scot,eegtopo --cover-erase --cover-inclusive --cover-branches
+  - nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
+
+#after_success:
+#    - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
+
+cache: apt
