@@ -3,6 +3,9 @@ language: python
 env:
   - PYTHON=2.7
   - PYTHON=3
+  
+install:
+  - pip install numpy scipy scikit-learn coverage
 
 script:
   - nosetests --with-coverage --cover-package=scot,eegtopo --cover-erase --cover-inclusive --cover-branches
