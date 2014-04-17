@@ -1,11 +1,14 @@
 language: python
 
+virtualenv:
+  system_site_packages: true
+
 env:
   - PYTHON=2.7
   - PYTHON=3
-  
-install:
-  - pip install numpy scipy scikit-learn coverage
+
+#install:
+#  - pip install numpy scipy scikit-learn coverage
 
 script:
   - nosetests --with-coverage --cover-package=scot,eegtopo --cover-erase --cover-inclusive --cover-branches
