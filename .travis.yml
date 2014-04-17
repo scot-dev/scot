@@ -12,7 +12,7 @@ before_install:
 
 install:
   - pip install coverage
-  - pip install sklearn
+  - pip install scikit-learn
 #  - pip install numpy scipy scikit-learn coverage
 
 script:
