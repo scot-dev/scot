@@ -7,6 +7,7 @@ from __future__ import print_function
 from uuid import uuid4
 import os
 import sys
+import subprocess
 
 import numpy as np
 
@@ -83,24 +84,26 @@ def binica(data, binary=binica_binary):
     sys.stdout.flush()
     sys.stderr.flush()
 
-    for dirname, dirnames, filenames in os.walk('.'):
-        # print path to all subdirectories first.
-        for subdirname in sorted(dirnames):
-            print(os.path.join(dirname, subdirname))
-
-        # print path to all filenames.
-        for filename in sorted(filenames):
-            print(os.path.join(dirname, filename))
-
     if not os.path.exists(scriptfile):
         raise RuntimeError(scriptfile + ' does not exist!')
     print('Scriptfile exists...')
     
     # run ICA
-    print('running binica:', binary + ' < ' + scriptfile)
-    retval = os.system(binary)
+    #print('running binica:', binary + ' < ' + scriptfile)
+    #retval = os.system(binary)
     #retval = os.system(binary + ' < ' + scriptfile)
-    print('binica return value:', retval)
+    #print('binica return value:', retval)
+
+    with open(scriptfile) as sc, subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=sc) as proc:
+        print('waiting for binica to finish...')
+        proc.wait()
+        print('binica output:')
+        print(proc.stdout.read().decode())
+
+    #print('***')
+    #ret = subprocess.call(binary, stderr=subprocess.STDOUT, stdin=open(scriptfile))
+    #print(ret)
+    #return
     
     os.remove(scriptfile)
     os.remove(datafile)    
