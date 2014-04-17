@@ -9,7 +9,9 @@ env:
 
 install:
   - sudo apt-get install libblas-dev liblapack-dev
-  - pip install numpy scipy scikit-learn coverage
+  - sudo apt-get install python-numpy python-scipy python-sklearn
+  - pip install coverage
+#  - pip install numpy scipy scikit-learn coverage
 
 script:
   - nosetests --with-coverage --cover-package=scot,eegtopo --cover-erase --cover-inclusive --cover-branches
