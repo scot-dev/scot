@@ -98,7 +98,8 @@ def binica(data, binary=binica_binary):
     
     # run ICA
     print('running binica:', binary + ' < ' + scriptfile)
-    retval = os.system(binary + ' < ' + scriptfile)
+    retval = os.system(binary)
+    #retval = os.system(binary + ' < ' + scriptfile)
     print('binica return value:', retval)
     
     os.remove(scriptfile)
