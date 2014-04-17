@@ -83,8 +83,10 @@ def binica(data, binary=binica_binary):
     sys.stdout.flush()
     sys.stderr.flush()
     
-    # run ICA    
-    os.system(binary + ' < ' + scriptfile)
+    # run ICA
+    print('running binica:', binary)
+    retval = os.system(binary + ' < ' + scriptfile)
+    print('binica return value:', retval)
     
     os.remove(scriptfile)
     os.remove(datafile)    
@@ -136,6 +138,8 @@ def check_binary_(binary):
 
     if not os.path.exists(path + '/binica.zip'):
         raise RuntimeError('Error downloading binica.zip.')
+
+    print('unzipping', path + '/binica.zip')
 
     with zipfile.ZipFile(path + '/binica.zip') as tgz:
         tgz.extractall(path + '/..')
