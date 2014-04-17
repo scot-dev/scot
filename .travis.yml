@@ -8,10 +8,11 @@ python:
   - "3.2"
   
 before_install:
- - sudo apt-get install -qq python-numpy python-scipy python-sklearn
+ - sudo apt-get install -qq python-numpy python-scipy
 
 install:
   - pip install coverage
+  - pip install sklearn
 #  - pip install numpy scipy scikit-learn coverage
 
 script:
