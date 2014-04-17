@@ -94,11 +94,14 @@ def binica(data, binary=binica_binary):
     #retval = os.system(binary + ' < ' + scriptfile)
     #print('binica return value:', retval)
 
-    with open(scriptfile) as sc, subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=sc) as proc:
-        print('waiting for binica to finish...')
-        proc.wait()
-        print('binica output:')
-        print(proc.stdout.read().decode())
+    if os.path.exists(binary):
+        with open(scriptfile) as sc, subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=sc) as proc:
+            print('waiting for binica to finish...')
+            proc.wait()
+            print('binica output:')
+            print(proc.stdout.read().decode())
+    else:
+        raise RuntimeError('the binary is not there!?')
 
     #print('***')
     #ret = subprocess.call(binary, stderr=subprocess.STDOUT, stdin=open(scriptfile))
