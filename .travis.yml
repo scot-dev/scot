@@ -8,6 +8,7 @@ env:
   - PYTHON=3
 
 install:
+  - apt-get install libblas-dev liblapack-dev
   - pip install numpy scipy scikit-learn coverage
 
 script:
