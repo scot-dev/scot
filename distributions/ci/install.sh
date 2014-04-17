@@ -40,7 +40,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
-    sudo apt-get install -qq python-scipy python-nose python-pip
+    sudo apt-get install -qq python-scipy python-nose python-pip python-matplotlib python-scikit-learn
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
