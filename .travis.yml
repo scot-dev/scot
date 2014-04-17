@@ -6,10 +6,11 @@ virtualenv:
 env:
   - PYTHON=2.7
   - PYTHON=3
+  
+before_install:
+ - sudo apt-get install -qq python-numpy python-scipy python-sklearn
 
 install:
-  - sudo apt-get install libblas-dev liblapack-dev
-  - sudo apt-get install python-numpy python-scipy python-sklearn
   - pip install coverage
 #  - pip install numpy scipy scikit-learn coverage
 
