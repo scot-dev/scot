@@ -19,7 +19,8 @@ env:
 install: source distributions/ci/install.sh
 
 script:
-  - nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
+  - PYTHONPATH=. python tests/test_plainica.py
+  #- nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
 
 #after_success:
 #    - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
