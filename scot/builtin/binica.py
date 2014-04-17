@@ -134,13 +134,13 @@ def check_binary_(binary):
 
     urlretrieve(url, path + '/binica.zip')
 
-    if not os.path.exists(path + '/binica.zip')
+    if not os.path.exists(path + '/binica.zip'):
         raise RuntimeError('Error downloading binica.zip.')
 
     with zipfile.ZipFile(path + '/binica.zip') as tgz:
         tgz.extractall(path + '/..')
     
-    if not os.path.exists(binary)
+    if not os.path.exists(binary):
         raise RuntimeError(binary + ' not found, even after extracting binica.zip.')
 
     os.chmod(binary, stat.S_IXUSR)
