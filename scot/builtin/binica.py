@@ -82,6 +82,15 @@ def binica(data, binary=binica_binary):
     # flush output streams otherwise things printed before might appear after the ICA output.
     sys.stdout.flush()
     sys.stderr.flush()
+
+    for dirname, dirnames, filenames in os.walk(os.path.dirname(binary)):
+        # print path to all subdirectories first.
+        for subdirname in sorted(dirnames):
+            print(os.path.join(dirname, subdirname))
+
+        # print path to all filenames.
+        for filename in sorted(filenames):
+            print(os.path.join(dirname, filename))
     
     # run ICA
     print('running binica:', binary)
