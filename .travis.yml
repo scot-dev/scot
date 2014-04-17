@@ -3,9 +3,9 @@ language: python
 virtualenv:
   system_site_packages: true
 
-env:
-  - PYTHON=2.7
-  - PYTHON=3
+python:
+  - "2.7"
+  - "3.2"
   
 before_install:
  - sudo apt-get install -qq python-numpy python-scipy python-sklearn
