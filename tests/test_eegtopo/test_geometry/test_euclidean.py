@@ -2,6 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2014 SCoT Development Team
 
+from __future__ import division
+
 import unittest
 
 from eegtopo.geometry.euclidean import Vector

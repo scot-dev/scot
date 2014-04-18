@@ -53,7 +53,7 @@ class Vector:
         return Vector(self.x, self.y, self.z)
 
     def __repr__(self):
-        return ''.join((__class__.__name__, '(', str(self.x), ', ', str(self.y), ', ', str(self.z), ')'))
+        return ''.join((self.__class__.__name__, '(', str(self.x), ', ', str(self.y), ', ', str(self.z), ')'))
 
     def __eq__(self, other):
         return self.x == other[0] and self.y == other[1] and self.z == other[2]
