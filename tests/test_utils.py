@@ -8,8 +8,38 @@ from importlib import import_module
 import numpy as np
 
 import scot.backend
+import scot.utils
 
 backend_modules = [import_module('scot.backend.' + b) for b in scot.backend.__all__]
+
+
+class TestUtils(unittest.TestCase):
+        def setUp(self):
+            pass
+
+        def tearDown(self):
+            pass
+
+        def test_memoize(self):
+            class Obj(object):
+                @scot.utils.memoize
+                def add_to(self, arg):
+                    return self + arg
+            self.assertRaises(TypeError, Obj.add_to, 1)
+            self.assertEqual(3, Obj.add_to(1, 2))
+            self.assertEqual(3, Obj.add_to(1, 2))
+
+            class Obj(object):
+                @scot.utils.memoize
+                def squareone(self, a):
+                    return a * a + 1
+            obj = Obj()
+            self.assertEqual(2, obj.squareone(1))
+            self.assertEqual(2, obj.squareone(1))
+            self.assertEqual(5, obj.squareone(2))
+            self.assertEqual(10, obj.squareone(3))
+            self.assertEqual(5, obj.squareone(2))
+            self.assertEqual(10, obj.squareone(3))
 
 
 def generate_backend_test(module):
