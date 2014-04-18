@@ -228,7 +228,7 @@ class TestMVARICA(unittest.TestCase):
                 api.get_surrogate_connectivity('PHI', plot=fig, repeats=5)
                 api.get_bootstrap_connectivity('PHI', plot=fig, repeats=5)
                 api.get_tf_connectivity('PHI', winlen=2, winstep=1, plot=fig)
-                api.compare_conditions([0], [1], 'PHI', repeats=5)
+                api.compare_conditions([0], [1], 'PHI', plot=fig, repeats=5)
 
 
 def main():
