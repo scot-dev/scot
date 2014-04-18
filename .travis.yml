@@ -19,8 +19,8 @@ env:
 install: source distributions/ci/install.sh
 
 script:
-  - PYTHONPATH=. python tests/test_plainica.py
   - pwd
+  - PYTHONPATH=. python tests/test_plainica.py
   - /home/travis/build/SCoT-dev/SCoT/scot/builtin/binica/ica_linux
   - /home/travis/build/SCoT-dev/SCoT/scot/builtin/binica/ica_linux
   #- nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
