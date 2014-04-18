@@ -8,12 +8,12 @@ env:
     #- DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
 
     # This environment tests the oldest supported anaconda env
-    - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
+    - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="true"
       NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.14.1" MATPLOTLIB_VERSION="1.3.1"
 
     # This environment tests the newest supported anaconda env
-    - DISTRIB="conda" PYTHON_VERSION="3.3" INSTALL_MKL="true"
+    - DISTRIB="conda" PYTHON_VERSION="3.3" INSTALL_MKL="false"
       NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.14.1" MATPLOTLIB_VERSION="1.3.1"
       COVERAGE="true"
