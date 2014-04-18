@@ -19,7 +19,7 @@ env:
       COVERAGE="true"
       
 #install: source distributions/ci/install.sh
-install: sudo apt-get install ia32-libs-muiltiarch
+install: sudo apt-get install ia32-libs-multiarch
 
 script:
   - wget http://sccn.ucsd.edu/eeglab/binica/binica.zip
