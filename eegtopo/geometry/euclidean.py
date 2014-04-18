@@ -55,6 +55,12 @@ class Vector:
     def __repr__(self):
         return ''.join((__class__.__name__, '(', str(self.x), ', ', str(self.y), ', ', str(self.z), ')'))
 
+    def __eq__(self, other):
+        return self.x == other[0] and self.y == other[1] and self.z == other[2]
+
+    def close(self, other, epsilon=1e-10):
+        return all([abs(v) <= epsilon for v in self-other])
+
     def __add__(self, other):
         if isinstance(other, Vector):
             return Vector(self.x + other.x, self.y + other.y, self.z + other.z)
