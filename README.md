@@ -1,4 +1,4 @@
-
+[![Build Status](https://travis-ci.org/SCoT-dev/SCoT.svg?branch=master)](https://travis-ci.org/SCoT-dev/SCoT)
 [![Coverage Status](https://coveralls.io/repos/SCoT-dev/SCoT/badge.png)](https://coveralls.io/r/SCoT-dev/SCoT)
 
 SCoT
