@@ -58,7 +58,7 @@ class TestUtils(unittest.TestCase):
             self.assertEqual(p, [1, 3, 0, 2])
 
 
-def generate_backend_test(module):
+def generate_backend(module):
     class BackendCase(unittest.TestCase):
         def setUp(self):
             pass
@@ -87,4 +87,4 @@ def generate_backend_test(module):
 
 for bm in backend_modules:
     testname = 'TestBackend_' + bm.__name__.split('.')[-1]
-    globals()[testname] = generate_backend_test(bm)
+    globals()[testname] = generate_backend(bm)
