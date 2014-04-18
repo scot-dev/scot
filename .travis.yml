@@ -23,7 +23,7 @@ install: source distributions/ci/install.sh
 script:
   - xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
 
-#after_success:
-#    - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
+after_success:
+    - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
 
 cache: apt
