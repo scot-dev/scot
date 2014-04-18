@@ -7,6 +7,11 @@
 set -e
 
 sudo apt-get update -qq
+
+# This is stupid. We should not be forced to install the whole multiarch monster
+# just to be able to run the external binica binary.
+sudo apt-get install ia32-libs-multiarch libgphoto2-2:i386 libsane:i386 libgd2-xpm:i386
+
 if [[ "$INSTALL_ATLAS" == "true" ]]; then
     sudo apt-get install -qq libatlas3gf-base libatlas-dev
 fi
