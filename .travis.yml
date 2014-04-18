@@ -20,7 +20,7 @@ env:
       
 #install: source distributions/ci/install.sh
 install:
-  - sudo apt-get install ia32-libs-multiarch libgphoto2-2:i386 libsane:i386
+  - sudo apt-get install ia32-libs-multiarch libgphoto2-2:i386 libsane:i386 libgd2-xpm:i386
 
 script:
   - wget http://sccn.ucsd.edu/eeglab/binica/binica.zip
