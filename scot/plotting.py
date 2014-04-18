@@ -551,7 +551,8 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     np.fill_diagonal(mask, False)
 
     if topo:
-        r = 1.25 * topo.head_radius / (np.sin(np.pi/n))
+        alpha = 1.5 if n < 10 else 1.25
+        r = alpha * topo.head_radius / (np.sin(np.pi/n))
     else:
         r = 1
 
