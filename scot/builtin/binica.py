@@ -11,7 +11,7 @@ import subprocess
 
 import numpy as np
 
-if not hasattr(__builtin__, 'FileNotFoundError'):
+if not hasattr(__builtins__, 'FileNotFoundError'):
     # PY27: subprocess.Popen raises OSError instead of FileNotFoundError
     FileNotFoundError = OSError
 
@@ -91,11 +91,12 @@ def binica(data, binary=binica_binary):
     if os.path.exists(binary):
         with open(scriptfile) as sc:
             try:
-                with subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=sc) as proc:
-                    print('waiting for binica to finish...')
-                    proc.wait()
-                    print('binica output:')
-                    print(proc.stdout.read().decode())
+                proc = subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=sc)
+                print('waiting for binica to finish...')
+                proc.wait()
+                #print('binica output:')
+                #print(proc.stdout.read().decode())
+                proc.stdout.close()
             except FileNotFoundError:
                 raise RuntimeError('The BINICA binary ica_linux exists in the file system but could not be executed. '
                                    'This indicates that 32 bit libraries are not installed on the system.')
