@@ -22,9 +22,9 @@ install: source distributions/ci/install.sh
 
 script:
   - if [[ "$COVERAGE" == "true" ]]; then
-        nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
+        nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
     else
-        nosetests
+        nosetests;
     fi
 
 after_success:
