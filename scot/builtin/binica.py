@@ -11,6 +11,10 @@ import subprocess
 
 import numpy as np
 
+if not hasattr(__builtin__, 'FileNotFoundError'):
+    # PY27: subprocess.Popen raises OSError instead of FileNotFoundError
+    FileNotFoundError = OSError
+
 
 binica_binary = os.path.dirname(os.path.abspath(__file__)) + '/binica/ica_linux'
 
