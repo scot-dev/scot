@@ -7,11 +7,12 @@ from __future__ import print_function
 from uuid import uuid4
 import os
 import sys
+import subprocess
 
 import numpy as np
 
 
-binica_binary = os.path.dirname(os.path.relpath(__file__)) + '/binica/ica_linux'
+binica_binary = os.path.dirname(os.path.abspath(__file__)) + '/binica/ica_linux'
 
 #noinspection PyNoneFunctionAssignment,PyTypeChecker
 def binica(data, binary=binica_binary):
@@ -82,9 +83,30 @@ def binica(data, binary=binica_binary):
     # flush output streams otherwise things printed before might appear after the ICA output.
     sys.stdout.flush()
     sys.stderr.flush()
+
+    if not os.path.exists(scriptfile):
+        raise RuntimeError(scriptfile + ' does not exist!')
+    print('Scriptfile exists...')
     
-    # run ICA    
-    os.system(binary + ' < ' + scriptfile)
+    # run ICA
+    #print('running binica:', binary + ' < ' + scriptfile)
+    #retval = os.system(binary)
+    #retval = os.system(binary + ' < ' + scriptfile)
+    #print('binica return value:', retval)
+
+    if os.path.exists(binary):
+        with open(scriptfile) as sc, subprocess.Popen(binary, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=sc) as proc:
+            print('waiting for binica to finish...')
+            proc.wait()
+            print('binica output:')
+            print(proc.stdout.read().decode())
+    else:
+        raise RuntimeError('the binary is not there!?')
+
+    #print('***')
+    #ret = subprocess.call(binary, stderr=subprocess.STDOUT, stdin=open(scriptfile))
+    #print(ret)
+    #return
     
     os.remove(scriptfile)
     os.remove(datafile)    
@@ -113,6 +135,7 @@ def check_binary_(binary):
     """check if binary is available, and try to download it if not"""
     
     if os.path.exists(binary):
+        print(binary, 'found')
         return
 
     url = 'http://sccn.ucsd.edu/eeglab/binica/binica.zip'
@@ -136,6 +159,8 @@ def check_binary_(binary):
 
     if not os.path.exists(path + '/binica.zip'):
         raise RuntimeError('Error downloading binica.zip.')
+
+    print('unzipping', path + '/binica.zip')
 
     with zipfile.ZipFile(path + '/binica.zip') as tgz:
         tgz.extractall(path + '/..')

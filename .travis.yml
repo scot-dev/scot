@@ -5,21 +5,34 @@ virtualenv:
   
 env:
   matrix:
-    - DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
+    #- DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
+
     # This environment tests the oldest supported anaconda env
     - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
       NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.14.1" MATPLOTLIB_VERSION="1.3.1"
+
     # This environment tests the newest supported anaconda env
     - DISTRIB="conda" PYTHON_VERSION="3.3" INSTALL_MKL="true"
       NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.14.1" MATPLOTLIB_VERSION="1.3.1"
       COVERAGE="true"
       
-install: source distributions/ci/install.sh
+#install: source distributions/ci/install.sh
+install:
+  - sudo apt-get install ia32-libs-multiarch libgphoto2-2:i386 libsane:i386 libgd2-xpm:i386
 
 script:
-  - nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
+  - wget http://sccn.ucsd.edu/eeglab/binica/binica.zip
+  - unzip binica.zip
+  - ls binica
+  - binica/ica_linux
+  #- pwd
+  #- PYTHONPATH=. python tests/test_plainica.py
+  #- PYTHONPATH=. python tests/test_icabinary.py
+  #- /home/travis/build/SCoT-dev/SCoT/scot/builtin/binica/ica_linux
+  #- /home/travis/build/SCoT-dev/SCoT/scot/builtin/binica/ica_linux
+  #- nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches
 
 #after_success:
 #    - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
