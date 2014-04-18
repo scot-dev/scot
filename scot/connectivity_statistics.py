@@ -5,6 +5,8 @@
 """ Routines for statistical evaluation of connectivity.
 """
 
+from __future__ import division
+
 import numpy as np
 import scipy as sp
 from .datatools import randomize_phase

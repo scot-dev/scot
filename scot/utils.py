@@ -4,6 +4,8 @@
 
 """ Utility functions """
 
+from __future__ import division
+
 import numpy as np
 
 from functools import partial
