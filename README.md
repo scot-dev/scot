@@ -1,3 +1,6 @@
+
+[![Coverage Status](https://coveralls.io/repos/SCoT-dev/SCoT/badge.png)](https://coveralls.io/r/SCoT-dev/SCoT)
+
 SCoT
 ====
 
