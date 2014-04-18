@@ -52,6 +52,11 @@ class TestUtils(unittest.TestCase):
             self.assertEqual(acm(1)*0.5, acm(5))
             self.assertEqual(0, acm(6))
 
+        def test_cuthill(self):
+            A = np.array([[0,0,1,1], [0,0,0,0], [1,0,1,0], [1,0,0,0]])
+            p = scot.utils.cuthill_mckee(A)
+            self.assertEqual(p, [1, 3, 0, 2])
+
 
 def generate_backend_test(module):
     class BackendCase(unittest.TestCase):
