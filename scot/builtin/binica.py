@@ -135,6 +135,7 @@ def check_binary_(binary):
     """check if binary is available, and try to download it if not"""
     
     if os.path.exists(binary):
+        print(binary, 'found')
         return
 
     url = 'http://sccn.ucsd.edu/eeglab/binica/binica.zip'
