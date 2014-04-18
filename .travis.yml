@@ -24,7 +24,7 @@ script:
   - wget http://sccn.ucsd.edu/eeglab/binica/binica.zip
   - unzip binica.zip
   - ls binica
-  - binica/ica_linux
+  - sh binica/ica_linux
   #- pwd
   #- PYTHONPATH=. python tests/test_plainica.py
   #- PYTHONPATH=. python tests/test_icabinary.py
