@@ -4,6 +4,9 @@
 
 import unittest
 
+import matplotlib
+matplotlib.use('Agg')   # make sure we don't access the display
+
 from eegtopo.topoplot import Topoplot
 import numpy as np
 
