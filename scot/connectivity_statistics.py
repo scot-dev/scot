@@ -193,25 +193,6 @@ def test_bootstrap_difference(a, b):
     return p.reshape(old_shape)
 
 
-def test_rank_difference_a(a, b):
-    """ Test for difference between two statistics with Mann-Whitney-U test.
-        Samples along first dimension. p-values returned.
-    """
-    old_shape = a.shape[1:]
-    assert(b.shape[1:] == old_shape)
-    a = np.asarray(a).reshape((a.shape[0], -1))
-    b = np.asarray(b).reshape((b.shape[0], -1))
-
-    p = np.zeros(a.shape[1])
-
-    for i in range(a.shape[1]):
-        #u, pr = sp.stats.mannwhitneyu(a[:,i], b[:,i])
-        t, pr = sp.stats.ttest_ind(a[:,i], b[:,i], equal_var=False)
-        p[i] = pr
-
-    return p.reshape(old_shape)
-
-
 def significance_fdr(p, alpha):
     """ Calculate significance by controlling for the false discovery rate.
 
