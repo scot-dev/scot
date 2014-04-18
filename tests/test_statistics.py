@@ -91,3 +91,7 @@ class TestFunctions(unittest.TestCase):
             p = cs.test_bootstrap_difference(a, b)
             self.assertTrue(np.all(p < 0.0001))
             self.assertTrue(np.all(cs.significance_fdr(p, 0.01)))
+
+
+if __name__ == '__main__':
+    unittest.main()

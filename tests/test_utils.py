@@ -44,8 +44,6 @@ class TestUtils(unittest.TestCase):
         def test_acm(self):
             v = np.array([[1], [2], [0], [0]]*2)
             acm = lambda l: scot.utils.acm(v, l)
-            for l in range(7):
-                print(l, acm(l))
             self.assertEqual(np.mean(v**2), acm(0))
             self.assertEqual(0.5, acm(1))
             self.assertEqual(0, acm(2))
@@ -90,3 +88,7 @@ def generate_backend(module):
 for bm in backend_modules:
     testname = 'TestBackend_' + bm.__name__.split('.')[-1]
     globals()[testname] = generate_backend(bm)
+
+
+if __name__ == '__main__':
+    unittest.main()
