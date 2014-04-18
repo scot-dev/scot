@@ -20,15 +20,23 @@ class TestMVARICA(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testTrivia(self):
+        api = scot.Workspace(VAR(1))
+        str(api)
+
     def testExceptions(self):
         self.assertRaises(TypeError, scot.Workspace)
         api = scot.Workspace({'model_order':50})
+        self.assertRaises(RuntimeError, api.remove_sources, [])
         self.assertRaises(RuntimeError, api.do_mvarica)
         self.assertRaises(RuntimeError, api.do_cspvarica)
+        self.assertRaises(RuntimeError, api.do_ica)
         self.assertRaises(RuntimeError, api.fit_var)
         self.assertRaises(TypeError, api.get_connectivity)
         self.assertRaises(RuntimeError, api.get_connectivity, 'S')
         self.assertRaises(RuntimeError, api.get_tf_connectivity, 'PDC', 10, 1)
+        api.set_data([[[1,1], [1,1]], [[1,1], [1,1]]])
+        self.assertRaises(RuntimeError, api.do_cspvarica)
         
     def testModelIdentification(self):
         """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
@@ -94,6 +102,7 @@ class TestMVARICA(unittest.TestCase):
     def testFunctionality(self):
         """ generate VAR signals, and apply the api to them
             do this for every backend """
+        np.random.seed(3141592)
 
         # original model coefficients
         b01 = np.zeros((3, 6))
@@ -118,9 +127,7 @@ class TestMVARICA(unittest.TestCase):
         sources2 = var.simulate([l, sum(cl==1)], noisefunc)
 
         var.fit(sources1)
-        print(var.coef)
         var.fit(sources2)
-        print(var.coef)
 
         sources = np.zeros((l,m0,t))
 
@@ -136,6 +143,7 @@ class TestMVARICA(unittest.TestCase):
         backend_modules = [import_module('scot.backend.' + b) for b in scot.backend.__all__]
 
         for bm in backend_modules:
+            np.random.seed(3141592)  # reset random seed so we're independent of module order
 
             api = scot.Workspace({'model_order': 2}, reducedim=3, backend=bm.backend)
 
@@ -187,6 +195,40 @@ class TestMVARICA(unittest.TestCase):
             api.fit_var()
             self.assertEqual(api.get_connectivity('S').shape, (1, 1, 512))
             self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1, 1, 512, 18))
+
+            try:
+                api.optimize_var()
+            except NotImplementedError:
+                pass
+            api.fit_var()
+            self.assertEqual(api.get_connectivity('S').shape, (1, 1, 512))
+            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1, 1, 512, 18))
+
+    def test_premixing(self):
+        api = scot.Workspace(VAR(1))
+        api.set_premixing([[0,1], [1,0]])
+
+    def test_plotting(self):
+        np.random.seed(3141592)
+
+        api = scot.Workspace(VAR(1), locations=[[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]])
+
+        api.set_data(np.random.randn(10, 5, 10), [1, 0]*5)
+        api.do_mvarica()
+
+        api.plot_source_topos()
+
+        for diag in ['S', 'fill', 'none']:
+            for outside in [True, False]:
+                api.plot_diagonal = diag
+                api.plot_outside_topo = outside
+
+                fig = api.plot_connectivity_topos()
+                api.get_connectivity('PHI', plot=fig)
+                api.get_surrogate_connectivity('PHI', plot=fig, repeats=5)
+                api.get_bootstrap_connectivity('PHI', plot=fig, repeats=5)
+                api.get_tf_connectivity('PHI', winlen=2, winstep=1, plot=fig)
+                api.compare_conditions([0], [1], 'PHI', repeats=5)
 
 
 def main():
