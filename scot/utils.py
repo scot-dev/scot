@@ -4,6 +4,8 @@
 
 """ Utility functions """
 
+from __future__ import division
+
 import numpy as np
 
 from functools import partial
@@ -154,33 +156,3 @@ class memoize(object):
             res = cache[key] = self.func(*args, **kw)
         return res
 
-
-class DocStringInheritorMeta(type):
-    """ Inherit doc strings from base class.
-
-    Based on unutbu's DocStringInheritor [1]_ which is a variation of Paul McGuire's DocStringInheritor [2]_
-
-    References
-    ----------
-    .. [1] http://stackoverflow.com/a/8101118
-    .. [2] http://groups.google.com/group/comp.lang.python/msg/26f7b4fcb4d66c95
-    """
-    def __new__(mcs, class_name, base_classes, class_dict):
-        if not('__doc__' in class_dict and class_dict['__doc__']):
-            for mro_cls in (mro_cls for base in base_classes for mro_cls in base.mro()):
-                doc = mro_cls.__doc__
-                if doc:
-                    class_dict['__doc__'] = doc
-                    break
-        for attr, attribute in class_dict.items():
-            if not attribute.__doc__:
-                for mro_cls in (mro_cls for base in base_classes for mro_cls in base.mro()
-                                if hasattr(mro_cls, attr)):
-                    doc = getattr(getattr(mro_cls, attr), '__doc__')
-                    if doc:
-                        attribute.__doc__ = doc
-                        break
-        return type.__new__(mcs, class_name, base_classes, class_dict)
-
-
-DocStringInheritor = DocStringInheritorMeta('DocStringInheritor', (object, ), {})

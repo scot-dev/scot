@@ -47,7 +47,7 @@ class Point:
 
     def __repr__(self):
         return ''.join(
-            (__class__.__name__, '(', str(self._pos3d.x), ', ', str(self._pos3d.y), ', ', str(self._pos3d.z), ')'))
+            (self.__class__.__name__, '(', str(self._pos3d.x), ', ', str(self._pos3d.y), ', ', str(self._pos3d.z), ')'))
 
     def distance(self, other):
         """Distance to another point on the sphere"""
@@ -120,8 +120,8 @@ class Construct:
 
     @staticmethod
     def line_intersect_line(k, l):
-        c1 = k.A.vector.cross(k.B.vector)
-        c2 = l.A.vector.cross(l.B.vector)
+        c1 = k.a.vector.cross(k.b.vector)
+        c2 = l.a.vector.cross(l.b.vector)
         p = c1.cross(c2)
         return Point.fromvector(p), Point.fromvector(p * -1)
 

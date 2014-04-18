@@ -18,14 +18,13 @@ from . import datatools
 from . import xvschema as xv
 from .utils import acm
 from .datatools import cat_trials
-from .utils import DocStringInheritor
 
 
 class Defaults:
     xvschema = xv.multitrial
 
 
-class VARBase(DocStringInheritor):
+class VARBase():
     """ Represents a vector autoregressive (VAR) model.
     
     .. warning:: `VARBase` is an abstract class that defines the interface for VAR model implementations. Several methods must be implemented by derived classes.

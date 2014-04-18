@@ -5,6 +5,8 @@
 """ Routines for statistical evaluation of connectivity.
 """
 
+from __future__ import division
+
 import numpy as np
 import scipy as sp
 from .datatools import randomize_phase
@@ -189,25 +191,6 @@ def test_bootstrap_difference(a, b):
         s2 += c <= 0
 
     p = np.minimum(s1, s2) / (n*n)
-
-    return p.reshape(old_shape)
-
-
-def test_rank_difference_a(a, b):
-    """ Test for difference between two statistics with Mann-Whitney-U test.
-        Samples along first dimension. p-values returned.
-    """
-    old_shape = a.shape[1:]
-    assert(b.shape[1:] == old_shape)
-    a = np.asarray(a).reshape((a.shape[0], -1))
-    b = np.asarray(b).reshape((b.shape[0], -1))
-
-    p = np.zeros(a.shape[1])
-
-    for i in range(a.shape[1]):
-        #u, pr = sp.stats.mannwhitneyu(a[:,i], b[:,i])
-        t, pr = sp.stats.ttest_ind(a[:,i], b[:,i], equal_var=False)
-        p[i] = pr
 
     return p.reshape(old_shape)
 

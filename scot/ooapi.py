@@ -265,8 +265,12 @@ class Workspace:
         """
         if self.data_ is None:
             raise RuntimeError("CSPVARICA requires data to be set")
-        if self.cl_ is None:
-            raise RuntimeError("CSPVARICA requires class labels")
+        try:
+            sorted(self.cl_)
+            for c in self.cl_:
+                assert(c is not None)
+        except (TypeError, AssertionError):
+            raise RuntimeError("CSPVARICA requires orderable and hashable class labels that are not None")
         result = cspvarica(x=self.data_, var=self.var_, cl=self.cl_,
                            reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
