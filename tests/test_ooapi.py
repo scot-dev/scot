@@ -218,7 +218,7 @@ class TestMVARICA(unittest.TestCase):
 
         api.plot_source_topos()
 
-        for diag in ['S', 'fill', 'none']:
+        for diag in ['S', 'fill', 'topo']:
             for outside in [True, False]:
                 api.plot_diagonal = diag
                 api.plot_outside_topo = outside
