@@ -149,6 +149,10 @@ class Topoplot:
 
 
 def topoplot(values, locations, headcolor=[0, 0, 0, 1], axes=None, offset=(0, 0)):
+    """ Wrapper function for :class:`Topoplot.
+    
+    This function is only provided for convenience.
+    """
     topo = Topoplot(headcolor=headcolor)
     topo.set_locations(locations)
     topo.set_values(values)
