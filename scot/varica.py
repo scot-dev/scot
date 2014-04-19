@@ -18,6 +18,8 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     ----------
     x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
         data set
+    var : :class:`~scot.var.VARBase`-like object
+        Vector autoregressive model (VAR) object that is used for model fitting.
     cl : list of valid dict keys, optional
         Class labels associated with each trial.
     reducedim : {int, float, 'no_pca'}, optional
@@ -32,8 +34,8 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     varfit : string
         Determines how to calculate the residuals for source decomposition.
         'ensemble' (default) fits one model to the whole data set,
-        'class' fits a different model for each class, and
-        'trial' fits a different model for each individual trial.
+        'class' fits a new model for each class, and
+        'trial' fits a new model for each individual trial.
         
     Returns
     -------
@@ -145,6 +147,8 @@ def cspvarica(x, var, cl, reducedim=np.inf, optimize_var=False, backend=None, va
     ----------
     x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
         data set
+    var : :class:`~scot.var.VARBase`-like object
+        Vector autoregressive model (VAR) object that is used for model fitting.
     cl : list of valid dict keys
         Class labels associated with each trial.
     reducedim : {int}, optional
@@ -156,8 +160,8 @@ def cspvarica(x, var, cl, reducedim=np.inf, optimize_var=False, backend=None, va
     varfit : string
         Determines how to calculate the residuals for source decomposition.
         'ensemble' (default) fits one model to the whole data set,
-        'class' fits a different model for each class, and
-        'trial' fits a different model for each individual trial.
+        'class' fits a new model for each class, and
+        'trial' fits a new model for each individual trial.
 
     Returns
     -------
