@@ -20,12 +20,7 @@ env:
       
 install: source distributions/ci/install.sh
 
-script:
-  - if [[ "$COVERAGE" == "true" ]]; then
-        xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
-    else
-        xvfb-run --server-args="-screen 0 1024x768x24" nosetests;
-    fi
+script: source distributions/ci/run_tests.sh
 
 after_success:
     - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
