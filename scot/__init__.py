@@ -5,25 +5,16 @@
 """ SCoT: The Source Connectivity Toolbox
 """
 
-from __future__ import absolute_import
-
-__all__ = ['connectivity', 'datatools', 'matfiles', 'ooapi', 'plainica', 'plotting', 'var', 'varica', 'xvschema']
-
 from . import config
 
 # default backend
+# TODO: set default backend in config
 from .backend import builtin
 
 from .ooapi import Workspace
 
 from .connectivity import Connectivity
 
-#from . import matfiles
-#from . import datatools
-#from . import xvschema
+from . import datatools
 
-#from . import var
-
-#from .varica import mvarica
-
-#from . import plotting
+__all__ = ['Workspace', 'Connectivity', 'datatools']
