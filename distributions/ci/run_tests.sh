@@ -18,8 +18,8 @@ fi
 
 if [[ "$RUN_EXAMPLES" == "true" ]]; then
     if [[ "$INSTALL_SCOT" == "true" ]]; then
-        xvfb-run --server-args="-screen 0 1024x768x24" find ../examples -type f -iname "*\.py" -exec python -v {} \;
+        xvfb-run --server-args="-screen 0 1024x768x24" find ../examples -type f -iname "*\.py" -exec python {} \;
     else
-        PYTHONPATH=. xvfb-run --server-args="-screen 0 1024x768x24" find examples -type f -iname "*\.py" -exec python -v {} \;
+        PYTHONPATH=. xvfb-run --server-args="-screen 0 1024x768x24" find examples -type f -iname "*\.py" -exec python {} \;
     fi
 fi
