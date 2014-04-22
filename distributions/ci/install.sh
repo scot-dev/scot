@@ -55,5 +55,5 @@ fi
 if [[ "$RUN_EXAMPLES" == "true" ]]; then
     git clone https://github.com/SCoT-dev/scot-data.git
     cd scot-data
-    pthon setup.py install
+    python setup.py install
 fi
