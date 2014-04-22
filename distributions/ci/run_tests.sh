@@ -5,7 +5,10 @@
 # in the .travis.yml in the top level folder of the project.
 
 
-python setup.py install
+if [[ "$INSTALL_SCOT" == "true" ]]; then
+    python setup.py install
+    cd tests
+fi
 
 if [[ "$COVERAGE" == "true" ]]; then
     xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
