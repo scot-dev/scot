@@ -15,3 +15,11 @@ if [[ "$COVERAGE" == "true" ]]; then
 else
     xvfb-run --server-args="-screen 0 1024x768x24" nosetests;
 fi
+
+if [[ "$RUN_EXAMPLES" == "true" ]]; then
+    if [[ "$INSTALL_SCOT" == "true" ]]; then
+        find ../examples -type f -iname "*\.py" -exec python {} \;
+    else
+        PYTHONPATH=. find examples -type f -iname "*\.py" -exec python {} \;
+    fi
+fi
