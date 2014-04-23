@@ -51,3 +51,10 @@ fi
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls
 fi
+
+if [[ "$RUN_EXAMPLES" == "true" ]]; then
+    git clone https://github.com/SCoT-dev/scot-data.git
+    cd scot-data
+    python setup.py install
+    cd ..
+fi

@@ -11,21 +11,18 @@ env:
     - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
       NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.14.1" MATPLOTLIB_VERSION="1.3.1"
+      INSTALL_SCOT="true" RUN_EXAMPLES="false"
 
     # This environment tests the newest supported anaconda env
     - DISTRIB="conda" PYTHON_VERSION="3.3" INSTALL_MKL="false"
       NUMPY_VERSION="1.8.1" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.14.1" MATPLOTLIB_VERSION="1.3.1"
       COVERAGE="true"
+      INSTALL_SCOT="true" RUN_EXAMPLES="false"
       
 install: source distributions/ci/install.sh
 
-script:
-  - if [[ "$COVERAGE" == "true" ]]; then
-        xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
-    else
-        xvfb-run --server-args="-screen 0 1024x768x24" nosetests;
-    fi
+script: source distributions/ci/run_tests.sh
 
 after_success:
     - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
