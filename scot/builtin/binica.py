@@ -163,4 +163,5 @@ def check_binary_(binary):
     if not os.path.exists(binary):
         raise RuntimeError(binary + ' not found, even after extracting binica.zip.')
 
-    os.chmod(binary, stat.S_IXUSR)
+    mode = os.stat(binary).st_mode
+    os.chmod(binary, mode | stat.S_IXUSR)
