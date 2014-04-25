@@ -5,9 +5,9 @@
 """common spatial patterns (CSP) implementation"""
 
 import numpy as np
-from scipy.linalg import eigh
+from scipy.linalg import eig
 from itertools import combinations
-    
+
 
 def csp(x, cl, numcomp=None, mode='ova'):
     """ Calculate common spatial patterns (CSP)
@@ -31,12 +31,12 @@ def csp(x, cl, numcomp=None, mode='ova'):
     v : array, shape = [n_components, n_channels]
         CSP projection matrix
     """
-    
+
     x = np.atleast_3d(x)
     cl = np.asarray(cl).ravel()
-    
+
     n, m, t = x.shape
-    
+
     if t != cl.size:
         raise AttributeError('CSP only works with multiple classes. Number of'
                              ' elemnts in cl (%d) must equal 3rd dimension of X (%d)' % (cl.size, t))
@@ -68,12 +68,12 @@ def csp(x, cl, numcomp=None, mode='ova'):
         for c in labels:
             sigma_pooled += sigma[c]
         for c in labels:
-            evals, evecs = eigh(sigma[c], sigma_pooled, overwrite_a=True, overwrite_b=False, check_finite=False)
+            evals, evecs = eig(sigma[c], sigma_pooled, overwrite_a=True, overwrite_b=False, check_finite=False)
             w[c] = evecs[:, np.argsort(evals)[::-1]]
     elif mode == 'pairwise':
         # one-versus-one
         for c, d in combinations(labels, 2):
-            evals, evecs = eigh(sigma[c], sigma[c] + sigma[d], overwrite_a=False, overwrite_b=True, check_finite=False)
+            evals, evecs = eig(sigma[c], sigma[c] + sigma[d], overwrite_a=False, overwrite_b=True, check_finite=False)
             w[(c, d)] = evecs[:, np.argsort(evals)[::-1]]
 
     v = {k_: np.linalg.inv(w_) for k_, w_ in w.items()}
@@ -93,7 +93,7 @@ def csp(x, cl, numcomp=None, mode='ova'):
 
     if False:
         #raise ValueError('unknown mode: {}'.format(mode))
-        
+
         x1 = x[:, :, cl == labels[0]]
         x2 = x[:, :, cl == labels[1]]
 
@@ -107,7 +107,7 @@ def csp(x, cl, numcomp=None, mode='ova'):
             sigma2 += np.cov(x2[:, :, t].transpose()) / x2.shape[2]
         sigma2 /= sigma2.trace()
 
-        e, w = eigh(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
+        e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
 
         order = np.argsort(e)[::-1]
         w = w[:, order]
@@ -133,7 +133,7 @@ def csp(x, cl, numcomp=None, mode='ova'):
         #    i = int(np.floor(w.shape[1]/2))
         #    w = np.delete(w, i, 1)
         #    v = np.delete(v, i, 0)
-        
+
     return ws, vs
 
 
