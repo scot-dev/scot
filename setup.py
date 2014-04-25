@@ -8,6 +8,15 @@ ver = versionfile.read().strip()
 versionfile.close()
 
 
+download_binica = True
+if download_binica:
+    from scot.builtin.binica import binica
+    try:
+        binica([])
+    except ValueError:
+        pass
+
+
 setup(name='SCoT',
       version=ver,
       description='Source Connectivity Toolbox',
@@ -19,6 +28,8 @@ setup(name='SCoT',
                 'scot.builtin',
                 'eegtopo',
                 'eegtopo.geometry'],
+
+      package_data={'scot.builtin': ['binica/ica_linux']},
 
       install_requires=['numpy >=1.7', 'scipy >=0.12']
      )
