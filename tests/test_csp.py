@@ -4,6 +4,7 @@
 
 import unittest
 import sys
+from math import cos, sin
 
 import numpy as np
 
@@ -29,7 +30,7 @@ class TestFunctionality(unittest.TestCase):
         B = generate_covsig([[10,2,2],[2,10,5],[2,5,10]], 500)
             
         X = np.dstack([A,B])
-        W, V = csp(X,[1,2])        
+        W, V = csp(X,[1,2])
         C1a = np.cov(X[:,:,0].dot(W).T)
         C2a = np.cov(X[:,:,1].dot(W).T)
         
@@ -39,8 +40,8 @@ class TestFunctionality(unittest.TestCase):
         C2b = np.cov(Y[:,:,1].dot(W).T)
         
         # check symmetric case
-        self.assertTrue(np.allclose(C1a.diagonal(), C2a.diagonal()[::-1]))
-        self.assertTrue(np.allclose(C1b.diagonal(), C2b.diagonal()[::-1]))
+        self.assertTrue(np.allclose(C1a.diagonal()[[0,1,2]], C2a.diagonal()[[1,0,2]]))
+        self.assertTrue(np.allclose(C1b.diagonal()[[0,1,2]], C2b.diagonal()[[1,0,2]]))
         
         # swapping class labels (or in this case, trials) should not change the result
         self.assertTrue(np.allclose(C1a, C1b))
@@ -49,11 +50,11 @@ class TestFunctionality(unittest.TestCase):
         # variance of first component should be greatest for class 1
         self.assertTrue(C1a[0,0] > C2a[0,0])
         
-        # variance of last component should be greatest for class 1
-        self.assertTrue(C1a[2,2] < C2a[2,2])
+        # variance of second component should be greatest for class 2
+        self.assertTrue(C1a[1,1] < C2a[1,1])
         
-        # variance of central component should be equal for both classes
-        self.assertTrue(np.allclose(C1a[1,1], C2a[1,1]))
+        # variance of last component should be equal for both classes
+        self.assertTrue(np.allclose(C1a[2,2], C2a[2,2]))
         
 
 class TestDefaults(unittest.TestCase):
@@ -119,6 +120,35 @@ class TestDimensionalityReduction(unittest.TestCase):
         
         I = self.W.dot(self.V)        
         self.assertFalse(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
+
+    def testMulticlass(self):
+
+        def rot(a, angles):
+            t = angles[0]
+            a = np.dot(a, [[cos(t), -sin(t), 0, 0], [sin(t), cos(t), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+            t = angles[1]
+            a = np.dot(a, [[cos(t), 0, -sin(t), 0], [0, 1, 0, 0], [sin(t), 0, cos(t), 0], [0, 0, 0, 1]])
+            t = angles[2]
+            a = np.dot(a, [[1, 0, 0, 0], [0, cos(t), -sin(t), 0], [0, sin(t), cos(t), 0], [0, 0, 0, 1]])
+            t = angles[3]
+            a = np.dot(a, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, cos(t), -sin(t)], [0, 0, sin(t), cos(t)]])
+            return a
+
+        np.random.seed(12345)
+
+        A = rot(generate_covsig([[10, 0, 0, 0], [0, 10, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], 500), np.random.rand(4))
+        B = rot(generate_covsig([[10, 0, 0, 0], [0, 10, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], 500), np.random.rand(4))
+        C = rot(generate_covsig([[10, 0, 0, 0], [0, 10, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], 500), np.random.rand(4))
+        D = rot(generate_covsig([[10, 0, 0, 0], [0, 10, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], 500), np.random.rand(4))
+
+        X = np.dstack([A,B,C,D])
+        W, V = csp(X, [1,2,3,4], mode='pairwise')
+        print(V.dot(W))
+
+        X = np.dstack([A,B,C,D])
+        W, V = csp(X, [1,2,3,4], mode='ova')
+        print(V.dot(W))
+
         
 def main():
     unittest.main()
