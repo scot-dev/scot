@@ -1,35 +1,38 @@
-backend Package
-===============
+scot.backend package
+====================
 
-:mod:`backend` Package
-----------------------
+Submodules
+----------
 
-.. automodule:: scot.backend
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`builtin` Module
----------------------
+scot.backend.builtin module
+---------------------------
 
 .. automodule:: scot.backend.builtin
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`sklearn` Module
----------------------
+scot.backend.sklearn module
+---------------------------
 
 .. automodule:: scot.backend.sklearn
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`sklearn_utils` Module
----------------------------
+scot.backend.sklearn_utils module
+---------------------------------
 
 .. automodule:: scot.backend.sklearn_utils
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: scot.backend
+    :members:
+    :undoc-members:
+    :show-inheritance:

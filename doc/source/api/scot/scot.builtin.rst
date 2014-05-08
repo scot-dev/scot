@@ -1,43 +1,54 @@
-builtin Package
-===============
+scot.builtin package
+====================
 
-:mod:`builtin` Package
-----------------------
+Submodules
+----------
 
-.. automodule:: scot.builtin
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`binica` Module
---------------------
+scot.builtin.binica module
+--------------------------
 
 .. automodule:: scot.builtin.binica
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`pca` Module
------------------
+scot.builtin.csp module
+-----------------------
+
+.. automodule:: scot.builtin.csp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scot.builtin.pca module
+-----------------------
 
 .. automodule:: scot.builtin.pca
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`utils` Module
--------------------
+scot.builtin.utils module
+-------------------------
 
 .. automodule:: scot.builtin.utils
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`var` Module
------------------
+scot.builtin.var module
+-----------------------
 
 .. automodule:: scot.builtin.var
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: scot.builtin
+    :members:
+    :undoc-members:
+    :show-inheritance:
