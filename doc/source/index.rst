@@ -3,18 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to SCoT's documentation!
-================================
+Overview
+========
 
 This is the documentation of SCoT, the EEG source connectivity toolbox in Python.
 SCoT provides functionality for blind source decomposition and connectivity estimation.
-Connectivity is estimated from spectral measures (such as :func:`~scot.connectivity.Connectivity.COH`, :func:`~scot.connectivity.Connectivity.PDC`, or :func:`~scot.connectivity.Connectivity.DTF`) relying on vector autoregressive (VAR) models.
+Connectivity is estimated from spectral measures (such as :func:`~scot.connectivity.Connectivity.COH`, :func:`~scot.connectivity.Connectivity.PDC`, or :func:`~scot.connectivity.Connectivity.DTF`) using vector autoregressive (VAR) models.
 
-Note that the documentation is work-in-progress. Most sections are still missing but we will add them in the near future.
+Note that the documentation is work-in-progress. Most sections are still missing, but we will add them in the near future.
 However, the :ref:`api_reference` is in a usable state.
 
 
-Contents:
+Contents
+========
 
 .. toctree::
    :maxdepth: 2

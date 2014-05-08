@@ -213,6 +213,13 @@ class Connectivity:
         """ Coherence
 
         .. math:: \mathrm{COH}_{ij}(f) = \\frac{S_{ij}(f)}{\sqrt{S_{ii}(f) S_{jj}(f)}}
+        
+        References
+        ----------
+        P. L. Nunez, R. Srinivasan, A. F. Westdorp, R. S. Wijesinghe, D. M. Tucker,
+        R. B. Silverstein, P. J. Cadusch. EEG coherency: I: statistics, reference electrode,
+        volume conduction, Laplacians, cortical imaging, and interpretation at multiple scales.
+        Electroenceph. Clin. Neurophysiol. 103(5): 499-515, 1997.
         """
         S = self.S()
         #TODO can we do that more efficiently?
@@ -231,6 +238,11 @@ class Connectivity:
         """ Partial coherence
 
         .. math:: \mathrm{pCOH}_{ij}(f) = \\frac{G_{ij}(f)}{\sqrt{G_{ii}(f) G_{jj}(f)}}
+        
+        References
+        ----------
+        P. J. Franaszczuk, K. J. Blinowska, M. Kowalczyk. The application of parametric multichannel
+        spectral estimates in the study of electrical brain activity. Biol. Cybernetics 51(4): 239-247, 1985.
         """
         G = self.G()
         #TODO can we do that more efficiently?
@@ -241,6 +253,11 @@ class Connectivity:
         """ Partial directed coherence
 
         .. math:: \mathrm{PDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) A_{:j}(f)}}
+        
+        References
+        ----------
+        L. A. Baccalá, K. Sameshima. Partial directed coherence: a new concept in neural structure
+        determination. Biol. Cybernetics 84(6):463-474, 2001.
         """
         A = self.A()
         return np.abs(A / np.sqrt(np.sum(A.conj() * A, axis=0, keepdims=True)))
@@ -259,6 +276,11 @@ class Connectivity:
         """ Partial directed coherence factor
 
         .. math:: \mathrm{PDCF}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) \mathbf{C}^{-1} A_{:j}(f)}}
+        
+        References
+        ----------
+        L. A. Baccalá, K. Sameshima. Partial directed coherence: a new concept in neural structure
+        determination. Biol. Cybernetics 84(6):463-474, 2001.
         """
         A = self.A()
         #TODO can we do that more efficiently?
@@ -270,6 +292,11 @@ class Connectivity:
 
         .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{|A_{ij}(f)|}
             {\sigma_i \sqrt{A_{:j}'(f) \mathrm{diag}(\mathbf{C})^{-1} A_{:j}(f)}}
+            
+        References
+        ----------
+        L. Faes, S. Erla, G. Nollo. Measuring Connectivity in Linear Multivariate Processes:
+        Definitions, Interpretation, and Practical Analysis. Comput. Math. Meth. Med. 2012:140513, 2012.
         """
         A = self.A()
         return np.abs(A / np.sqrt(np.einsum('aj..., a..., aj..., ii... ->ij...', A.conj(), 1/np.diag(self.c), A, self.c)))
@@ -279,6 +306,11 @@ class Connectivity:
         """ Directed transfer function
 
         .. math:: \mathrm{DTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{H_{i:}(f) H_{i:}'(f)}}
+        
+        References
+        ----------
+        M. J. Kaminski, K. J. Blinowska. A new method of the description of the information flow
+        in the brain structures. Biol. Cybernetics 65(3): 203-210, 1991.
         """
         H = self.H()
         return np.abs(H / np.sqrt(np.sum(H * H.conj(), axis=1, keepdims=True)))
@@ -288,6 +320,12 @@ class Connectivity:
         """ Full frequency directed transfer function
 
         .. math:: \mathrm{ffDTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{\sum_f H_{i:}(f) H_{i:}'(f)}}
+        
+        References
+        ----------
+        A. Korzeniewska, M. Mańczak, M. Kaminski, K. J. Blinowska, S. Kasicki. Determination of
+        information flow direction among brain structures by a modified directed transfer 
+        function (dDTF) method. J. Neurosci. Meth. 125(1-2): 195-207, 2003.
         """
         H = self.H()
         return np.abs(H * self.nfft / np.sqrt(np.sum(H * H.conj(), axis=(1, 2), keepdims=True)))
@@ -297,6 +335,12 @@ class Connectivity:
         """" Direct" directed transfer function
 
         .. math:: \mathrm{dDTF}_{ij}(f) = |\mathrm{pCOH}_{ij}(f)| \mathrm{ffDTF}_{ij}(f)
+        
+        References
+        ----------
+        A. Korzeniewska, M. Mańczak, M. Kaminski, K. J. Blinowska, S. Kasicki. Determination of
+        information flow direction among brain structures by a modified directed transfer 
+        function (dDTF) method. J. Neurosci. Meth. 125(1-2): 195-207, 2003.
         """
         return np.abs(self.pCOH()) * self.ffDTF()
 
@@ -306,6 +350,11 @@ class Connectivity:
 
         .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{\sigma_j |H_{ij}(f)|}
             {\sqrt{H_{i:}(f) \mathrm{diag}(\mathbf{C}) H_{i:}'(f)}}
+            
+        References
+        ----------
+        L. Faes, S. Erla, G. Nollo. Measuring Connectivity in Linear Multivariate Processes:
+        Definitions, Interpretation, and Practical Analysis. Comput. Math. Meth. Med. 2012:140513, 2012.
         """
         H = self.H()
         return np.abs(H / np.sqrt(np.einsum('ia..., aa..., ia..., j... ->ij...', H.conj(), self.c, H, 1/self.c.diagonal())))
