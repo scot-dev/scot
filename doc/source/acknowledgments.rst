@@ -5,7 +5,7 @@ Acknowledgments
 Overview
 ========
 
-SCoT has been developed to provide connectivity estimation between brain sources for the Python community. SCoT was mainly developed by Martin Billinger as part of his PhD thesis. Although all source code was written from scratch, there are several existing sources that contributed directly or indirectly to this toolbox. Furthermore, there are a number of related connectivity toolboxes available for non-Python programming languages. In the following paragraphs, we would like to acknowledge these sources.
+SCoT has been developed to provide connectivity estimation between brain sources for the Python community. SCoT was mainly developed by Martin Billinger as part of his PhD thesis at the `Institute for Knowledge Discovery`_, `Graz University of Technology`_, Graz, Austria. Although all source code was written from scratch, there are several existing sources that contributed directly or indirectly to this toolbox. Furthermore, there are a number of related connectivity toolboxes available for non-Python programming languages. In the following paragraphs, we would like to acknowledge these sources.
 
 Related toolboxes
 =================
@@ -25,7 +25,8 @@ Schlögl and Supp (2006) provide an excellent overview of the various connectivi
 
 The MVARICA approach implemented in SCoT was developed by Gómez-Herrero et al. (2008).
 
-
+.. _`Institute for Knowledge Discovery`: http://bci.tugraz.at/
+.. _`Graz University of Technology`: http://www.tugraz.at/
 .. _SIFT: http://sccn.ucsd.edu/wiki/SIFT
 .. _EEGLAB: http://sccn.ucsd.edu/eeglab/
 .. _BioSig: http://biosig.sourceforge.net/
