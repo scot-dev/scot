@@ -11,20 +11,25 @@ import matplotlib.path as path
 #noinspection PyPep8Naming
 import matplotlib.patches as patches
 import matplotlib.transforms as transforms
-from .projections import array_project_radial_to3d, project_radial_to2d
+from .projections import (array_project_radial_to3d,
+                                 project_radial_to2d,
+                                 array_project_radial_to2d)
 from .geometry.euclidean import Vector
+from scipy.spatial import ConvexHull
 
 
 class Topoplot:
     """ Creates 2D scalp maps. """
 
-    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1]):
+    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head'):
         self.interprange = np.pi * 3 / 4
         self.head_radius = self.interprange
         self.nose_angle = 15
         self.nose_length = 0.12
 
         self.headcolor = headcolor
+
+        self.clipping = clipping
 
         verts = np.array([
             (1, 0),
@@ -49,6 +54,7 @@ class Topoplot:
 
         self.legendre_factors = self.calc_legendre_factors(m, num_lterms)
 
+        self.channel_fence = None
         self.locations = None
         self.g = None
         self.z = None
@@ -75,6 +81,7 @@ class Topoplot:
             for j in range(n):
                 g[i, j + 1] = self.calc_g(np.dot(locations[i], locations[j]))
 
+        self.channel_fence = None
         self.locations = locations
         self.g = g
 
@@ -112,14 +119,28 @@ class Topoplot:
 
     def plot_map(self, axes=None, crange=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
-        if crange is None:
+        if crange is None or crange.lower() == 'channels':
+            vru = np.nanmax(np.abs(self.z))
+            vrl = -vru
+        elif crange.lower() in ['full', 'map']:
             vru = np.nanmax(np.abs(self.image))
             vrl = -vru
         else:
             vrl, vru = crange
         head = self.path_head.deepcopy()
         head.vertices += offset
-        return axes.imshow(self.image, vmin=vrl, vmax=vru, clip_path=(head, axes.transData),
+
+        if self.clipping == 'head':
+            clip_path = (head, axes.transData)
+        elif self.clipping == 'electrodes':
+            verts = self._get_fence()
+            codes = [path.Path.LINETO] * (len(verts) - 1)
+            codes.insert(0, path.Path.MOVETO)
+            clip_path = (path.Path(verts, codes), axes.transData)
+        else:
+            raise ValueError('unknown clipping mode: ', self.clipping)
+
+        return axes.imshow(self.image, vmin=vrl, vmax=vru, clip_path=clip_path,
                            extent=(offset[0]-self.interprange, offset[0]+self.interprange,
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
@@ -146,6 +167,13 @@ class Topoplot:
             p2 = project_radial_to2d(Vector.fromiterable(p3))
             circ = plot.Circle((p2.x+offset[0], p2.y+offset[1]), radius=radius, color=col(self.z[i]))
             axes.add_patch(circ)
+
+    def _get_fence(self):
+        if self.channel_fence is None:
+            points = array_project_radial_to2d(self.locations)
+            hull = ConvexHull(points)
+            self.channel_fence = points[hull.vertices]
+        return self.channel_fence
 
 
 def topoplot(values, locations, headcolor=[0, 0, 0, 1], axes=None, offset=(0, 0)):
