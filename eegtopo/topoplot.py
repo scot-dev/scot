@@ -2,6 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 Martin Billinger
 
+from __future__ import division
+
 import numpy as np
 from scipy.interpolate import interp1d
 #noinspection PyPep8Naming
@@ -21,7 +23,7 @@ from scipy.spatial import ConvexHull
 class Topoplot:
     """ Creates 2D scalp maps. """
 
-    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head'):
+    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head', electrodescale=1):
         self.interprange = np.pi * 3 / 4
         self.head_radius = self.interprange
         self.nose_angle = 15
@@ -30,6 +32,7 @@ class Topoplot:
         self.headcolor = headcolor
 
         self.clipping = clipping
+        self.electrodescale = np.asarray(electrodescale)
 
         verts = np.array([
             (1, 0),
@@ -105,7 +108,7 @@ class Topoplot:
         x = np.linspace(-self.interprange, self.interprange, pixels)
         y = np.linspace(self.interprange, -self.interprange, pixels)
 
-        xy = np.transpose(np.meshgrid(x, y))
+        xy = np.transpose(np.meshgrid(x, y)) / self.electrodescale
 
         e = array_project_radial_to3d(xy)
 
@@ -146,9 +149,8 @@ class Topoplot:
 
     def plot_locations(self, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
-        for p in self.locations:
-            p2 = project_radial_to2d(Vector.fromiterable(p))
-            axes.plot(p2.x+offset[0], p2.y+offset[1], 'k.')
+        p2 = array_project_radial_to2d(self.locations) * self.electrodescale + offset
+        axes.plot(p2[:, 0], p2[:, 1], 'k.')
 
     def plot_head(self, axes=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
@@ -164,13 +166,13 @@ class Topoplot:
         col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
             p3 = self.locations[i]
-            p2 = project_radial_to2d(Vector.fromiterable(p3))
-            circ = plot.Circle((p2.x+offset[0], p2.y+offset[1]), radius=radius, color=col(self.z[i]))
+            p2 = array_project_radial_to2d(Vector.fromiterable(p3)) * self.electrodescale + offset
+            circ = plot.Circle((p2[0, 0], p2[0, 1]), radius=radius, color=col(self.z[i]))
             axes.add_patch(circ)
 
     def _get_fence(self):
         if self.channel_fence is None:
-            points = array_project_radial_to2d(self.locations)
+            points = array_project_radial_to2d(self.locations) * self.electrodescale
             hull = ConvexHull(points)
             self.channel_fence = points[hull.vertices]
         return self.channel_fence
