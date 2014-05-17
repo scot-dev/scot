@@ -122,11 +122,14 @@ class Topoplot:
 
     def plot_map(self, axes=None, crange=None, offset=(0,0)):
         if axes is None: axes = plot.gca()
-        if crange is None or crange.lower() == 'channels':
+        if crange is str:
+            if crange.lower() == 'channels':
+                crange = None
+            elif crange.lower() in ['full', 'map']:
+                vru = np.nanmax(np.abs(self.image))
+                vrl = -vru
+        if crange is None:
             vru = np.nanmax(np.abs(self.z))
-            vrl = -vru
-        elif crange.lower() in ['full', 'map']:
-            vru = np.nanmax(np.abs(self.image))
             vrl = -vru
         else:
             vrl, vru = crange
