@@ -23,8 +23,8 @@ from scipy.spatial import ConvexHull
 class Topoplot:
     """ Creates 2D scalp maps. """
 
-    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head', electrodescale=1):
-        self.interprange = np.pi * 3 / 4
+    def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head', electrodescale=1, interpolationrange=np.pi * 3 / 4):
+        self.interprange = interpolationrange
         self.head_radius = self.interprange
         self.nose_angle = 15
         self.nose_length = 0.12
@@ -40,7 +40,7 @@ class Topoplot:
             (-0.5535714285714286, 1), (-1, 0.5535714285714286), (-1, 0),
             (-1, -0.5535714285714286), (-0.5535714285714286, -1), (0, -1),
             (0.5535714285714286, -1), (1, -0.5535714285714286), (1, 0),
-        ]) * self.interprange
+        ]) * self.head_radius
         codes = [path.Path.MOVETO,
                  path.Path.CURVE4, path.Path.CURVE4, path.Path.CURVE4,
                  path.Path.CURVE4, path.Path.CURVE4, path.Path.CURVE4,
