@@ -97,6 +97,39 @@ class VARBase():
         raise NotImplementedError('method optimize() is not implemented in ' + str(self))
         return self
 
+    def from_yw(self, acms):
+        """ Determine VAR model from autocorrelation matrices by solving the
+        Yule-Walker equations.
+
+        Parameters
+        ----------
+        acms : array-like, shape = [n_lags, n_channels, n_channels]
+            acms[l] contains the autocorrelation matrix at lag l. The highest
+            lag must equal the model order.
+
+        Returns
+        -------
+        self : :class:`VAR`
+            The :class:`VAR` object to facilitate method chaining (see usage example)
+        """
+        assert(len(acms) == self.p + 1)
+
+        n_channels = acms[0].shape[0]
+
+        acm = lambda l: acms[l] if l >= 0 else acms[-l].T
+
+        r = np.concatenate(acms[1:], 0)
+
+        R = np.array([[acm(m-k) for k in range(self.p)] for m in range(self.p)])
+        R = np.concatenate(np.concatenate(R, -2), -1)
+
+        c = np.linalg.solve(R, r)
+        c = np.concatenate([c[m::self.p, :] for m in range(n_channels)]).T
+
+        self.coef = c
+
+        return self
+
     def simulate(self, l, noisefunc=None):
         """ Simulate vector autoregressive (VAR) model
         
