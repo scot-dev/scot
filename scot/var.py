@@ -124,9 +124,15 @@ class VARBase():
         R = np.concatenate(np.concatenate(R, -2), -1)
 
         c = sp.linalg.solve(R, r)
-        c = np.concatenate([c[m::n_channels, :] for m in range(n_channels)]).T
 
-        self.coef = c
+        # calculate residual covariance
+        r = acm(0)
+        for k in range(self.p):
+            bs = k * n_channels
+            r -= np.dot(c[bs:bs + n_channels, :].T, acm(k + 1))
+
+        self.coef = np.concatenate([c[m::n_channels, :] for m in range(n_channels)]).T
+        self.rescov = r
 
         return self
 

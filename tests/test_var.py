@@ -19,11 +19,11 @@ class TestVAR(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def generate_data(self):
+    def generate_data(self, cc=((1, 0), (0, 1))):
         var = VAR(2)
         var.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
         l = (1000, 100)
-        x = var.simulate(l)
+        x = var.simulate(l, lambda: np.random.randn(2).dot(cc))
         return x, var
 
     def test_simulate(self):
@@ -52,7 +52,7 @@ class TestVAR(unittest.TestCase):
 
     def test_yulewalker(self):
         np.random.seed(7353)
-        x, var0 = self.generate_data()
+        x, var0 = self.generate_data([[1, 2], [3, 4]])
 
         acms = [acm(x, l) for l in range(var0.p+1)]
 
@@ -61,6 +61,7 @@ class TestVAR(unittest.TestCase):
 
         # that limit is rather generous, but we don't want tests to fail due to random variation
         self.assertTrue(np.all(np.abs(var0.coef - var.coef) < 0.02))
+        self.assertTrue(np.all(np.abs(var0.rescov - var.rescov) < 0.02))
 
     def test_whiteness(self):
         np.random.seed(91)
