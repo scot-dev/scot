@@ -124,7 +124,7 @@ class VARBase():
         R = np.concatenate(np.concatenate(R, -2), -1)
 
         c = sp.linalg.solve(R, r)
-        c = np.concatenate([c[m::self.p, :] for m in range(n_channels)]).T
+        c = np.concatenate([c[m::n_channels, :] for m in range(n_channels)]).T
 
         self.coef = c
 
