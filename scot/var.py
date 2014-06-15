@@ -123,7 +123,7 @@ class VARBase():
         R = np.array([[acm(m-k) for k in range(self.p)] for m in range(self.p)])
         R = np.concatenate(np.concatenate(R, -2), -1)
 
-        c = np.linalg.solve(R, r)
+        c = sp.linalg.solve(R, r, sym_pos=True)
         c = np.concatenate([c[m::self.p, :] for m in range(n_channels)]).T
 
         self.coef = c
