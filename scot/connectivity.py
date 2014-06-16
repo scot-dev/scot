@@ -7,6 +7,8 @@
 """ Connectivity Analysis """
 
 import numpy as np
+import scipy as sp
+from scipy.fftpack import fft
 from .utils import memoize
 
 
@@ -147,7 +149,7 @@ class Connectivity:
 
         .. math:: \mathbf{A}(f) = \mathbf{I} - \sum_{k=1}^{p} \mathbf{a}^{(k)} \mathrm{e}^{-2\pi f}
         """
-        return np.fft.rfft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)
+        return fft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)[:, :, :self.nfft]
 
     @memoize
     def H(self):
@@ -167,7 +169,9 @@ class Connectivity:
             raise RuntimeError('Cross spectral density requires noise covariance matrix c.')
         H = self.H()
         #TODO can we do that more efficiently?
-        S = np.einsum('ia..., ab..., jb... ->ij...', H, self.c, H.conj())
+        S = np.empty(H.shape, dtype=H.dtype)
+        for f in range(H.shape[2]):
+            S[:, :, f] = H[:, :, f].dot(self.c).dot(H[:, :, f].conj().T)
         return S
 
     @memoize
@@ -223,7 +227,7 @@ class Connectivity:
         """
         S = self.S()
         #TODO can we do that more efficiently?
-        return S / np.sqrt(np.einsum('ii..., jj... ->ij...', S, S))
+        return S / np.sqrt(np.einsum('ii..., jj... ->ij...', S, S.conj()))
 
     @memoize
     def PHI(self):
@@ -361,5 +365,5 @@ class Connectivity:
 
 
 def _inv3(x):
-    identity = np.eye(x.shape[0])[np.newaxis, :, :]
-    return np.linalg.solve(x.T, identity).T
+    identity = np.eye(x.shape[0])
+    return np.array([sp.linalg.solve(a, identity) for a in x.T]).T

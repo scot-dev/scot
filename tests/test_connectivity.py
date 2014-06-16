@@ -38,12 +38,12 @@ class TestFunctionality(unittest.TestCase):
         self.assertEqual(k(c.G())[0, 2], 0)
         self.assertTrue(np.all(k(c.G()) == k(c.G()).T))
         # Phase should be zero along the diagonal
-        self.assertTrue(np.all(k(c.PHI()).diagonal() == 0))
-        # Phase should be zero along the diagonal and antisymmetric
-        self.assertTrue(np.all(k(c.PHI()).diagonal() == 0))
-        self.assertTrue(np.all(l(c.PHI()) == -l(c.PHI()).T))
+        self.assertTrue(np.allclose(k(c.PHI()).diagonal(), 0))
+        # Phase should be antisymmetric
+        self.assertTrue(np.allclose(l(c.PHI()), -l(c.PHI()).T))
         # Coherence should be 1 over all frequencies along the diagonal
         self.assertTrue(np.all(k(c.COH()).diagonal() == nfft))
+        self.assertLessEqual(np.max(np.abs(c.COH())), 1)
         # pCOH should be nonzero for direct connections only and symmetric in magnitude
         self.assertEqual(k(c.pCOH())[0, 2], 0)
         self.assertTrue(np.all(k(c.pCOH()) == k(c.pCOH()).T))

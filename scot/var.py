@@ -2,7 +2,7 @@
 
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2014 SCoT Development Team
 
 """ vector autoregressive (VAR) model """
 
@@ -95,6 +95,45 @@ class VARBase():
                 Continuous or segmented data set.
         """
         raise NotImplementedError('method optimize() is not implemented in ' + str(self))
+        return self
+
+    def from_yw(self, acms):
+        """ Determine VAR model from autocorrelation matrices by solving the
+        Yule-Walker equations.
+
+        Parameters
+        ----------
+        acms : array-like, shape = [n_lags, n_channels, n_channels]
+            acms[l] contains the autocorrelation matrix at lag l. The highest
+            lag must equal the model order.
+
+        Returns
+        -------
+        self : :class:`VAR`
+            The :class:`VAR` object to facilitate method chaining (see usage example)
+        """
+        assert(len(acms) == self.p + 1)
+
+        n_channels = acms[0].shape[0]
+
+        acm = lambda l: acms[l] if l >= 0 else acms[-l].T
+
+        r = np.concatenate(acms[1:], 0)
+
+        R = np.array([[acm(m-k) for k in range(self.p)] for m in range(self.p)])
+        R = np.concatenate(np.concatenate(R, -2), -1)
+
+        c = sp.linalg.solve(R, r)
+
+        # calculate residual covariance
+        r = acm(0)
+        for k in range(self.p):
+            bs = k * n_channels
+            r -= np.dot(c[bs:bs + n_channels, :].T, acm(k + 1))
+
+        self.coef = np.concatenate([c[m::n_channels, :] for m in range(n_channels)]).T
+        self.rescov = r
+
         return self
 
     def simulate(self, l, noisefunc=None):

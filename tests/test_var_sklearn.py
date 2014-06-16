@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2014 SCoT Development Team
 
 import unittest
 
@@ -24,23 +24,6 @@ class TestVAR(unittest.TestCase):
         x = var.simulate(l)
         return x, var
 
-    def test_simulate(self):
-        noisefunc = lambda: [1, 1]   # use deterministic function instead of noise
-        num_samples = 100
-
-        b = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-
-        var = VAR(2)
-        var.coef = b
-
-        np.random.seed(42)
-        x = var.simulate(num_samples, noisefunc)
-
-        # make sure we got expected values within reasonable accuracy
-        for n in range(10, num_samples):
-            self.assertTrue(np.all(
-                np.abs(x[n, :] - 1 - np.dot(b[:, 0::2], x[n - 1, :]) - np.dot(b[:, 1::2], x[n - 2, :])) < 1e-10))
-
     def test_fit(self):
         np.random.seed(12345)
         x, var0 = self.generate_data()
@@ -54,13 +37,6 @@ class TestVAR(unittest.TestCase):
 
         self.assertTrue(np.all(np.abs(var0.coef - var.coef) < 0.005))
 
-    def test_predict(self):
-        np.random.seed(777)
-        x, var = self.generate_data()
-        z = var.predict(x)
-
-        self.assertTrue(np.abs(np.var(x[100:, :] - z[100:, :]) - 1) < 0.005)
-
     def test_residuals(self):
         np.random.seed(31415)
         x, var0 = self.generate_data()
@@ -70,23 +46,6 @@ class TestVAR(unittest.TestCase):
 
         self.assertEqual(x.shape, var.residuals.shape)
         self.assertTrue(np.allclose(var.rescov, np.eye(var.rescov.shape[0]), 0.005, 0.005))
-
-    def test_whiteness(self):
-        np.random.seed(91)
-        r = np.random.randn(100, 5, 10)     # gaussian white noise
-        r0 = r.copy()
-
-        var = VAR(0)
-        var.residuals = r
-
-        p = var.test_whiteness(20)
-
-        self.assertTrue(np.all(r == r0))    # make sure we don't modify the input
-        self.assertGreater(p, 0.01)         # test should be non-significant for white noise
-
-        r[3:,1,:] = r[:-3,0,:]              # create cross-correlation at lag 3
-        p = var.test_whiteness(20)
-        self.assertLessEqual(p, 0.01)       # now test should be significant
 
 
 # dynamically create testing functions for different fitting models
