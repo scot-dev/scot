@@ -8,6 +8,7 @@
 
 import numpy as np
 import scipy as sp
+from scipy.fftpack import fft
 from .utils import memoize
 
 
@@ -148,7 +149,7 @@ class Connectivity:
 
         .. math:: \mathbf{A}(f) = \mathbf{I} - \sum_{k=1}^{p} \mathbf{a}^{(k)} \mathrm{e}^{-2\pi f}
         """
-        return sp.fft.rfft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)
+        return fft(np.dstack([np.eye(self.m), -self.b]), self.nfft * 2 - 1)[:, :, :self.nfft]
 
     @memoize
     def H(self):
@@ -364,5 +365,5 @@ class Connectivity:
 
 
 def _inv3(x):
-    identity = np.eye(x.shape[0])[np.newaxis, :, :]
-    return sp.linalg.solve(x.T, identity).T
+    identity = np.eye(x.shape[0])
+    return np.array([sp.linalg.solve(a, identity) for a in x.T]).T
