@@ -3,13 +3,12 @@ This example shows how to decompose EEG signals into source activations with
 MVARICA, and visualize a connectivity.
 """
 
-import scot.backend.builtin     # use builtin (default) backend
-import scot
-
 import numpy as np
-from scot.utils import cuthill_mckee
 import matplotlib.pyplot as plt
-from eegtopo.topoplot import Topoplot
+
+import scot
+from scot.utils import cuthill_mckee
+from scot.eegtopo.topoplot import Topoplot
 from scot import plotting
 
 

@@ -5,10 +5,11 @@
 from __future__ import division
 
 import unittest
-
-from eegtopo.geometry.euclidean import Vector
 from math import sqrt
+
 import numpy as np
+
+from scot.eegtopo.geometry.euclidean import Vector
 
 
 class TestVector(unittest.TestCase):

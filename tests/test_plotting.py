@@ -4,15 +4,14 @@
 
 import unittest
 
-from eegtopo.topoplot import Topoplot
 import numpy as np
-
-from scot import plotting as sp
-from scot.var import VARBase
-
 import matplotlib.pyplot as plt
 from matplotlib.image import AxesImage
 from matplotlib.figure import Figure
+
+from scot.eegtopo.topoplot import Topoplot
+from scot import plotting as sp
+from scot.var import VARBase
 
 
 class TestFunctionality(unittest.TestCase):
