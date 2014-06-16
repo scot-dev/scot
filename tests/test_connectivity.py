@@ -40,7 +40,7 @@ class TestFunctionality(unittest.TestCase):
         # Phase should be zero along the diagonal
         self.assertTrue(np.allclose(k(c.PHI()).diagonal(), 0))
         # Phase should be antisymmetric
-        self.assertTrue(np.all(l(c.PHI()) == -l(c.PHI()).T))
+        self.assertTrue(np.allclose(l(c.PHI()), -l(c.PHI()).T))
         # Coherence should be 1 over all frequencies along the diagonal
         self.assertTrue(np.all(k(c.COH()).diagonal() == nfft))
         self.assertLessEqual(np.max(np.abs(c.COH())), 1)
