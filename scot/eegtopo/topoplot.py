@@ -12,10 +12,8 @@ import matplotlib.pyplot as plot
 import matplotlib.path as path
 #noinspection PyPep8Naming
 import matplotlib.patches as patches
-import matplotlib.transforms as transforms
 from .projections import (array_project_radial_to3d,
-                                 project_radial_to2d,
-                                 array_project_radial_to2d)
+                                       array_project_radial_to2d)
 from .geometry.euclidean import Vector
 from scipy.spatial import ConvexHull
 

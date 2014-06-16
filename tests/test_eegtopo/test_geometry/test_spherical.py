@@ -6,10 +6,10 @@ from __future__ import division
 
 import unittest
 
-from eegtopo.geometry.euclidean import Vector
-from eegtopo.geometry.spherical import Point, Line, Circle, Construct
-from math import sqrt
 import numpy as np
+
+from scot.eegtopo.geometry.euclidean import Vector
+from scot.eegtopo.geometry.spherical import Point, Line, Circle, Construct
 
 
 class TestClasses(unittest.TestCase):

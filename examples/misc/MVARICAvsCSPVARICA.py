@@ -3,14 +3,9 @@
 This example shows how to decompose motor imagery EEG into sources using
 SCPVARICA and visualize a connectivity measure.
 """
-import numpy as np
 
-import scot.backend.sklearn     # use scikit-learn backend
 #import scot.backend.builtin     # use builtin (default) backend
 import scot
-
-from eegtopo.eegpos3d import positions as eeg_locations
-from eegtopo.topoplot import topoplot
 
 """
 The example data set contains a continuous 45 channel EEG recording of a motor

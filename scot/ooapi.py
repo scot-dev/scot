@@ -14,6 +14,7 @@ example usage of the low-level API.
 """
 
 import numpy as np
+
 from . import config
 from .varica import mvarica, cspvarica
 from .plainica import plainica
@@ -22,7 +23,7 @@ from .connectivity import Connectivity
 from .connectivity_statistics import surrogate_connectivity, bootstrap_connectivity, test_bootstrap_difference
 from .connectivity_statistics import significance_fdr
 from . import plotting
-from eegtopo.topoplot import Topoplot
+from scot.eegtopo.topoplot import Topoplot
 
 
 class Workspace:

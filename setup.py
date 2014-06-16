@@ -26,8 +26,8 @@ setup(name='SCoT',
       packages=['scot', 
                 'scot.backend',
                 'scot.builtin',
-                'eegtopo',
-                'eegtopo.geometry'],
+                'scot.eegtopo',
+                'scot.eegtopo.geometry'],
 
       package_data={'scot.builtin': ['binica/ica_linux']},
 

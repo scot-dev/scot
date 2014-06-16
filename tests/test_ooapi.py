@@ -114,7 +114,7 @@ class TestMVARICA(unittest.TestCase):
                         [0.0, 0.0, 0.4, 0.0]]
         m0 = b01.shape[0]
         cl = np.array([0, 1, 0, 1, 0, 0, 1, 1, 1, 0])
-        l = 1000
+        l = 200
         t = len(cl)
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
@@ -158,12 +158,15 @@ class TestMVARICA(unittest.TestCase):
 
             self.assertEqual(api.get_connectivity('S').shape, (3, 3, 512))
 
+            self.assertFalse(np.any(np.isnan(api.activations_)))
+            self.assertFalse(np.any(np.isinf(api.activations_)))
+
             api.set_data(data)
 
             api.fit_var()
 
             self.assertEqual(api.get_connectivity('S').shape, (3, 3, 512))
-            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (3, 3, 512, 18))
+            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (3, 3, 512, (l-100)//50))
 
             api.set_data(data, cl)
             
@@ -171,9 +174,6 @@ class TestMVARICA(unittest.TestCase):
             self.assertFalse(np.any(np.isinf(api.data_)))
             
             api.do_cspvarica()
-            
-            self.assertFalse(np.any(np.isnan(api.activations_)))
-            self.assertFalse(np.any(np.isinf(api.activations_)))
             
             self.assertEqual(api.get_connectivity('S').shape, (3,3,512))
 
@@ -188,13 +188,13 @@ class TestMVARICA(unittest.TestCase):
                 self.assertEqual(fc.shape, (3, 3, 512))
 
                 tfc = api.get_tf_connectivity('S', 100, 50)
-                self.assertEqual(tfc.shape, (3, 3, 512, 18))
+                self.assertEqual(tfc.shape, (3, 3, 512, (l-100)//50))
 
             api.set_data(data)
             api.remove_sources([0, 2])
             api.fit_var()
             self.assertEqual(api.get_connectivity('S').shape, (1, 1, 512))
-            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1, 1, 512, 18))
+            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1, 1, 512, (l-100)//50))
 
             try:
                 api.optimize_var()
@@ -202,7 +202,7 @@ class TestMVARICA(unittest.TestCase):
                 pass
             api.fit_var()
             self.assertEqual(api.get_connectivity('S').shape, (1, 1, 512))
-            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1, 1, 512, 18))
+            self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (1, 1, 512, (l-100)//50))
 
     def test_premixing(self):
         api = scot.Workspace(VAR(1))
