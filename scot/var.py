@@ -181,8 +181,7 @@ class VAR(VARBase):
         d = None
         j, k = 0, 0
         nt = sp.ceil(t / skipstep)
-        for s in range(0, t, skipstep):
-            trainset, testset = xvschema(s, t)
+        for trainset, testset in xvschema(t, skipstep):
 
             (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
             (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
@@ -211,9 +210,7 @@ class VAR(VARBase):
         d = None
         l, k = 0, 0
         nt = sp.ceil(t / skipstep)
-        for s in range(0, t, skipstep):
-            #print(s,drange)
-            trainset, testset = xvschema(s, t)
+        for trainset, testset in xvschema(t, skipstep):
 
             (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
             (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
