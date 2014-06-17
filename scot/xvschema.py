@@ -4,6 +4,9 @@
 
 """ Cross-validation schemas """
 
+from __future__ import division
+
+import numpy as np
 from numpy import sort
 
 
@@ -79,3 +82,28 @@ def splitset(num_trials, skipstep):
     b = list(range(split, num_trials))
     yield a, b
     yield b, a
+
+
+def make_nfold(n):
+    """ n-fold cross validation
+
+    Use each of n blocks for testing once.
+
+    Parameters
+    ----------
+    n : int
+        number of blocks
+
+    Returns
+    -------
+    gengen : func
+        a function that returns the generator
+    """
+    def nfold(num_trials, skipstep):
+        blocksize = int(np.ceil(num_trials / n))
+        for i in range(0, num_trials, blocksize):
+            testset = list(i + np.arange(blocksize))
+            trainset = [i for i in range(testset[0])] + [i for i in range(testset[-1] + 1, num_trials)]
+            trainset = sort([t % num_trials for t in trainset])
+            yield trainset, testset
+    return nfold
