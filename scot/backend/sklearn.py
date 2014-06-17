@@ -18,7 +18,7 @@ from . import builtin
 
 from .. import config
 from .. import datatools
-from ..var import VARBase
+from ..varbase import VARBase
 
 
 def wrapper_fastica(data):
