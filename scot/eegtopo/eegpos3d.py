@@ -6,7 +6,7 @@
 
 from numpy import *
 
-from .geometry import spherical as geo
+from scot.eegtopo import geo_spherical as geo
 from .tools import Struct
 
 #import matplotlib.pyplot as plt
