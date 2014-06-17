@@ -26,7 +26,7 @@ setup(name='SCoT',
       packages=['scot',
                 'scot.eegtopo'],
 
-      package_data={'scot.builtin': ['binica/ica_linux']},
+      package_data={'scot': ['binica/ica_linux']},
 
       install_requires=['numpy >=1.7', 'scipy >=0.12']
      )
