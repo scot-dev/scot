@@ -75,6 +75,7 @@ class VAR(VARBase):
         max_p : int
             maximum model order to check
         """
+        data = np.asarray(data)
         assert (data.shape[2] > 1)
         msge = []
         prange = range(min_p, max_p + 1)
