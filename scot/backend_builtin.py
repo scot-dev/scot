@@ -7,8 +7,8 @@
 
 import numpy as np
 
-from .. import config, datatools, binica, pca, csp, utils
-from ..var import VAR
+from . import config, datatools, binica, pca, csp
+from .var import VAR
 
 
 def wrapper_binica(data):
@@ -36,8 +36,7 @@ backend = {
     'ica': wrapper_binica,
     'pca': wrapper_pca,
     'csp': wrapper_csp,
-    'var': VAR,
-    'utils': utils
+    'var': VAR
 }
 
 

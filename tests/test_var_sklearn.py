@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 from sklearn import linear_model
 
-from scot.backend.sklearn import VAR
+from scot.backend_sklearn import VAR
 
 
 class TestVAR(unittest.TestCase):

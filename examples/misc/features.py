@@ -8,11 +8,11 @@ import numpy as np
 from sklearn.lda import LDA
 from sklearn.cross_validation import KFold
 from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
 
 import scot
-import scot.backend.sklearn     # use scikit-learn backend
+import scot.backend_sklearn  # use scikit-learn backend
 import scot.xvschema
+
 
 
 # The example data set contains a continuous 45 channel EEG recording of a motor

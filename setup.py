@@ -10,7 +10,7 @@ versionfile.close()
 
 download_binica = True
 if download_binica:
-    from scot.builtin.binica import binica
+    from scot.backend_builtin.binica import binica
     try:
         binica([])
     except ValueError:

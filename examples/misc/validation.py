@@ -3,11 +3,13 @@ This example shows how to decompose EEG signals into source activations with
 MVARICA, and visualize a connectivity.
 """
 
-import scot.backend.sklearn     # use builtin (default) backend
+import matplotlib.pyplot as plt
+
+import scot.backend_sklearn  # use builtin (default) backend
 from scot.varica import cspvarica
 from scot.datatools import cut_segments
 import scot.plotting as splot
-import matplotlib.pyplot as plt
+
 
 # The example data set contains a continuous 45 channel EEG recording of a motor
 # imagery experiment. The data was preprocessed to reduce eye movement artifacts

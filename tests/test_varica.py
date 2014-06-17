@@ -7,7 +7,7 @@ from importlib import import_module
 
 import numpy as np
 
-import scot.backend
+import scot
 from scot import varica, datatools
 from scot.var import VAR
 
@@ -43,7 +43,7 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(sources, mix)
 
-        backend_modules = [import_module('scot.backend.' + b) for b in scot.backend.__all__]
+        backend_modules = [import_module('scot.' + b) for b in scot.backends]
 
         for bm in backend_modules:
 
