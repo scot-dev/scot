@@ -23,11 +23,8 @@ setup(name='SCoT',
       author='Martin Billinger',
       author_email='martin.billinger@tugraz.at',
       url='https://github.com/SCoT-dev/SCoT',
-      packages=['scot', 
-                'scot.backend',
-                'scot.builtin',
-                'scot.eegtopo',
-                'scot.eegtopo.geometry'],
+      packages=['scot',
+                'scot.eegtopo'],
 
       package_data={'scot.builtin': ['binica/ica_linux']},
 
