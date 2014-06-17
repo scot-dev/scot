@@ -16,7 +16,19 @@ class TestFunctionality(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testSimple(self):
+    def testFunction(self):
+        # Three sources: a <- b <-c
+        # simply test if connectivity measures are 0 where expected to be so
+        b0 = np.array([[0, 0.9, 0], [0, 0, 0.9], [0, 0, 0]])
+        identity = np.eye(3)
+        nfft = 5
+        measures = ['A', 'H', 'COH', 'DTF', 'PDC']
+        C = connectivity.Connectivity(b=b0, c=identity, nfft=nfft)
+        c = connectivity.connectivity(measures, b=b0, c=identity, nfft=nfft)
+        for m in measures:
+            self.assertTrue(np.all(c[m] == getattr(C, m)()))
+
+    def testClass(self):
         # Three sources: a <- b <-c
         # simply test if connectivity measures are 0 where expected to be so
         b0 = np.array([[0, 0.9, 0], [0, 0, 0.9], [0, 0, 0]])
