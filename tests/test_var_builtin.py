@@ -75,7 +75,7 @@ class TestVAR(unittest.TestCase):
         x = var0.simulate(l)
 
         var = VAR(-1)
-        var.optimize_order(x, 1, 20)
+        var.optimize_order(x, verbose=True)
 
         self.assertEqual(var.p, 2)
 

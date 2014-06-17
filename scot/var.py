@@ -64,7 +64,7 @@ class VAR(VARBase):
 
         return self
 
-    def optimize_order(self, data, min_p, max_p, skipstep=1, verbose=False):
+    def optimize_order(self, data, min_p=1, max_p=None, skipstep=1, verbose=False):
         """ Determine optimal model order by cross-validating the mean-squared
         generalization error.
 
@@ -77,18 +77,26 @@ class VAR(VARBase):
         """
         data = np.asarray(data)
         assert (data.shape[2] > 1)
-        msge = []
-        prange = range(min_p, max_p + 1)
+        msge, prange = [], []
         if verbose:
             print('optimizing model order...')
-        for p in prange:
+        p = min_p
+        while True:
             if verbose:
                 print(p, end=': ')
             f = self._get_msge_with_gradient_func(data.shape, p)
             j, k = f(data, self.delta, self.xvschema, skipstep, p)
+            prange.append(p)
             msge.append(j)
             if verbose:
                 print(j)
+            if max_p is None and len(msge) >= 2:
+                if msge[-1] > msge[-2]:
+                    break
+            else:
+                if p == max_p:
+                    break
+            p += 1
         self.p = prange[np.argmin(msge)]
         return zip(prange, msge)
 
