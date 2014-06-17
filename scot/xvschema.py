@@ -102,7 +102,7 @@ def make_nfold(n):
     def nfold(num_trials, skipstep):
         blocksize = int(np.ceil(num_trials / n))
         for i in range(0, num_trials, blocksize):
-            testset = list(i + np.arange(blocksize))
+            testset = [k for k in (i + np.arange(blocksize)) if k < num_trials]
             trainset = [i for i in range(testset[0])] + [i for i in range(testset[-1] + 1, num_trials)]
             trainset = sort([t % num_trials for t in trainset])
             yield trainset, testset
