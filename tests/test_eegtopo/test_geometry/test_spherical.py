@@ -8,8 +8,8 @@ import unittest
 
 import numpy as np
 
-from scot.eegtopo.geometry.euclidean import Vector
-from scot.eegtopo.geometry.spherical import Point, Line, Circle, Construct
+from scot.eegtopo.geo_euclidean import Vector
+from scot.eegtopo.geo_spherical import Point, Line, Circle, Construct
 
 
 class TestClasses(unittest.TestCase):

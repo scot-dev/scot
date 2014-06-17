@@ -3,11 +3,10 @@
 # Copyright (c) 2013 SCoT Development Team
 
 import unittest
-import sys
 
 import numpy as np
 
-from scot.builtin.csp import csp
+from scot.csp import csp
 
 try:
     from generate_testdata import generate_covsig

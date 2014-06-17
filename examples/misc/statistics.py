@@ -3,16 +3,7 @@ This example shows how to create surrogate connectivity to determine
 if connectivity is statistically significant.
 """
 
-import scot.backend.sklearn     # use builtin (default) backend
 import scot
-
-from scot import plotting as splt
-import matplotlib.pyplot as plt
-from scot.datatools import randomize_phase
-
-from scot.connectivity_statistics import *
-
-import numpy as np
 
 # The example data set contains a continuous 45 channel EEG recording of a motor
 # imagery experiment. The data was preprocessed to reduce eye movement artifacts

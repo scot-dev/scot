@@ -6,9 +6,8 @@ pre-transformed data.
 import numpy as np
 import matplotlib.pyplot as plt
 
-import scot.backend.sklearn     # use builtin (default) backend
 import scot
-from scot.datatools import dot_special
+
 
 # The example data set contains a continuous 45 channel EEG recording of a motor
 # imagery experiment. The data was preprocessed to reduce eye movement artifacts

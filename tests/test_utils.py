@@ -7,10 +7,10 @@ import unittest
 from importlib import import_module
 import numpy as np
 
-import scot.backend
-import scot.utils
+import scot
+from scot import utils
 
-backend_modules = [import_module('scot.backend.' + b) for b in scot.backend.__all__]
+backend_modules = [import_module('scot.' + b) for b in scot.backends]
 
 
 class TestUtils(unittest.TestCase):
@@ -67,7 +67,7 @@ def generate_backend(module):
             pass
 
         def test_cartesian(self):
-            cartesian = module.backend['utils'].cartesian
+            cartesian = utils.cartesian
             ret = cartesian(([1, 2, 3], [4, 5], [6, 7]))
             self.assertTrue(np.all(ret == np.array(
                 [[1, 4, 6],

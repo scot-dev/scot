@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from scot.var import VARBase as VAR
+from scot.varbase import VARBase as VAR
 from scot.datatools import dot_special
 
 epsilon = 1e-10

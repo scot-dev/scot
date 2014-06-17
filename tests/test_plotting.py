@@ -11,7 +11,7 @@ from matplotlib.figure import Figure
 
 from scot.eegtopo.topoplot import Topoplot
 from scot import plotting as sp
-from scot.var import VARBase
+from scot.varbase import VARBase
 
 
 class TestFunctionality(unittest.TestCase):

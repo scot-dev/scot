@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from scot.builtin.pca import pca
+from scot.pca import pca
 
 try:
     from generate_testdata import generate_covsig

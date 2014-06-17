@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from scot.builtin.var import VAR
+from scot.var import VAR
 
 epsilon = 1e-10
 

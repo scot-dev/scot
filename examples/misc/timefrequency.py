@@ -2,7 +2,7 @@
 This example shows how to decompose EEG signals into source activations with MVARICA, and visualize time varying connectivity.
 """
 import scot
-import scot.backend.sklearn     # use scikit-learn backend
+import scot.backend_sklearn  # use scikit-learn backend
 #import scot.backend.builtin     # use builtin (default) backend
 
 # The example data set contains a continuous 45 channel EEG recording of a motor

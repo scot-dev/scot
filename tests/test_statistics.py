@@ -5,8 +5,8 @@
 import unittest
 
 import numpy as np
-from scot.backend.builtin import VAR
 
+from scot.backend_builtin import VAR
 import scot.connectivity_statistics as cs
 
 

@@ -10,7 +10,7 @@ versionfile.close()
 
 download_binica = True
 if download_binica:
-    from scot.builtin.binica import binica
+    from scot.binica import binica
     try:
         binica([])
     except ValueError:
@@ -23,13 +23,10 @@ setup(name='SCoT',
       author='Martin Billinger',
       author_email='martin.billinger@tugraz.at',
       url='https://github.com/SCoT-dev/SCoT',
-      packages=['scot', 
-                'scot.backend',
-                'scot.builtin',
-                'scot.eegtopo',
-                'scot.eegtopo.geometry'],
+      packages=['scot',
+                'scot.eegtopo'],
 
-      package_data={'scot.builtin': ['binica/ica_linux']},
+      package_data={'scot': ['binica/ica_linux']},
 
       install_requires=['numpy >=1.7', 'scipy >=0.12']
      )

@@ -4,9 +4,14 @@ include a PCA step in the process.
 """
 
 from __future__ import print_function
-from scot.builtin.var import VAR
-from scot.builtin.pca import pca
+
 import numpy as np
+
+from scot import pca
+
+from scot.var import VAR
+
+
 
 # Generate data from a VAR(1) process
 model0 = VAR(1)

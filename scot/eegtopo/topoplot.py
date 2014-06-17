@@ -6,15 +6,12 @@ from __future__ import division
 
 import numpy as np
 from scipy.interpolate import interp1d
-#noinspection PyPep8Naming
 import matplotlib.pyplot as plot
-#noinspection PyPep8Naming
 import matplotlib.path as path
-#noinspection PyPep8Naming
 import matplotlib.patches as patches
 from .projections import (array_project_radial_to3d,
                                        array_project_radial_to2d)
-from .geometry.euclidean import Vector
+from .geo_euclidean import Vector
 from scipy.spatial import ConvexHull
 
 
