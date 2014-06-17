@@ -4,13 +4,13 @@
 
 import unittest
 from importlib import import_module
+
 import numpy as np
 
 import scot.backend
 from scot import datatools
 import scot
-
-from scot.builtin.var import VAR
+from scot.var import VAR
 
 
 class TestMVARICA(unittest.TestCase):

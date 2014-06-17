@@ -7,12 +7,8 @@
 
 import numpy as np
 
-from .. import config
-from .. import datatools
-
-from ..builtin import binica, pca, csp
-from ..builtin.var import VAR
-from ..builtin import utils
+from .. import config, datatools, binica, pca, csp, utils
+from ..var import VAR
 
 
 def wrapper_binica(data):

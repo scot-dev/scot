@@ -7,9 +7,9 @@
 
 import numpy as np
 import scipy as sp
-from ..varbase import VARBase
-from ..datatools import cat_trials
-from .. import xvschema as xv
+from .varbase import VARBase
+from .datatools import cat_trials
+from . import xvschema as xv
 
 
 class VAR(VARBase):

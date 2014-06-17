@@ -10,6 +10,6 @@ if hasattr(extmath, 'cartesian_'):
 else:
     # fall back to builtin cartesian since older
     # sklearn versions don't have this function.
-    from ..builtin import utils
+    from .. import utils
     cartesian = utils.cartesian
 
