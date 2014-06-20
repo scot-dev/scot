@@ -6,11 +6,34 @@ Subpackages
 
 .. toctree::
 
-    scot.backend
-    scot.builtin
+    scot.eegtopo
 
 Submodules
 ----------
+
+scot.backend_builtin module
+---------------------------
+
+.. automodule:: scot.backend_builtin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scot.backend_sklearn module
+---------------------------
+
+.. automodule:: scot.backend_sklearn
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scot.binica module
+------------------
+
+.. automodule:: scot.binica
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 scot.config module
 ------------------
@@ -36,6 +59,14 @@ scot.connectivity_statistics module
     :undoc-members:
     :show-inheritance:
 
+scot.csp module
+---------------
+
+.. automodule:: scot.csp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 scot.datatools module
 ---------------------
 
@@ -56,6 +87,14 @@ scot.ooapi module
 -----------------
 
 .. automodule:: scot.ooapi
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scot.pca module
+---------------
+
+.. automodule:: scot.pca
     :members:
     :undoc-members:
     :show-inheritance:
@@ -88,6 +127,14 @@ scot.var module
 ---------------
 
 .. automodule:: scot.var
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+scot.varbase module
+-------------------
+
+.. automodule:: scot.varbase
     :members:
     :undoc-members:
     :show-inheritance:
