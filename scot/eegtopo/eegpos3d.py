@@ -9,10 +9,6 @@ from numpy import *
 from scot.eegtopo import geo_spherical as geo
 from .tools import Struct
 
-#import matplotlib.pyplot as plt
-#from matplotlib.patches import Circle
-#from mpl_toolkits.mplot3d import Axes3D
-
 Point = geo.Point
 Line = geo.Line
 Circle = geo.Circle

@@ -67,6 +67,18 @@ class TestVAR(unittest.TestCase):
 
         self.assertTrue(np.allclose(var.rescov, np.eye(var.rescov.shape[0]), 1e-2, 1e-2))
 
+    def test_optimize(self):
+        np.random.seed(745)
+        var0 = VAR(2)
+        var0.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = (100, 10)
+        x = var0.simulate(l)
+
+        var = VAR(-1)
+        var.optimize_order(x, verbose=True)
+
+        self.assertEqual(var.p, 2)
+
 
 def main():
     unittest.main()

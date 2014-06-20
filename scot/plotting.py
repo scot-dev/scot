@@ -11,20 +11,25 @@ If matplotlib is not available no error is raised, but plotting functions will n
 
 import numpy as np
 
-try:
-    #noinspection PyPep8Naming
-    import matplotlib.pyplot as plt
-    from matplotlib.ticker import MaxNLocator
-    import matplotlib.cm as cm
-
-    _have_pyplot = True
-except ImportError:
-    plt, MaxNLocator = None, None
-    _have_pyplot = False
-
 
 def show_plots():
+    import matplotlib.pyplot as plt
     plt.show()
+
+
+def new_figure(*args, **kwargs):
+    import matplotlib.pyplot as plt
+    return plt.figure(*args, **kwargs)
+
+
+def current_axis():
+    import matplotlib.pyplot as plt
+    return plt.gca()
+
+
+def MaxNLocator(*args, **kwargs):
+    from matplotlib.ticker import MaxNLocator as mnl
+    return mnl(*args, **kwargs)
 
 
 def prepare_topoplots(topo, values):
@@ -111,9 +116,6 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
     fig : Figure object
         The figure into which was plotted.
     """
-    if not _have_pyplot:
-        raise ImportError("matplotlib.pyplot is required for plotting")
-
     urange, mrange = None, None
 
     m = len(mixmaps)
@@ -135,7 +137,7 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
     x = np.ceil(m / y)
 
     if fig is None:
-        fig = plt.figure()
+        fig = new_figure()
 
     axes = []
     for i in range(m):
@@ -184,7 +186,7 @@ def plot_connectivity_topos(layout='diagonal', topo=None, topomaps=None, fig=Non
     m = len(topomaps)
 
     if fig is None:
-        fig = plt.figure()
+        fig = new_figure()
 
     if layout == 'diagonal':
         for i in range(m):
@@ -247,7 +249,7 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0
     right = min(freq_range[1], freq[-1])
 
     if fig is None:
-        fig = plt.figure()
+        fig = new_figure()
 
     axes = []
     for i in range(m):
@@ -345,7 +347,7 @@ def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagon
     imext = (freq[0], freq[-1], -1e25, 1e25)
 
     if fig is None:
-        fig = plt.figure()
+        fig = new_figure()
 
     axes = []
     for i in range(m):
@@ -361,7 +363,7 @@ def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagon
             else:
                 ax = fig.add_subplot(m, m, j + i * m + 1)
             axes.append((i, j, ax))
-            ax.imshow(s[i, j, np.newaxis], vmin=0, vmax=2, cmap=cm.binary, aspect='auto', extent=imext, zorder=-999)
+            ax.imshow(s[i, j, np.newaxis], vmin=0, vmax=2, cmap='binary', aspect='auto', extent=imext, zorder=-999)
 
             ax.xaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
             ax.yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
@@ -433,7 +435,7 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
     ymax = min(freq_range[1], f0)
 
     if fig is None:
-        fig = plt.figure()
+        fig = new_figure()
 
     axes = []
     for i in range(m):
@@ -533,7 +535,7 @@ def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=
     assert(n == m)
 
     if axes is None:
-        fig = plt.figure()
+        fig = new_figure()
         axes = fig.add_subplot(111)
     axes.set_yticks([])
     axes.set_xticks([])
@@ -642,7 +644,7 @@ def plot_whiteness(var, h, repeats=1000, axis=None):
     pr, q0, q = var.test_whiteness(h, repeats, True)
 
     if axis is None:
-        axis = plt.gca()
+        axis = current_axis()
 
     pdf, _, _ = axis.hist(q0, 30, normed=True, label='surrogate distribution')
     axis.plot([q,q], [0,np.max(pdf)], 'r-', label='fitted model')

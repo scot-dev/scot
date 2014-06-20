@@ -6,9 +6,6 @@ from __future__ import division
 
 import numpy as np
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plot
-import matplotlib.path as path
-import matplotlib.patches as patches
 from .projections import (array_project_radial_to3d,
                                        array_project_radial_to2d)
 from .geo_euclidean import Vector
@@ -19,6 +16,7 @@ class Topoplot:
     """ Creates 2D scalp maps. """
 
     def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head', electrodescale=1, interpolationrange=np.pi * 3 / 4, head_radius=np.pi * 3 / 4):
+        import matplotlib.path as path
         self.interprange = interpolationrange
         self.head_radius = head_radius
         self.nose_angle = 15
@@ -116,7 +114,9 @@ class Topoplot:
         self.image = gm.dot(self.c[1:]) + self.c[0]
 
     def plot_map(self, axes=None, crange=None, offset=(0,0)):
-        if axes is None: axes = plot.gca()
+        if axes is None:
+            import matplotlib.pyplot as plot
+            axes = plot.gca()
         if crange is str:
             if crange.lower() == 'channels':
                 crange = None
@@ -134,6 +134,7 @@ class Topoplot:
         if self.clipping == 'head':
             clip_path = (head, axes.transData)
         elif self.clipping == 'electrodes':
+            import matplotlib.path as path
             verts = self._get_fence()
             codes = [path.Path.LINETO] * (len(verts) - 1)
             codes.insert(0, path.Path.MOVETO)
@@ -146,12 +147,17 @@ class Topoplot:
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
     def plot_locations(self, axes=None, offset=(0,0)):
-        if axes is None: axes = plot.gca()
+        if axes is None:
+            import matplotlib.pyplot as plot
+            axes = plot.gca()
         p2 = array_project_radial_to2d(self.locations) * self.electrodescale + offset
         axes.plot(p2[:, 0], p2[:, 1], 'k.')
 
     def plot_head(self, axes=None, offset=(0,0)):
-        if axes is None: axes = plot.gca()
+        import matplotlib.patches as patches
+        if axes is None:
+            import matplotlib.pyplot as plot
+            axes = plot.gca()
         head = self.path_head.deepcopy()
         nose = self.path_nose.deepcopy()
         head.vertices += offset
@@ -160,6 +166,7 @@ class Topoplot:
         axes.add_patch(patches.PathPatch(nose, facecolor='none', edgecolor=self.headcolor, lw=2))
 
     def plot_circles(self, radius, axes=None, offset=(0,0)):
+        import matplotlib.pyplot as plot
         if axes is None: axes = plot.gca()
         col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
