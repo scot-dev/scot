@@ -12,6 +12,7 @@ import scipy as sp
 from .varbase import VARBase, _construct_var_eqns
 from .datatools import cat_trials
 from . import xvschema as xv
+from .parallel import parallel_loop
 
 
 class VAR(VARBase):
@@ -64,39 +65,50 @@ class VAR(VARBase):
 
         return self
 
-    def optimize_order(self, data, min_p=1, max_p=None, skipstep=1, verbose=False):
+    def optimize_order(self, data, min_p=1, max_p=None, n_jobs=1, verbose=0):
         """ Determine optimal model order by cross-validating the mean-squared
         generalization error.
 
         Parameters
         ----------
+        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+            Continuous or segmented data set on which to optimize the model order.
         min_p : int
             minimal model order to check
         max_p : int
             maximum model order to check
+        n_jobs : int | None
+            number of jobs to run in parallel. See `joblib.Parallel` for details.
+        verbose : int
+            verbosity level passed to joblib.
         """
         data = np.asarray(data)
         assert (data.shape[2] > 1)
         msge, prange = [], []
-        if verbose:
-            print('optimizing model order...')
+
+        par, func = parallel_loop(_get_msge_with_gradient,
+                                  n_jobs=n_jobs, verbose=verbose)
+        if not n_jobs:
+            npar = 1
+        elif n_jobs < 0:
+                npar = 4  # is this a sane default?
+        else:
+            npar = n_jobs
+
         p = min_p
         while True:
-            if verbose:
-                print(p, end=': ')
-            f = self._get_msge_with_gradient_func(data.shape, p)
-            j, k = f(data, self.delta, self.xvschema, skipstep, p)
-            prange.append(p)
-            msge.append(j)
-            if verbose:
-                print(j)
-            if max_p is None and len(msge) >= 2:
-                if msge[-1] > msge[-2]:
+            result = par(func(data, self.delta, self.xvschema, 1, p_)
+                         for p_ in range(p, p + npar))
+            j, k = zip(*result)
+            prange.extend(range(p, p + npar))
+            msge.extend(j)
+            p += npar
+            if max_p is None:
+                if len(msge) >= 2 and msge[-1] > msge[-2]:
                     break
             else:
-                if p == max_p:
+                if prange[-1] >= max_p:
                     break
-            p += 1
         self.p = prange[np.argmin(msge)]
         return zip(prange, msge)
 
@@ -127,7 +139,7 @@ class VAR(VARBase):
 
         transform = lambda x: sp.sqrt(sp.exp(x))
 
-        msge = self._get_msge_with_gradient_func(data.shape, self.p)
+        msge = _get_msge_with_gradient_func(data.shape, self.p)
 
         (ja, ka) = msge(data, transform(a), self.xvschema, skipstep, self.p)
         (jb, kb) = msge(data, transform(b), self.xvschema, skipstep, self.p)
@@ -173,75 +185,89 @@ class VAR(VARBase):
         """
         return _construct_var_eqns_rls(data, self.p, self.delta)
 
-    @staticmethod
-    def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
-        """ Calculate the mean squared generalization error and it's gradient for underdetermined equation system.
-        """
-        (l, m, t) = data.shape
-        d = None
-        j, k = 0, 0
-        nt = sp.ceil(t / skipstep)
-        for trainset, testset in xvschema(t, skipstep):
 
-            (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
-            (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
+def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
+    """ Calculate the mean squared generalization error and it's gradient for underdetermined equation system.
+    """
+    (l, m, t) = data.shape
+    d = None
+    j, k = 0, 0
+    nt = sp.ceil(t / skipstep)
+    for trainset, testset in xvschema(t, skipstep):
 
-            e = sp.linalg.inv(sp.eye(a.shape[0]) * delta ** 2 + a.dot(a.transpose()))
+        (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
+        (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
 
-            cc = c.transpose().dot(c)
+        e = sp.linalg.inv(sp.eye(a.shape[0]) * delta ** 2 + a.dot(a.transpose()))
 
-            be = b.transpose().dot(e)
-            bee = be.dot(e)
-            bea = be.dot(a)
-            beea = bee.dot(a)
-            beacc = bea.dot(cc)
-            dc = d.transpose().dot(c)
+        cc = c.transpose().dot(c)
 
-            j += sp.sum(beacc * bea - 2 * bea * dc) + sp.sum(d ** 2)
-            k += sp.sum(beea * dc - beacc * beea) * 4 * delta
+        be = b.transpose().dot(e)
+        bee = be.dot(e)
+        bea = be.dot(a)
+        beea = bee.dot(a)
+        beacc = bea.dot(cc)
+        dc = d.transpose().dot(c)
 
-        return j / (nt * d.size), k / (nt * d.size)
+        j += sp.sum(beacc * bea - 2 * bea * dc) + sp.sum(d ** 2)
+        k += sp.sum(beea * dc - beacc * beea) * 4 * delta
 
-    @staticmethod
-    def _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p):
-        """ Calculate the mean squared generalization error and it's gradient for overdetermined equation system.
-        """
-        (l, m, t) = data.shape
-        d = None
-        l, k = 0, 0
-        nt = sp.ceil(t / skipstep)
-        for trainset, testset in xvschema(t, skipstep):
+    return j / (nt * d.size), k / (nt * d.size)
 
-            (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
-            (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
 
-            #e = sp.linalg.inv(np.eye(a.shape[1])*delta**2 + a.transpose().dot(a), overwrite_a=True, check_finite=False)
-            e = sp.linalg.inv(sp.eye(a.shape[1]) * delta ** 2 + a.transpose().dot(a))
+def _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p):
+    """ Calculate the mean squared generalization error and it's gradient for overdetermined equation system.
+    """
+    (l, m, t) = data.shape
+    d = None
+    l, k = 0, 0
+    nt = sp.ceil(t / skipstep)
+    for trainset, testset in xvschema(t, skipstep):
 
-            ba = b.transpose().dot(a)
-            dc = d.transpose().dot(c)
-            bae = ba.dot(e)
-            baee = bae.dot(e)
-            baecc = bae.dot(c.transpose().dot(c))
+        (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
+        (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
 
-            l += sp.sum(baecc * bae - 2 * bae * dc) + sp.sum(d ** 2)
-            k += sp.sum(baee * dc - baecc * baee) * 4 * delta
+        #e = sp.linalg.inv(np.eye(a.shape[1])*delta**2 + a.transpose().dot(a), overwrite_a=True, check_finite=False)
+        e = sp.linalg.inv(sp.eye(a.shape[1]) * delta ** 2 + a.transpose().dot(a))
 
-        return l / (nt * d.size), k / (nt * d.size)
+        ba = b.transpose().dot(a)
+        dc = d.transpose().dot(c)
+        bae = ba.dot(e)
+        baee = bae.dot(e)
+        baecc = bae.dot(c.transpose().dot(c))
 
-    @staticmethod
-    def _get_msge_with_gradient_func(shape, p):
-        """ Select which function to use for MSGE calculation (over- or underdetermined).
-        """
-        (l, m, t) = shape
+        l += sp.sum(baecc * bae - 2 * bae * dc) + sp.sum(d ** 2)
+        k += sp.sum(baee * dc - baecc * baee) * 4 * delta
 
-        n = (l - p) * t
-        underdetermined = n < m * p
+    return l / (nt * d.size), k / (nt * d.size)
 
-        if underdetermined:
-            return VAR._msge_with_gradient_underdetermined
-        else:
-            return VAR._msge_with_gradient_overdetermined
+
+def _get_msge_with_gradient_func(shape, p):
+    """ Select which function to use for MSGE calculation (over- or underdetermined).
+    """
+    (l, m, t) = shape
+
+    n = (l - p) * t
+    underdetermined = n < m * p
+
+    if underdetermined:
+        return _msge_with_gradient_underdetermined
+    else:
+        return _msge_with_gradient_overdetermined
+
+
+def _get_msge_with_gradient(data, delta, xvschema, skipstep, p):
+    """ Calculate the mean squared generalization error and it's gradient, automatically selecting the best function.
+    """
+    (l, m, t) = data.shape
+
+    n = (l - p) * t
+    underdetermined = n < m * p
+
+    if underdetermined:
+        return _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p)
+    else:
+        return _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p)
 
 
 def _construct_var_eqns_rls(data, p, delta):
