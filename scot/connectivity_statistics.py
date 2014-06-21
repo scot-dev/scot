@@ -12,10 +12,10 @@ import scipy as sp
 from .datatools import randomize_phase
 from .connectivity import connectivity
 from .utils import cartesian
-from . import config
+from .parallel import parallel_loop
 
 
-def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
+def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100, n_jobs=1, verbose=0):
     """ Calculates surrogate connectivity for a multivariate time series by phase randomization [1]_.
 
     .. note:: Parameter `var` will be modified by the function. Treat as undefined after the function returned.
@@ -33,6 +33,10 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
         sampling rate.
     repeats : int, optional
         How many surrogate samples to take.
+    n_jobs : int | None
+        number of jobs to run in parallel. See `joblib.Parallel` for details.
+    verbose : int
+        verbosity level passed to joblib.
 
     Returns
     -------
@@ -44,16 +48,18 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100):
     .. [1] J. Theiler et al. "Testing for nonlinearity in time series: the method of surrogate data", Physica D,
            vol 58, pp. 77-94, 1992
     """
-    output = []
-    for r in range(repeats):
-        surrogate_data = randomize_phase(data)
-        var.fit(surrogate_data)
-        c = connectivity(measure_names, var.coef, var.rescov, nfft)
-        output.append(c)
+    par, func = parallel_loop(_calc_surrogate, n_jobs=n_jobs, verbose=verbose)
+    output = par(func(data, var, measure_names, nfft) for _ in range(repeats))
     return convert_output_(output, measure_names)
 
 
-def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1):
+def _calc_surrogate(data, var, measure_names, nfft):
+    surrogate_data = randomize_phase(data)
+    var.fit(surrogate_data)
+    return connectivity(measure_names, var.coef, var.rescov, nfft)
+
+
+def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1, n_jobs=1, verbose=0):
     """ Calculates Jackknife estimates of connectivity.
 
     For each Jackknife estimate a block of trials is left out. This is repeated until each trial was left out exactly
@@ -75,6 +81,10 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1):
         sampling rate.
     leaveout : int, optional
         Number of trials to leave out in each estimate.
+    n_jobs : int | None
+        number of jobs to run in parallel. See `joblib.Parallel` for details.
+    verbose : int
+        verbosity level passed to joblib.
 
     Returns
     -------
@@ -91,17 +101,19 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1):
 
     num_blocks = int(t / leaveout)
 
-    output = []
-    for b in range(num_blocks):
-        mask = [i for i in range(t) if i < b*leaveout or i >= (b+1)*leaveout]
-        data_used = data[:, :, mask]
-        var.fit(data_used)
-        c = connectivity(measure_names, var.coef, var.rescov, nfft)
-        output.append(c)
+    mask = lambda block: [i for i in range(t) if i < block*leaveout or i >= (block+1)*leaveout]
+
+    par, func = parallel_loop(_calc_jackknife, n_jobs=n_jobs, verbose=verbose)
+    output = par(func(data[:, :, mask(b)], var, measure_names, nfft) for b in range(num_blocks))
     return convert_output_(output, measure_names)
 
 
-def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100, num_samples=None):
+def _calc_jackknife(data_used, var, measure_names, nfft):
+    var.fit(data_used)
+    return connectivity(measure_names, var.coef, var.rescov, nfft)
+
+
+def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100, num_samples=None, n_jobs=1, verbose=0):
     """ Calculates Bootstrap estimates of connectivity.
 
     To obtain a bootstrap estimate trials are sampled randomly with replacement from the data set.
@@ -121,6 +133,10 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100, num_sampl
     num_samples : int, optional
         How many samples to take for each bootstrap estimates. Defaults to the same number of trials as present in
         the data.
+    n_jobs : int | None
+        number of jobs to run in parallel. See `joblib.Parallel` for details.
+    verbose : int
+        verbosity level passed to joblib.
 
     Returns
     -------
@@ -135,14 +151,16 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100, num_sampl
     if num_samples is None:
         num_samples = t
 
-    output = []
-    for r in range(repeats):
-        mask = np.random.random_integers(0, t-1, num_samples)
-        data_used = data[:, :, mask]
-        var.fit(data_used)
-        c = connectivity(measures, var.coef, var.rescov, nfft)
-        output.append(c)
+    par, func = parallel_loop(_calc_bootstrap, n_jobs=n_jobs, verbose=verbose)
+    output = par(func(data, var, measures, nfft, num_samples) for _ in range(repeats))
     return convert_output_(output, measures)
+
+
+def _calc_bootstrap(data, var, measures, nfft, num_samples):
+    mask = np.random.random_integers(0, data.shape[2]-1, num_samples)
+    data_used = data[:, :, mask]
+    var.fit(data_used)
+    return connectivity(measures, var.coef, var.rescov, nfft)
 
 
 def test_bootstrap_difference(a, b):
