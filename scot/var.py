@@ -166,6 +166,7 @@ class VAR(VARBase):
                   'New interval: (%f,%f)' % (a, b, a * 2, b * 2))
             a *= 2
             b *= 2
+            (ja, ka) = msge(data, trform(a), self.xvschema, skipstep, self.p)
             (jb, kb) = msge(data, trform(b), self.xvschema, skipstep, self.p)
 
             if trform(b) >= maxdelta:
