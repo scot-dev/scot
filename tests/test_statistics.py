@@ -17,7 +17,8 @@ class TestFunctions(unittest.TestCase):
         def tearDown(self):
             pass
 
-        def generate_data(self):
+        @staticmethod
+        def generate_data():
             var = VAR(2)
             var.coef = np.array([[0.2, 0.1, 0, 0], [0.7, -0.4, 0.1, 0]])
             l = (100, 100)
@@ -28,7 +29,8 @@ class TestFunctions(unittest.TestCase):
             np.random.seed(31415)
             x, var0 = self.generate_data()
 
-            result = cs.surrogate_connectivity('PDC', x, VAR(2), 4, repeats=100)
+            result = cs.surrogate_connectivity('PDC', x, VAR(2), 4,
+                                               repeats=100)
             self.assertEqual(result.shape, (100, 2, 2, 4))
 
             structure = np.mean(np.mean(result, axis=3), axis=0)
@@ -42,17 +44,22 @@ class TestFunctions(unittest.TestCase):
             self.assertEqual(result.shape, (100, 2, 2, 4))
 
             structure = np.mean(np.mean(result, axis=3), axis=0)
-            self.assertTrue(np.all(np.abs(structure-[[1, 0], [0.5, 1]]) < 0.25)) # make sure result has roughly the correct structure
+            # make sure result has roughly the correct structure
+            self.assertTrue(np.all(np.abs(structure-[[1, 0], [0.5, 1]])
+                                   < 0.25))
 
         def test_bootstrap(self):
             np.random.seed(31415)
             x, var0 = self.generate_data()
 
-            result = cs.bootstrap_connectivity('PDC', x, VAR(2), 4, repeats=100)
+            result = cs.bootstrap_connectivity('PDC', x, VAR(2), 4,
+                                               repeats=100)
             self.assertEqual(result.shape, (100, 2, 2, 4))
 
             structure = np.mean(np.mean(result, axis=3), axis=0)
-            self.assertTrue(np.all(np.abs(structure-[[1, 0], [0.5, 1]]) < 0.25)) # make sure result has roughly the correct structure
+            # make sure result has roughly the correct structure
+            self.assertTrue(np.all(np.abs(structure - [[1, 0], [0.5, 1]])
+                                   < 0.25))
 
         def test_bootstrap_difference_and_fdr(self):
             # Generate reference data
@@ -71,7 +78,8 @@ class TestFunctions(unittest.TestCase):
             # Trials rearranged ==> no significant differences expected
             np.random.seed(12345)
             x, var0 = self.generate_data()
-            b = cs.bootstrap_connectivity('PDC', x[:,:,::-1], VAR(2), 4, repeats=100)
+            b = cs.bootstrap_connectivity('PDC', x[:, :, ::-1], VAR(2), 4,
+                                          repeats=100)
             p = cs.test_bootstrap_difference(a, b)
             self.assertFalse(np.any(p < 0.01))
             self.assertFalse(np.any(cs.significance_fdr(p, 0.05)))
@@ -79,7 +87,8 @@ class TestFunctions(unittest.TestCase):
             # Channels rearranged ==> highly significant differences expected
             np.random.seed(12345)
             x, var0 = self.generate_data()
-            b = cs.bootstrap_connectivity('PDC', x[:,::-1, 1], VAR(2), 4, repeats=100)
+            b = cs.bootstrap_connectivity('PDC', x[:, ::-1, 1], VAR(2), 4,
+                                          repeats=100)
             p = cs.test_bootstrap_difference(a, b)
             self.assertTrue(np.all(p < 0.0001))
             self.assertTrue(np.all(cs.significance_fdr(p, 0.01)))
@@ -87,7 +96,8 @@ class TestFunctions(unittest.TestCase):
             # Time reversed ==> highly significant differences expected
             np.random.seed(12345)
             x, var0 = self.generate_data()
-            b = cs.bootstrap_connectivity('PDC', x[::-1,:, 1], VAR(2), 4, repeats=100)
+            b = cs.bootstrap_connectivity('PDC', x[::-1, :, 1], VAR(2), 4,
+                                          repeats=100)
             p = cs.test_bootstrap_difference(a, b)
             self.assertTrue(np.all(p < 0.0001))
             self.assertTrue(np.all(cs.significance_fdr(p, 0.01)))
