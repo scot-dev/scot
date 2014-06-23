@@ -33,9 +33,16 @@ class VAR(VARBase):
         function takes two parameters: the current cross-validation run (int)
         and the numer of trials (int). It returns a tuple of two arrays: the
         training set and the testing set.
+    n_jobs : int | None
+        Number of jobs to run in parallel for various tasks (e.g. whiteness
+        testing). If set to None, joblib is not used at all.
+    verbose : int
+        verbosity level passed to joblib.
     """
-    def __init__(self, model_order, delta=0, xvschema=xv.multitrial):
-        VARBase.__init__(self, model_order)
+    def __init__(self, model_order, delta=0, xvschema=xv.multitrial, n_jobs=1,
+                 verbose=0):
+        VARBase.__init__(self, model_order=model_order, n_jobs=n_jobs,
+                         verbose=verbose)
         self.delta = delta
         self.xvschema = xvschema
 
