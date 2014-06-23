@@ -61,7 +61,7 @@ class Topoplot:
 
     @staticmethod
     def calc_legendre_factors(m, num_lterms):
-        return [(2 * n + 1) / (n ** m * (n + 1) ** m * 4 * np.pi) for n in range(1, num_lterms + 1)]
+        return [0] + [(2 * n + 1) / (n ** m * (n + 1) ** m * 4 * np.pi) for n in range(1, num_lterms + 1)]
 
     def calc_g(self, x):
         return np.polynomial.legendre.legval(x, self.legendre_factors)
