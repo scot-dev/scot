@@ -13,6 +13,7 @@ import scipy as sp
 from . import xvschema as xv
 from .utils import acm
 from .datatools import cat_trials, atleast_3d
+from .parallel import parallel_loop
 
 
 class Defaults(object):
@@ -30,6 +31,11 @@ class VARBase(object):
     ----------
     model_order : int
         Autoregressive model order
+    n_jobs : int | None
+        Number of jobs to run in parallel for various tasks (e.g. whiteness
+        testing). If set to None, joblib is not used at all.
+    verbose : int
+        verbosity level passed to joblib.
 
     Notes
     -----
@@ -50,11 +56,13 @@ class VARBase(object):
     filter coefficients from channel j (source) to channel i (sink).
     """
 
-    def __init__(self, model_order):
+    def __init__(self, model_order, n_jobs=1, verbose=0):
         self.p = model_order
         self.coef = None
         self.residuals = None
         self.rescov = None
+        self.n_jobs = n_jobs
+        self.verbose = verbose
 
     def copy(self):
         """ Create a copy of the VAR model."""
@@ -316,7 +324,9 @@ class VARBase(object):
                J. Am. Statist. Assoc.
         """
 
-        return test_whiteness(self.residuals, h, self.p, repeats, get_q)
+        return test_whiteness(self.residuals, h=h, p=self.p, repeats=repeats,
+                              get_q=get_q, n_jobs=self.n_jobs,
+                              verbose=self.verbose)
 
     def _construct_eqns(self, data):
         """ Construct VAR equation system
@@ -350,7 +360,8 @@ def _construct_var_eqns(data, p, delta=None):
         return x, y
 
 
-def test_whiteness(data, h, p=0, repeats=100, get_q=False):
+def test_whiteness(data, h, p=0, repeats=100, get_q=False, n_jobs=1,
+                   verbose=0):
     """ Test if signals are white (serially uncorrelated up to a lag of h).
 
     This function calculates the Li-McLeod as Portmanteau test statistic Q to
@@ -377,6 +388,11 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
         Number of samples to create under the null hypothesis.
     get_q : bool, optional
         Return Q statistic along with *p*-value
+    n_jobs : int | None
+        number of jobs to run in parallel. See `joblib.Parallel` for details.
+        If set to None, joblib is not used at all.
+    verbose : int
+        verbosity level passed to joblib.
 
     Returns
     -------
@@ -405,7 +421,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
     (t, m, n) = res.shape
     nt = (n - p) * t
 
-    q0 = _calc_q_h0(repeats, res, h, nt)[:, 2, -1]
+    q0 = _calc_q_h0(repeats, res, h, nt, n_jobs, verbose)[:, 2, -1]
     q = _calc_q_statistic(res, h, nt)[2, -1]
 
     # probability of observing a result more extreme than q
@@ -458,13 +474,10 @@ def _calc_q_statistic(x, h, nt):
     return q
 
 
-def _calc_q_h0(n, x, h, nt):
+def _calc_q_h0(n, x, h, nt, n_jobs=1, verbose=0):
     """ Calculate q under the null-hypothesis of whiteness.
     """
-    x = x.copy()
-
-    q = []
-    for i in range(n):
-        np.random.shuffle(x.T)    # shuffle along time axis
-        q.append(_calc_q_statistic(x, h, nt))
+    par, func = parallel_loop(_calc_q_statistic, n_jobs, verbose)
+    q = par(func(np.random.permutation(x.T).T, h, nt) for _ in range(n))
+    
     return np.array(q)

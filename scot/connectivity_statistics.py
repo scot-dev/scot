@@ -40,6 +40,7 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
         How many surrogate samples to take.
     n_jobs : int | None
         number of jobs to run in parallel. See `joblib.Parallel` for details.
+        If set to None, joblib is not used at all.
     verbose : int
         verbosity level passed to joblib.
 
