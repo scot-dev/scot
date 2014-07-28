@@ -135,7 +135,7 @@ class Topoplot:
             clip_path = (head, axes.transData)
         elif self.clipping == 'electrodes':
             import matplotlib.path as path
-            verts = self._get_fence()
+            verts = self._get_fence() + offset
             codes = [path.Path.LINETO] * (len(verts) - 1)
             codes.insert(0, path.Path.MOVETO)
             clip_path = (path.Path(verts, codes), axes.transData)
