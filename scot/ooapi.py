@@ -549,19 +549,18 @@ class Workspace:
         if self.activations_ is None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
         [n, m, _] = self.activations_.shape
-
-        nstep = (n - winlen) // winstep
+        
+        steps = list(range(0, n - winlen, winstep))
+        nstep = len(steps)
 
         result = np.zeros((m, m, self.nfft_, nstep), np.complex64)
-        i = 0
-        for j in range(0, n - winlen, winstep):
+        for i, j in enumerate(steps):
             win = np.arange(winlen) + j
             data = self.activations_[win, :, :]
             data = data[:, :, self.trial_mask_]
             self.var_.fit(data)
             con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
             result[:, :, :, i] = getattr(con, measure_name)()
-            i += 1
 
         if plot is None or plot:
             fig = plot
