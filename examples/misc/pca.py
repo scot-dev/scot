@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import numpy as np
 
-from scot import pca
+from scot.pca import pca
 
 from scot.var import VAR
 
