@@ -33,7 +33,7 @@ def check_random_state(seed):
 class logger:
     @staticmethod
     def info(*args, **kwargs):
-        print(*args, **kwargs)
+        pass
 
 
 def infomax(data, weights=None, l_rate=None, block=None, w_change=1e-12,
