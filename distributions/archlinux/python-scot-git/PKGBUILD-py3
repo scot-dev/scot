@@ -12,7 +12,7 @@ makedepends=('git')
 depends=('python' 'python-numpy' 'python-scipy')
 optdepends=('python-scikit-learn: processing backend'
             'python-matplotlib: plotting support')
-source=("$pkgname"::'git+https://github.com/SCoT-dev/SCoT.git')
+source=("$pkgname"::'git+https://github.com/scot-dev/scot.git')
 md5sums=('SKIP')
 
 pkgver() {
