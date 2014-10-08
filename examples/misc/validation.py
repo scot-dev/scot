@@ -5,7 +5,7 @@ MVARICA, and visualize a connectivity.
 
 import matplotlib.pyplot as plt
 
-import scot.backend_sklearn  # use builtin (default) backend
+import scot
 from scot.varica import cspvarica
 from scot.datatools import cut_segments
 import scot.plotting as splot
