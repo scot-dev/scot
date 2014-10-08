@@ -22,7 +22,7 @@ setup(name='SCoT',
       description='Source Connectivity Toolbox',
       author='Martin Billinger',
       author_email='martin.billinger@tugraz.at',
-      url='https://github.com/SCoT-dev/SCoT',
+      url='https://github.com/scot-dev/scot',
       packages=['scot',
                 'scot.eegtopo'],
 
