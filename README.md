@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/SCoT-dev/SCoT.svg?branch=master)](https://travis-ci.org/SCoT-dev/SCoT)
-[![Coverage Status](https://coveralls.io/repos/SCoT-dev/SCoT/badge.png)](https://coveralls.io/r/SCoT-dev/SCoT)
+[![Build Status](https://travis-ci.org/scot-dev/scot.svg?branch=master)](https://travis-ci.org/scot-dev/scot)
+[![Coverage Status](https://coveralls.io/repos/scot-dev/scot/badge.png)](https://coveralls.io/r/scot-dev/scot)
 
 SCoT
 ====
@@ -12,7 +12,7 @@ Obtaining SCoT
 
 Use the following command to fetch the sources:
 
-    git clone --recursive https://github.com/SCoT-dev/SCoT.git SCoT
+    git clone --recursive https://github.com/scot-dev/scot.git scot
     
 `--recursive` tells git to check out the numpydoc submodule which is required for building the documentation.
 
