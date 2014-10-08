@@ -53,7 +53,7 @@ if [[ "$COVERAGE" == "true" ]]; then
 fi
 
 if [[ "$RUN_EXAMPLES" == "true" ]]; then
-    git clone https://github.com/SCoT-dev/scot-data.git
+    git clone https://github.com/scot-dev/scot-data.git
     cd scot-data
     python setup.py install
     cd ..
