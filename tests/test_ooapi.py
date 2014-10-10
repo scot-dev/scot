@@ -61,7 +61,9 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(sources, mix)
 
+        backup = scot.config.backend.copy()
         backend_modules = [import_module('scot.' + b) for b in scot.backends]
+        scot.config.backend = backup
 
         for bm in backend_modules:
 
@@ -139,7 +141,9 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(sources, mix)
 
+        backup = scot.config.backend.copy()
         backend_modules = [import_module('scot.' + b) for b in scot.backends]
+        scot.config.backend = backup
 
         for bm in backend_modules:
             np.random.seed(3141592)  # reset random seed so we're independent of module order

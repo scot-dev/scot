@@ -4,7 +4,6 @@ This example shows how to decompose motor imagery EEG into sources using
 SCPVARICA and visualize a connectivity measure.
 """
 
-#import scot.backend.builtin     # use builtin (default) backend
 import scot
 
 """

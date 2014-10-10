@@ -6,17 +6,18 @@
 """
 
 import numpy as np
+import scipy as sp
 
-from . import config, datatools, binica, pca, csp
+from . import config, datatools, pca, csp
 from .var import VAR
+from .external.infomax_ import infomax
 
 
-def wrapper_binica(data):
+def wrapper_infomax(data):
     """ Call binica for ICA calculation.
     """
-    w, s = binica.binica(datatools.cat_trials(data))
-    u = s.dot(w)
-    m = np.linalg.inv(u)
+    u = infomax(datatools.cat_trials(data)).T
+    m = sp.linalg.pinv(u)
     return m, u
 
 def wrapper_pca(x, reducedim):
@@ -33,7 +34,7 @@ def wrapper_csp(x, cl, reducedim):
 
 
 backend = {
-    'ica': wrapper_binica,
+    'ica': wrapper_infomax,
     'pca': wrapper_pca,
     'csp': wrapper_csp,
     'var': VAR
