@@ -14,7 +14,7 @@ from .external.infomax_ import infomax
 
 
 def wrapper_infomax(data):
-    """ Call binica for ICA calculation.
+    """ Call Infomax (from MNE) for ICA calculation.
     """
     u = infomax(datatools.cat_trials(data)).T
     m = sp.linalg.pinv(u)
