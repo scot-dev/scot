@@ -1,16 +1,12 @@
 #!/bin/bash
 # This script is meant to be called by the "install" step defined in
 # .travis.yml. See http://docs.travis-ci.com/ for more details.
-# The behavior of the script is controlled by environment variabled defined
+# The behavior of the script is controlled by environment variable defined
 # in the .travis.yml in the top level folder of the project.
 
 set -e
 
 sudo apt-get update -qq
-
-# This is stupid. We should not be forced to install the whole multiarch monster
-# just to be able to run the external binica binary.
-sudo apt-get install ia32-libs-multiarch libgphoto2-2:i386 libsane:i386 libgd2-xpm:i386
 
 if [[ "$INSTALL_ATLAS" == "true" ]]; then
     sudo apt-get install -qq libatlas3gf-base libatlas-dev

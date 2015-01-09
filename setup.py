@@ -7,16 +7,6 @@ versionfile = open('VERSION', 'r')
 ver = versionfile.read().strip()
 versionfile.close()
 
-
-download_binica = True
-if download_binica:
-    from scot.binica import binica
-    try:
-        binica([])
-    except ValueError:
-        pass
-
-
 setup(name='SCoT',
       version=ver,
       description='Source Connectivity Toolbox',
@@ -28,6 +18,4 @@ setup(name='SCoT',
 
       package_data={'scot': ['binica/ica_linux']},
 
-      install_requires=['numpy >=1.7', 'scipy >=0.12']
-     )
-
+      install_requires=['numpy >=1.7', 'scipy >=0.12'])

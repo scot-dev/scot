@@ -1,4 +1,3 @@
-
 Is VAR model fitting invariant to PCA transformations?
 ======================================================
 
