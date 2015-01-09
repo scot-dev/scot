@@ -7,15 +7,11 @@ versionfile = open('VERSION', 'r')
 ver = versionfile.read().strip()
 versionfile.close()
 
-setup(name='SCoT',
+setup(name='scot',
       version=ver,
       description='Source Connectivity Toolbox',
       author='Martin Billinger',
       author_email='martin.billinger@tugraz.at',
       url='https://github.com/scot-dev/scot',
-      packages=['scot',
-                'scot.eegtopo'],
-
-      package_data={'scot': ['binica/ica_linux']},
-
+      packages=['scot', 'scot.eegtopo', 'scot.external'],
       install_requires=['numpy >=1.7', 'scipy >=0.12'])
