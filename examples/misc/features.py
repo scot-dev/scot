@@ -1,5 +1,7 @@
 """
-This example shows how to decompose EEG signals into source activations with MVARICA, and subsequently extract single-trial connectivity as features for LDA.
+This example shows how to decompose EEG signals into source activations with
+CSPVARICA, and subsequently extract single-trial connectivity as features for
+LDA classification.
 """
 
 from __future__ import print_function
@@ -13,15 +15,13 @@ import scot
 import scot.backend_sklearn  # use scikit-learn backend
 import scot.xvschema
 
-
-
-# The example data set contains a continuous 45 channel EEG recording of a motor
-# imagery experiment. The data was preprocessed to reduce eye movement artifacts
-# and resampled to a sampling rate of 100 Hz.
-# With a visual cue the subject was instructed to perform either hand of foot
-# motor imagery. The the trigger time points of the cues are stored in 'tr', and
-# 'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor
-# imagery period was approximately 6 seconds.
+# The data set contains a continuous 45 channel EEG recording of a motor
+# imagery experiment. The data was preprocessed to reduce eye movement
+# artifacts and resampled to a sampling rate of 100 Hz. With a visual cue, the
+# subject was instructed to perform either hand or foot motor imagery. The
+# trigger time points of the cues are stored in 'triggers', and 'classes'
+# contains the class labels. Duration of the motor imagery period was
+# approximately six seconds.
 import scotdata.motorimagery as midata
 
 raweeg = midata.eeg
@@ -31,46 +31,48 @@ fs = midata.samplerate
 locs = midata.locations
 
 
-# Set up the analysis object
+# Set up analysis object
+#
 # We simply choose a VAR model order of 30, and reduction to 4 components.
 ws = scot.Workspace({'model_order': 30}, reducedim=4, fs=fs)
 freq = np.linspace(0, fs, ws.nfft_)
 
 
-# Prepare the data
+# Prepare data
 #
-# Here we cut segments from 3s to 4s following each trigger out of the EEG. This
-# is right in the middle of the motor imagery period.
+# Here we cut out segments from 3s to 4s after each trigger. This is right in
+# the middle of the motor imagery period.
 data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
-# Initialize Cross Validation
+# Initialize cross-validation
 nfolds = 10
 kf = KFold(len(triggers), n_folds=nfolds, indices=False)
 
 # LDA requires numeric class labels
-clunique = np.unique(midata.classes)
-classids = np.array([dict(zip(clunique, range(len(clunique))))[c] for c in midata.classes])
+cl = np.unique(midata.classes)
+classids = np.array([dict(zip(cl, range(len(cl))))[c] for c in midata.classes])
 
-# Perform Cross Validation
+# Perform cross-validation
 lda = LDA()
 cm = np.zeros((2, 2))
 fold = 0
 for train, test in kf:
     fold += 1
 
-    # Perform MVARICA
+    # Perform CSPVARICA
     ws.set_data(data[:, :, train], classes[train])
     ws.do_cspvarica()
 
     # Find optimal regularization parameter for single-trial fitting
-    #ws.var_.xvschema = scot.xvschema.singletrial
-    #ws.optimize_var()
+    # ws.var_.xvschema = scot.xvschema.singletrial
+    # ws.optimize_var()
     ws.var_.delta = 1
 
-    # Single-Trial Fitting and feature extraction
+    # Single-trial fitting and feature extraction
     features = np.zeros((len(triggers), 32))
     for t in range(len(triggers)):
-        print('Fold %d/%d, Trial: %d   ' %(fold, nfolds, t), end='\r')
+        print('Fold {:2d}/{:2d}, trial: {:d}   '.format(fold, nfolds, t),
+              end='\r')
         ws.set_data(data[:, :, t])
         ws.fit_var()
 
@@ -86,10 +88,12 @@ for train, test in kf:
     acc_train = lda.score(features[train, :], classids[train])
     acc_test = lda.score(features[test, :], classids[test])
 
-    print('Fold %d/%d, Acc Train: %.4f, Acc Test: %.4f' %(fold, nfolds, acc_train, acc_test))
+    print('Fold {:2d}/{:2d}, '
+          'acc train: {:.3f}, '
+          'acc test: {:.3f}'.format(fold, nfolds, acc_train, acc_test))
 
     pred = lda.predict(features[test, :])
     cm += confusion_matrix(classids[test], pred)
-print('Confusion Matrix:\n', cm)
 
-print('Total Accuracy: %.4f'%(np.sum(np.diag(cm))/np.sum(cm)))
+print('\nConfusion Matrix:\n', cm)
+print('\nTotal Accuracy: {:.3f}'.format(np.sum(np.diag(cm))/np.sum(cm)))
