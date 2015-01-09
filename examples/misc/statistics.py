@@ -1,17 +1,17 @@
 """
-This example shows how to create surrogate connectivity to determine
-if connectivity is statistically significant.
+This example shows how to create surrogate connectivity to determine if
+connectivity is statistically significant.
 """
 
 import scot
 
-# The example data set contains a continuous 45 channel EEG recording of a motor
-# imagery experiment. The data was preprocessed to reduce eye movement artifacts
-# and resampled to a sampling rate of 100 Hz.
-# With a visual cue the subject was instructed to perform either hand of foot
-# motor imagery. The the trigger time points of the cues are stored in 'tr', and
-# 'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor
-# imagery period was approximately 6 seconds.
+# The data set contains a continuous 45 channel EEG recording of a motor
+# imagery experiment. The data was preprocessed to reduce eye movement
+# artifacts and resampled to a sampling rate of 100 Hz. With a visual cue, the
+# subject was instructed to perform either hand or foot motor imagery. The
+# trigger time points of the cues are stored in 'triggers', and 'classes'
+# contains the class labels. Duration of the motor imagery period was
+# approximately six seconds.
 import scotdata.motorimagery as midata
 
 raweeg = midata.eeg
@@ -21,23 +21,21 @@ fs = midata.samplerate
 locs = midata.locations
 
 
-# Prepare the data
+# Prepare data
 #
-# Here we cut segments from 3s to 4s following each trigger out of the EEG. This
-# is right in the middle of the motor imagery period.
+# Here we cut out segments from 3s to 4s after each trigger. This is right in
+# the middle of the motor imagery period.
 data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 
-# Set up the analysis object
+# Set up analysis object
 #
 # We choose a VAR model order of 35, and reduction to 4 components.
 ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
 
-
 fig = None
 
-
-# Perform MVARICA and plot the components
+# Perform MVARICA and plot components
 ws.set_data(data, classes)
 ws.do_mvarica(varfit='class')
 
@@ -46,34 +44,8 @@ print('Whiteness:', p)
 
 fig = ws.plot_connectivity_topos(fig=fig)
 
-p, s, _ = ws.compare_conditions(['hand'], ['foot'], 'ffDTF', repeats=100, plot=fig)
+p, s, _ = ws.compare_conditions(['hand'], ['foot'], 'ffDTF', repeats=100,
+                                plot=fig)
 
 print(p)
-
-# brep = 10
-#
-# print('foot')
-# ws.set_data(data[:,:,classes=='foot'])
-# b = ws.get_bootstrap_connectivity('ffDTF', brep)
-# #ws.fit_var()
-# #fig = ws.plot_connectivity('ffDTF', freq_range=[0, 30], fig=fig)
-# fig = ws.plot_connectivity_bootstrap('ffDTF', freq_range=[0, 30], repeats=brep, fig=fig)
-#
-# print('hand')
-# ws.set_data(data[:,:,classes=='hand'])
-# a = ws.get_bootstrap_connectivity('ffDTF', brep)
-# #ws.fit_var()
-# #fig = ws.plot_connectivity('ffDTF', freq_range=[0, 30], fig=fig)
-# fig = ws.plot_connectivity_bootstrap('ffDTF', freq_range=[0, 30], repeats=brep, fig=fig)
-#
-# print('diff')
-#
-# p = test_bootstrap_difference(a, b)
-# for i in range(4):
-#     p[i,i,:] = np.nan
-# s = significance_fdr(p, 0.01)
-# #fig = splt.plot_connectivity_spectrum(s*50, fs, freq_range=[0, 30], diagonal=-1, border=True, fig=fig)
-#
-# splt.plot_connectivity_significance(s, fs, freq_range=[0, 30], diagonal=-1, border=True, fig=fig)
-
 ws.show_plots()

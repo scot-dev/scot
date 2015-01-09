@@ -8,9 +8,7 @@ from __future__ import print_function
 import numpy as np
 
 from scot.pca import pca
-
 from scot.var import VAR
-
 
 
 # Generate data from a VAR(1) process
@@ -38,4 +36,5 @@ model2.fit(y)
 print('\n(1) True VAR coefficients:\n', model0.coef)
 print('\n(2) VAR coefficients estimated on x:\n', model1.coef)
 print('\n(3) VAR coefficients estimated on y:\n', model2.coef)
-print('\n(4) VAR coefficients estimated on y and transformed back:\n', w.dot(model2.coef).dot(w.T))
+print('\n(4) VAR coefficients estimated on y and transformed back:\n',
+      w.dot(model2.coef).dot(w.T))

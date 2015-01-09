@@ -1,6 +1,6 @@
 """
 This example shows how to decompose EEG signals into source activations with
-MVARICA, and visualize a connectivity.
+CSPVARICA and visualize connectivity.
 """
 
 import numpy as np
@@ -12,13 +12,13 @@ from scot.eegtopo.topoplot import Topoplot
 from scot import plotting
 
 
-# The example data set contains a continuous 45 channel EEG recording of a motor
-# imagery experiment. The data was preprocessed to reduce eye movement artifacts
-# and resampled to a sampling rate of 100 Hz.
-# With a visual cue the subject was instructed to perform either hand of foot
-# motor imagery. The the trigger time points of the cues are stored in 'tr', and
-# 'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor
-# imagery period was approximately 6 seconds.
+# The data set contains a continuous 45 channel EEG recording of a motor
+# imagery experiment. The data was preprocessed to reduce eye movement
+# artifacts and resampled to a sampling rate of 100 Hz. With a visual cue, the
+# subject was instructed to perform either hand or foot motor imagery. The
+# trigger time points of the cues are stored in 'triggers', and 'classes'
+# contains the class labels. Duration of the motor imagery period was
+# approximately six seconds.
 import scotdata.motorimagery as midata
 
 raweeg = midata.eeg
@@ -28,28 +28,29 @@ fs = midata.samplerate
 locs = midata.locations
 
 
-# Prepare the data
+# Prepare data
 #
-# Here we cut segments from 2s to 5s following each trigger out of the EEG. This
-# is right in the middle of the motor imagery period.
+# Here we cut out segments from 2s to 5s after each trigger. This is right in
+# the middle of the motor imagery period.
 data = scot.datatools.cut_segments(raweeg, triggers, 2 * fs, 5 * fs)
 
 
-# Set up the analysis object
+# Set up analysis object
 #
 # We simply choose a VAR model order of 30, and reduction to 15 components.
 ws = scot.Workspace({'model_order': 30}, reducedim=15, fs=fs, locations=locs)
 
 
-# Perform MVARICA to obtain
+# Perform CSPVARICA
 ws.set_data(data, classes)
 ws.do_cspvarica()
 
 
-# Connectivity Analysis
+# Connectivity analysis
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
-# activations of each class and calculate the average value over the alpha band (8-12Hz).
+# activations of each class and calculate the average value over the alpha band
+# (8-12 Hz).
 
 freq = np.linspace(0, fs, ws.nfft_)
 alpha, beta = {}, {}
@@ -86,8 +87,8 @@ for cls in ['hand', 'foot']:
     a = (alpha[cls]-4) / max(np.max(alpha['hand']-4), np.max(alpha['foot']-4))
     c = np.dstack([r, g, b, a])
 
-    plotting.plot_circular(colors=c, widths=w, mask=m, topo=topo, topomaps=mixmaps, order=order)
+    plotting.plot_circular(colors=c, widths=w, mask=m, topo=topo,
+                           topomaps=mixmaps, order=order)
     plt.title(cls)
 
 plotting.show_plots()
-

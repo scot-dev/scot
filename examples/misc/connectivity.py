@@ -44,14 +44,14 @@ p = ws.var_.test_whiteness(50)
 print('Whiteness:', p)
 
 # Configure plotting options
-ws.plot_f_range = [0, 30]  # Only show 0-30 Hz
-ws.plot_diagonal = 'S'  # Put spectral density plots on the diagonal
-ws.plot_outside_topo = True  # Plot topos above and to the left
+ws.plot_f_range = [0, 30]  # only show 0-30 Hz
+ws.plot_diagonal = 'S'  # put spectral density plots on the diagonal
+ws.plot_outside_topo = True  # plot topos above and to the left
 
 fig = ws.plot_connectivity_topos()
 
 
-# Connectivity Analysis
+# Connectivity analysis
 #
 # Extract the full frequency directed transfer function (ffDTF) from the
 # activations of each class and plot them.
