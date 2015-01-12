@@ -12,7 +12,7 @@ from .geo_euclidean import Vector
 from scipy.spatial import ConvexHull
 
 
-class Topoplot:
+class Topoplot(object):
     """ Creates 2D scalp maps. """
 
     def __init__(self, m=4, num_lterms=10, headcolor=[0, 0, 0, 1], clipping='head', electrodescale=1, interpolationrange=np.pi * 3 / 4, head_radius=np.pi * 3 / 4):
@@ -185,7 +185,7 @@ class Topoplot:
 
 def topoplot(values, locations, headcolor=[0, 0, 0, 1], axes=None, offset=(0, 0)):
     """ Wrapper function for :class:`Topoplot.
-    
+
     This function is only provided for convenience.
     """
     topo = Topoplot(headcolor=headcolor)

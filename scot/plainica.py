@@ -11,7 +11,7 @@ from . import config
 from .datatools import cat_trials
 
 
-class ResultICA:
+class ResultICA(object):
     """ Result of :func:`plainica`
 
     Attributes
@@ -63,7 +63,7 @@ def plainica(x, reducedim=0.99, backend=None):
     else:
         c, d, xpca = backend['pca'](x, reducedim)
 
-    # run on residuals ICA to estimate volume conduction    
+    # run on residuals ICA to estimate volume conduction
     mx, ux = backend['ica'](cat_trials(xpca))
 
     # correct (un)mixing matrix estimatees

@@ -50,9 +50,9 @@ def connectivity(measure_names, b, c=None, nfft=512):
 
 
 #noinspection PyPep8Naming
-class Connectivity:
+class Connectivity(object):
     """ Calculation of connectivity measures
-    
+
     This class calculates various spectral connectivity measures from a vector autoregressive (VAR) model.
 
     Parameters
@@ -217,7 +217,7 @@ class Connectivity:
         """ Coherence
 
         .. math:: \mathrm{COH}_{ij}(f) = \\frac{S_{ij}(f)}{\sqrt{S_{ii}(f) S_{jj}(f)}}
-        
+
         References
         ----------
         P. L. Nunez, R. Srinivasan, A. F. Westdorp, R. S. Wijesinghe, D. M. Tucker,
@@ -242,7 +242,7 @@ class Connectivity:
         """ Partial coherence
 
         .. math:: \mathrm{pCOH}_{ij}(f) = \\frac{G_{ij}(f)}{\sqrt{G_{ii}(f) G_{jj}(f)}}
-        
+
         References
         ----------
         P. J. Franaszczuk, K. J. Blinowska, M. Kowalczyk. The application of parametric multichannel
@@ -257,7 +257,7 @@ class Connectivity:
         """ Partial directed coherence
 
         .. math:: \mathrm{PDC}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) A_{:j}(f)}}
-        
+
         References
         ----------
         L. A. Baccalá, K. Sameshima. Partial directed coherence: a new concept in neural structure
@@ -280,7 +280,7 @@ class Connectivity:
         """ Partial directed coherence factor
 
         .. math:: \mathrm{PDCF}_{ij}(f) = \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) \mathbf{C}^{-1} A_{:j}(f)}}
-        
+
         References
         ----------
         L. A. Baccalá, K. Sameshima. Partial directed coherence: a new concept in neural structure
@@ -296,7 +296,7 @@ class Connectivity:
 
         .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{|A_{ij}(f)|}
             {\sigma_i \sqrt{A_{:j}'(f) \mathrm{diag}(\mathbf{C})^{-1} A_{:j}(f)}}
-            
+
         References
         ----------
         L. Faes, S. Erla, G. Nollo. Measuring Connectivity in Linear Multivariate Processes:
@@ -310,7 +310,7 @@ class Connectivity:
         """ Directed transfer function
 
         .. math:: \mathrm{DTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{H_{i:}(f) H_{i:}'(f)}}
-        
+
         References
         ----------
         M. J. Kaminski, K. J. Blinowska. A new method of the description of the information flow
@@ -324,11 +324,11 @@ class Connectivity:
         """ Full frequency directed transfer function
 
         .. math:: \mathrm{ffDTF}_{ij}(f) = \\frac{H_{ij}(f)}{\sqrt{\sum_f H_{i:}(f) H_{i:}'(f)}}
-        
+
         References
         ----------
         A. Korzeniewska, M. Mańczak, M. Kaminski, K. J. Blinowska, S. Kasicki. Determination of
-        information flow direction among brain structures by a modified directed transfer 
+        information flow direction among brain structures by a modified directed transfer
         function (dDTF) method. J. Neurosci. Meth. 125(1-2): 195-207, 2003.
         """
         H = self.H()
@@ -339,11 +339,11 @@ class Connectivity:
         """" Direct" directed transfer function
 
         .. math:: \mathrm{dDTF}_{ij}(f) = |\mathrm{pCOH}_{ij}(f)| \mathrm{ffDTF}_{ij}(f)
-        
+
         References
         ----------
         A. Korzeniewska, M. Mańczak, M. Kaminski, K. J. Blinowska, S. Kasicki. Determination of
-        information flow direction among brain structures by a modified directed transfer 
+        information flow direction among brain structures by a modified directed transfer
         function (dDTF) method. J. Neurosci. Meth. 125(1-2): 195-207, 2003.
         """
         return np.abs(self.pCOH()) * self.ffDTF()
@@ -354,7 +354,7 @@ class Connectivity:
 
         .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{\sigma_j |H_{ij}(f)|}
             {\sqrt{H_{i:}(f) \mathrm{diag}(\mathbf{C}) H_{i:}'(f)}}
-            
+
         References
         ----------
         L. Faes, S. Erla, G. Nollo. Measuring Connectivity in Linear Multivariate Processes:
