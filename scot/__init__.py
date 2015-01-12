@@ -9,7 +9,7 @@ from __future__ import absolute_import
 
 from . import config
 
-backends = ['backend_builtin', 'backend_sklearn', 'backend_binica']
+backends = ['backend_builtin', 'backend_sklearn']
 
 # default backend
 # TODO: set default backend in config

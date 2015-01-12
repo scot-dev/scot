@@ -5,7 +5,6 @@
 """ Use internally implemented functions as backend.
 """
 
-import numpy as np
 import scipy as sp
 
 from . import config, datatools, pca, csp
@@ -20,16 +19,19 @@ def wrapper_infomax(data):
     m = sp.linalg.pinv(u)
     return m, u
 
+
 def wrapper_pca(x, reducedim):
     """ Call SCoT's PCA algorithm.
     """
-    c, d = pca.pca(datatools.cat_trials(x), subtract_mean=False, reducedim=reducedim)
+    c, d = pca.pca(datatools.cat_trials(x),
+                   subtract_mean=False, reducedim=reducedim)
     y = datatools.dot_special(x, c)
     return c, d, y
-    
+
+
 def wrapper_csp(x, cl, reducedim):
     c, d = csp.csp(x, cl, numcomp=reducedim)
-    y = datatools.dot_special(x,c)
+    y = datatools.dot_special(x, c)
     return c, d, y
 
 

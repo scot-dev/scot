@@ -12,7 +12,7 @@ Related toolboxes
 
 SIFT_, the Source Information Flow Toolbox, is a connectivity toolbox for MATLAB. It has close ties with EEGLAB_, a widely used toolbox for EEG signal processing. Although SCoT has been developed independently, we would like to mention the excellent SIFT user manual (available on the SIFT website), which provides a very nice overview of connectivity estimation. Parts of SCoT, for instance the methods available for statistical significance tests, were inspired by the SIFT manual.
 
-SCoT optionally uses scikit-learn_, a great machine learning package for Python, for some of its backend functionality. SCoT supports `Infomax ICA`_ from MNE_ or a binary version shipped with EEGLAB_.
+SCoT optionally uses scikit-learn_, a great machine learning package for Python, for some of its backend functionality. SCoT supports `Infomax ICA`_ from MNE_.
 
 BioSig_ is also a MATLAB-based toolbox for biosignal processing. Besides providing I/O functionality for many biosignal file formats, it supports various signal processing and machine learning routines. It also provides functions to fit vector autoregressive models and derive various connectivity measures from the model parameters.
 
