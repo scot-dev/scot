@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'SCoT'
-copyright = '2014, Martin Billinger'
+copyright = '2015, SCoT Development Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -211,7 +211,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'SCoT.tex', 'SCoT Documentation',
-   'Martin Billinger', 'manual'),
+   'SCoT Development Team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -241,7 +241,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'scot', 'SCoT Documentation',
-     ['Martin Billinger'], 1)
+     ['SCoT Development Team'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -255,7 +255,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'SCoT', 'SCoT Documentation',
-   'Martin Billinger', 'SCoT', 'One line description of project.',
+   'SCoT Development Team', 'SCoT', 'One line description of project.',
    'Miscellaneous'),
 ]
 
