@@ -20,27 +20,27 @@ from .utils import acm
 from .datatools import cat_trials
 
 
-class Defaults:
+class Defaults(object):
     xvschema = xv.multitrial
 
 
-class VARBase():
+class VARBase(object):
     """ Represents a vector autoregressive (VAR) model.
-    
+
     .. warning:: `VARBase` is an abstract class that defines the interface for
     VAR model implementations. Several methods must be implemented by derived
     classes.
-    
+
     Parameters
     ----------
     model_order : int
         Autoregressive model order
-    
+
     Notes
     -----
     Note on the arrangement of model coefficients:
     *b* is of shape [m, m*p], with sub matrices arranged as follows:
-        
+
     +------+------+------+------+
     | b_00 | b_01 | ...  | b_0m |
     +------+------+------+------+
@@ -50,7 +50,7 @@ class VARBase():
     +------+------+------+------+
     | b_m0 | b_m1 | ...  | b_mm |
     +------+------+------+------+
-    
+
     Each sub matrix b_ij is a column vector of length p that contains the
     filter coefficients from channel j (source) to channel i (sink).
     """
@@ -71,16 +71,16 @@ class VARBase():
 
     def fit(self, data):
         """ Fit VAR model to data.
-        
+
         .. warning:: This function must be implemented by derived classes.
-        
+
         Parameters
         ----------
         data : array-like
             shape = [n_samples, n_channels, n_trials] or
             [n_samples, n_channels]
             Continuous or segmented data set.
-            
+
         Returns
         -------
         self : :class:`VAR`
@@ -93,9 +93,9 @@ class VARBase():
     def optimize(self, data):
         """ Optimize model fitting hyperparameters (such as regularization
         penalty)
-        
+
             .. warning:: This function must be implemented by derived classes.
-        
+
             Parameters
             ----------
             data : array-like, shape = [n_samples, n_channels, n_trials] or
@@ -150,9 +150,9 @@ class VARBase():
 
     def simulate(self, l, noisefunc=None):
         """ Simulate vector autoregressive (VAR) model
-        
+
             This function generates data from the VAR model.
-            
+
             Parameters
             ----------
             l : {int, [int, int]}
@@ -163,7 +163,7 @@ class VARBase():
                 This function is used to create the generating noise process.
                 If set to None Gaussian white noise with zero mean and unit
                 variance is used.
-                
+
             Returns
             -------
             data : array, shape = [n_samples, n_channels, n_trials]
@@ -203,21 +203,21 @@ class VARBase():
 
     def predict(self, data):
         """ Predict samples on actual data.
-        
+
         The result of this function is used for calculating the residuals.
-        
+
         Parameters
         ----------
         data : array-like
             shape = [n_samples, n_channels, n_trials] or
             [n_samples, n_channels]
             Continuous or segmented data set.
-            
+
         Returns
         -------
         predicted : shape = `data`.shape
             Data as predicted by the VAR model.
-            
+
         Notes
         -----
         Residuals are obtained by r = x - var.predict(x)
@@ -243,14 +243,14 @@ class VARBase():
 
     def is_stable(self):
         """ Test if the VAR model is stable.
-        
+
         This function tests stability of the VAR model as described in [1]_.
-        
+
         Returns
         -------
         out : bool
             True if the model is stable.
-        
+
         References
         ----------
         .. [1] H. Lütkepohl, "New Introduction to Multiple Time Series
@@ -288,7 +288,7 @@ class VARBase():
         error level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of
         white residuals is rejected, which indicates that the VAR model does
         not properly describe the data.
-        
+
         Parameters
         ----------
         h : int
@@ -297,7 +297,7 @@ class VARBase():
             Number of samples to create under the null hypothesis.
         get_q : bool, optional
             Return Q statistic along with *p*-value
-            
+
         Returns
         -------
         pr : float
@@ -308,7 +308,7 @@ class VARBase():
             distribution of Q under H0.
         q : float, optional (`get_q`)
             Value of the Q statistic of the residuals
-        
+
         Notes
         -----
         According to [2]_ h must satisfy h = O(n^0.5), where n is the length
@@ -364,7 +364,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
     level of alpha=0.05 or alpha=0.01. If p<=alpha, the hypothesis of white
     residuals is rejected, which indicates that the VAR model does not properly
     describe the data.
-    
+
     Parameters
     ----------
     signals : array-like
@@ -379,7 +379,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
         Number of samples to create under the null hypothesis.
     get_q : bool, optional
         Return Q statistic along with *p*-value
-        
+
     Returns
     -------
     pr : float
@@ -390,7 +390,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
         distribution of Q under H0.
     q : float, optional (`get_q`)
         Value of the Q statistic of the residuals
-    
+
     Notes
     -----
     According to [2]_ h must satisfy h = O(n^0.5), where n is the length (time

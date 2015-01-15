@@ -9,7 +9,7 @@ from __future__ import division
 import math
 
 
-class Vector:
+class Vector(object):
     """3D-Vector class"""
 
     def __init__(self, x=0.0, y=0.0, z=0.0):
@@ -158,4 +158,4 @@ class Vector:
     def rotated(self, l, u):
         """rotate l radians around axis, but don't change original"""
         return self.copy().rotate(l, u)
-        
+

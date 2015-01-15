@@ -30,7 +30,7 @@ def check_random_state(seed):
 
 
 # this class replaces mne.utils.logger
-class logger:
+class logger(object):
     @staticmethod
     def info(*args, **kwargs):
         pass

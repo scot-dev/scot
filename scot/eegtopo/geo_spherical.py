@@ -17,7 +17,7 @@ eps = 1e-15
 
 ################################################################################
 
-class Point:
+class Point(object):
     """Point on the surface of a sphere"""
 
     def __init__(self, x=None, y=None, z=None):
@@ -61,7 +61,7 @@ class Point:
 
 ################################################################################
 
-class Line:
+class Line(object):
     """Line on the spherical surface (also known as grand circle)"""
 
     def __init__(self, a, b):
@@ -81,7 +81,7 @@ class Line:
 
 ################################################################################
 
-class Circle:
+class Circle(object):
     """Arbitrary circle on the spherical surface"""
 
     def __init__(self, a, b, c=None):
@@ -112,7 +112,7 @@ class Circle:
 
 ################################################################################
 
-class Construct:
+class Construct(object):
     """Collection of methods for geometric construction on a sphere"""
 
     @staticmethod
