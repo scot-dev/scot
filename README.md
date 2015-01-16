@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/scot-dev/scot.svg?branch=master)](https://travis-ci.org/scot-dev/scot)
-[![Coverage Status](https://coveralls.io/repos/scot-dev/scot/badge.svg)](https://coveralls.io/r/scot-dev/scot)
+[![Coverage Status](https://coveralls.io/repos/scot-dev/scot/badge.svg?branch=master)](https://coveralls.io/r/scot-dev/scot?branch=master)
 
 SCoT
 ====
