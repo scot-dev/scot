@@ -7,12 +7,8 @@ from codecs import open
 with open('VERSION', encoding='utf-8') as version:
     ver = version.read().strip()
 
-long_description = 'SCoT is an EEG/MEG source connectivity toolbox in Python. '
-                   'SCoT provides functionality for blind source decomposition'
-                   ' and connectivity estimation. Connectivity is estimated '
-                   'from spectral measures (such as coherence, partial '
-                   'directed coherence, or directed transfer function) using '
-                   'vector autoregressive (VAR) models.'
+with open('README.md', encoding='utf-8') as readme:
+    long_description = readme.read()
 
 setup(
     name='scot',
