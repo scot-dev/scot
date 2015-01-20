@@ -28,7 +28,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    keywords='source connectivity EEG MEG ICA'
+    keywords='source connectivity EEG MEG ICA',
     packages=['scot', 'scot.eegtopo', 'scot.external'],
     install_requires=['numpy >=1.7', 'scipy >=0.12'],
     )
