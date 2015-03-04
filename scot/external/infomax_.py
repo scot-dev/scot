@@ -39,7 +39,7 @@ class logger(object):
 def infomax(data, weights=None, l_rate=None, block=None, w_change=1e-12,
             anneal_deg=60., anneal_step=0.9, extended=False, n_subgauss=1,
             kurt_size=6000, ext_blocks=1, max_iter=200,
-            random_state=None, verbose=None):
+            random_state=None, force_random_seed=False, verbose=None):
     """Run the (extended) Infomax ICA decomposition on raw data
 
     based on the publications of Bell & Sejnowski 1995 (Infomax)
@@ -85,6 +85,8 @@ def infomax(data, weights=None, l_rate=None, block=None, w_change=1e-12,
         The maximum number of iterations. Defaults to 200.
     verbose : bool, str, int, or None
         If not None, override default verbose level (see mne.verbose).
+    force_random_seed : bool
+        If True, set random seed to a fixed value in each iteration.
 
     Returns
     -------
@@ -159,7 +161,8 @@ def infomax(data, weights=None, l_rate=None, block=None, w_change=1e-12,
     while step < max_iter:
 
         # shuffle data at each step
-        rng.seed(step)  # --> permutation is fixed but differs at each step
+        if force_random_seed:
+            rng.seed(step)  # --> permutation is fixed but differs at each step
         permute = list(range(n_samples))
         rng.shuffle(permute)
 
