@@ -516,7 +516,7 @@ class Workspace(object):
 
         return cb
 
-    def get_tf_connectivity(self, measure_name, winlen, winstep, plot=False, crange='default'):
+    def get_tf_connectivity(self, measure_name, winlen, winstep, plot=False, baseline=None, crange='default'):
         """ Calculate estimate of time-varying connectivity.
 
         Connectivity is estimated in a sliding window approach on the current data set. The window is stepped
@@ -533,6 +533,10 @@ class Workspace(object):
         plot : {False, None, Figure object}, optional
             Whether and where to plot the connectivity. If set to **False**, nothing is plotted. Otherwise set to the
             Figure object. If set to **None**, a new figure is created.
+        baseline : [int, int] or None
+            Start and end of the baseline period in samples. The baseline is subtracted from the connectivity. It is
+            computed as the average of all windows that contain start or end, or fall between start and end.
+            If set to None no baseline is subtracted.
 
         Returns
         -------
@@ -561,6 +565,14 @@ class Workspace(object):
             self.var_.fit(data)
             con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
             result[:, :, :, i] = getattr(con, measure_name)()
+            
+        if baseline:
+            inref = np.zeros(nstep, bool)
+            for i, j in enumerate(steps):
+                a, b = j, j + winlen - 1
+                inref = b >= baseline[1] and a <= baseline[0]
+            ref = np.mean(result[:, :, :, inref], axis=3, keepdims=True)
+            result -= ref
 
         if plot is None or plot:
             fig = plot
