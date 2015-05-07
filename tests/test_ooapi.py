@@ -170,6 +170,13 @@ class TestMVARICA(unittest.TestCase):
 
             self.assertEqual(api.get_connectivity('S').shape, (3, 3, 512))
             self.assertEqual(api.get_tf_connectivity('S', 100, 50).shape, (3, 3, 512, (l-100)//50))
+            
+            tfc1 = api.get_tf_connectivity('PDC', 100, 50, baseline=None)
+            tfc2 = api.get_tf_connectivity('PDC', 100, 50, baseline=[2, 1])
+            tfc3 = api.get_tf_connectivity('PDC', 100, 50, baseline=[0, np.inf])
+            tfc4 = tfc1 - np.mean(tfc1, axis=3, keepdims=True)
+            self.assertEqual(tfc1, tfc2)
+            self.assertEqual(tfc3, tfc4)
 
             api.set_data(data, cl)
             
