@@ -570,9 +570,10 @@ class Workspace(object):
             inref = np.zeros(nstep, bool)
             for i, j in enumerate(steps):
                 a, b = j, j + winlen - 1
-                inref = b >= baseline[1] and a <= baseline[0]
-            ref = np.mean(result[:, :, :, inref], axis=3, keepdims=True)
-            result -= ref
+                inref[i] = b >= baseline[0] and a <= baseline[1]
+            if np.any(inref):
+                ref = np.mean(result[:, :, :, inref], axis=3, keepdims=True)
+                result -= ref
 
         if plot is None or plot:
             fig = plot
