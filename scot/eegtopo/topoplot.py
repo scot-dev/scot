@@ -168,10 +168,11 @@ class Topoplot(object):
     def plot_circles(self, radius, axes=None, offset=(0,0)):
         import matplotlib.pyplot as plot
         if axes is None: axes = plot.gca()
-        col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
+        mx = np.max(np.abs(self.z))
+        col = interp1d([-mx, 0, mx], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
             p3 = self.locations[i]
-            p2 = array_project_radial_to2d(Vector.fromiterable(p3)) * self.electrodescale + offset
+            p2 = array_project_radial_to2d(p3) * self.electrodescale + offset
             circ = plot.Circle((p2[0, 0], p2[0, 1]), radius=radius, color=col(self.z[i]))
             axes.add_patch(circ)
 
