@@ -151,7 +151,7 @@ class Topoplot(object):
             import matplotlib.pyplot as plot
             axes = plot.gca()
         p2 = array_project_radial_to2d(self.locations) * self.electrodescale + offset
-        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha)
+        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha=alpha)
 
     def plot_head(self, axes=None, offset=(0,0)):
         import matplotlib.patches as patches
