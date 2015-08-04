@@ -102,6 +102,6 @@ def _project_on_ellipsoid(c, r, locations):
 
     fun = lambda x: np.sum((x.reshape(p0.shape) - p0)**2)              # minimize distance between new and old points
     con = lambda x: np.sum(x.reshape(p0.shape)**2 / r**2, axis=1) - 1  # new points constrained to surface of ellipsoid
-    res = sp.optimize.minimize(fun, p, constraints={'type': 'eq', 'fun': con})
+    res = sp.optimize.minimize(fun, p, constraints={'type': 'eq', 'fun': con}, method='SLSQP')
 
     return res['x'].reshape(p0.shape) + c
