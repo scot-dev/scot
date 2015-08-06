@@ -105,3 +105,4 @@ def _project_on_ellipsoid(c, r, locations):
     res = sp.optimize.minimize(fun, p, constraints={'type': 'eq', 'fun': con}, method='SLSQP')
 
     return res['x'].reshape(p0.shape) + c
+
