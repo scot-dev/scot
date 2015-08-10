@@ -146,12 +146,12 @@ class Topoplot(object):
                            extent=(offset[0]-self.interprange, offset[0]+self.interprange,
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
-    def plot_locations(self, axes=None, offset=(0,0)):
+    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=1.0):
         if axes is None:
             import matplotlib.pyplot as plot
             axes = plot.gca()
         p2 = array_project_radial_to2d(self.locations) * self.electrodescale + offset
-        axes.plot(p2[:, 0], p2[:, 1], 'k.')
+        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha=alpha)
 
     def plot_head(self, axes=None, offset=(0,0)):
         import matplotlib.patches as patches
@@ -168,10 +168,11 @@ class Topoplot(object):
     def plot_circles(self, radius, axes=None, offset=(0,0)):
         import matplotlib.pyplot as plot
         if axes is None: axes = plot.gca()
-        col = interp1d([-1, 0, 1], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
+        mx = np.max(np.abs(self.z))
+        col = interp1d([-mx, 0, mx], [[0, 1, 1], [0, 1, 0], [1, 1, 0]])
         for i in range(len(self.locations)):
             p3 = self.locations[i]
-            p2 = array_project_radial_to2d(Vector.fromiterable(p3)) * self.electrodescale + offset
+            p2 = array_project_radial_to2d(p3) * self.electrodescale + offset
             circ = plot.Circle((p2[0, 0], p2[0, 1]), radius=radius, color=col(self.z[i]))
             axes.add_patch(circ)
 

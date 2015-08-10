@@ -41,6 +41,11 @@ class Point(object):
         """position in 3d space"""
         return self._pos3d
 
+    @property
+    def list(self):
+        """position in 3d space"""
+        return [self._pos3d.x, self._pos3d.y, self._pos3d.z]
+
     @vector.setter
     def vector(self, v):
         self._pos3d.x = v.x
