@@ -2,7 +2,7 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 Martin Billinger
 
-class Struct:
+class Struct(object):
     def __init__(self, content=None):
         if type(content) == dict:
             self.__dict__ = content
@@ -29,4 +29,4 @@ class Struct:
 
     def __repr__(self):
         return 'Struct( %s )' % str(self.__dict__)
-        
+

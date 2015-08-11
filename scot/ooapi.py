@@ -24,7 +24,7 @@ from .connectivity_statistics import surrogate_connectivity, bootstrap_connectiv
 from .connectivity_statistics import significance_fdr
 
 
-class Workspace:
+class Workspace(object):
     """SCoT Workspace
 
     This class provides high-level functionality for source identification, connectivity estimation, and visualization.
@@ -219,7 +219,7 @@ class Workspace:
         ------
         RuntimeError
             If the :class:`Workspace` instance does not contain data.
-            
+
         See Also
         --------
         :func:`mvarica` : MVARICA implementation
@@ -236,7 +236,7 @@ class Workspace:
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return result
-    
+
     def do_cspvarica(self, varfit='ensemble'):
         """ Perform CSPVARICA
 
@@ -549,7 +549,7 @@ class Workspace:
         if self.activations_ is None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
         [n, m, _] = self.activations_.shape
-        
+
         steps = list(range(0, n - winlen, winstep))
         nstep = len(steps)
 
