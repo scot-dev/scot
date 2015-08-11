@@ -13,7 +13,7 @@ with open('README.md', encoding='utf-8') as readme:
 setup(
     name='scot',
     version=ver,
-    description='Source Connectivity Toolbox',
+    description='EEG/MEG Source Connectivity Toolbox',
     long_description=long_description,
     url='https://github.com/scot-dev/scot',
     author='SCoT Development Team',
@@ -33,6 +33,5 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     keywords='source connectivity EEG MEG ICA',
-    packages=['scot', 'scot.eegtopo', 'scot.external'],
-    install_requires=['numpy >=1.7', 'scipy >=0.12'],
-    )
+    packages=['scot', 'scot.eegtopo', 'scot.external']
+)
