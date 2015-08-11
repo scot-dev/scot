@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
     url='https://github.com/scot-dev/scot',
     author='SCoT Development Team',
-    author_email='martin.billinger@tugraz.at',
+    author_email='scotdev@googlegroups.com',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
