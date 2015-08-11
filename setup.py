@@ -17,7 +17,7 @@ setup(
     long_description=long_description,
     url='https://github.com/scot-dev/scot',
     author='SCoT Development Team',
-    author_email='martin.billinger@tugraz.at',
+    author_email='scotdev@googlegroups.com',
     license='MIT',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -33,6 +33,5 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     keywords='source connectivity EEG MEG ICA',
-    packages=['scot', 'scot.eegtopo', 'scot.external'],
-    install_requires=['numpy >=1.7', 'scipy >=0.12'],
-    )
+    packages=['scot', 'scot.eegtopo', 'scot.external']
+)
