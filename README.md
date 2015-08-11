@@ -1,7 +1,7 @@
 SCoT
 ====
 
-EEG/MEG Source Connectivity Toolbox for Python.
+SCoT is a Python package for EEG/MEG source connectivity estimation.
 
 
 Obtaining SCoT
@@ -9,7 +9,7 @@ Obtaining SCoT
 Use the following command to fetch the sources:
 
     git clone --recursive https://github.com/scot-dev/scot.git scot
-    
+
 The flag `--recursive` tells git to check out the numpydoc submodule, which is required for building the documentation.
 
 
