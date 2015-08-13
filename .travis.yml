@@ -10,7 +10,7 @@ env:
     # This environment tests Python 2 support
     - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
       NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.16.0"
-      SKLEARN_VERSION="0.16cond.1" MATPLOTLIB_VERSION="1.4.3"
+      SKLEARN_VERSION="0.16.1" MATPLOTLIB_VERSION="1.4.3"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
 
     # This environment tests Python 3 support
