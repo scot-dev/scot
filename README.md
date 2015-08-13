@@ -6,6 +6,16 @@ SCoT is a Python package for EEG/MEG source connectivity estimation.
 
 Obtaining SCoT
 --------------
+
+##### From PyPi
+
+Use the following command to install SCoT from PyPi:
+
+    pip install scot
+
+
+##### From Source
+
 Use the following command to fetch the sources:
 
     git clone --recursive https://github.com/scot-dev/scot.git scot
