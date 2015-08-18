@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Use internally implemented functions as backend.
 """
@@ -15,7 +15,7 @@ from .external.infomax_ import infomax
 def wrapper_infomax(data):
     """ Call Infomax (from MNE) for ICA calculation.
     """
-    u = infomax(datatools.cat_trials(data)).T
+    u = infomax(datatools.cat_trials(data).T).T
     m = sp.linalg.pinv(u)
     return m, u
 
@@ -23,7 +23,7 @@ def wrapper_infomax(data):
 def wrapper_pca(x, reducedim):
     """ Call SCoT's PCA algorithm.
     """
-    c, d = pca.pca(datatools.cat_trials(x),
+    c, d = pca.pca(datatools.cat_trials(x).T,
                    subtract_mean=False, reducedim=reducedim)
     y = datatools.dot_special(x, c)
     return c, d, y
