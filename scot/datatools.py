@@ -12,11 +12,12 @@ import numpy as np
 
 
 def cut_segments(x2d, tr, start, stop):
-    """Cut continuous signal into segments.
+    """
+    This function cuts segments from a continuous signal.
 
     Parameters
     ----------
-    data : array, shape (m, n)
+    x2d : array, shape (m, n)
         Input data with m signals and n samples.
     tr : list of int
         Trigger positions.
