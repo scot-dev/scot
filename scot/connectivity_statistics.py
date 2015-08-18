@@ -28,7 +28,7 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
+    data : ndarray, shape = [(n_trials), n_samples, n_channels]
         Time series data (2D or 3D for multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -83,7 +83,7 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : array, shape (n_trials, n_channels, n_samples)
+    data : ndarray, shape = [n_trials, n_samples, n_channels]
         Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -146,7 +146,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : array, shape (n_trials, n_channels, n_samples)
+    data : ndarray, shape = [n_trials, n_samples, n_channels]
         Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -169,7 +169,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
         ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
     """
     data = atleast_3d(data)
-    n, m, t = data.shape
+    t, m, n = data.shape
 
     assert(t > 1)
 
