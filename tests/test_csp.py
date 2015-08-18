@@ -28,7 +28,7 @@ class TestFunctionality(unittest.TestCase):
     def testComponentSeparation(self):
         A = generate_covsig([[10,5,2],[5,10,2],[2,2,10]], 500)
         B = generate_covsig([[10,2,2],[2,10,5],[2,5,10]], 500)
-            
+
         X = np.concatenate([A[np.newaxis], B[np.newaxis]], axis=0)
         W, V = csp(X, [1, 2])
         C1a = np.cov(np.dot(W.T, X[0, :, :]))
@@ -38,7 +38,7 @@ class TestFunctionality(unittest.TestCase):
         W, V = csp(Y, [1, 2])
         C1b = np.cov(np.dot(W.T, Y[0, :, :]))
         C2b = np.cov(np.dot(W.T, Y[1, :, :]))
-        
+
         # check symmetric case
         assert_allclose(C1a.diagonal(), C2a.diagonal()[::-1])
         assert_allclose(C1b.diagonal(), C2b.diagonal()[::-1])
@@ -131,7 +131,6 @@ class TestDimensionalityReduction(unittest.TestCase):
         self.assertGreater(v1[1], v2[1])
         self.assertLess(v1[-2], v2[-2])
         self.assertLess(v1[-1], v2[-1])
-
         
 def main():
     unittest.main()
