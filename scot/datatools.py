@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2015 SCoT Development Team
 
 """
 Summary
@@ -11,91 +11,91 @@ Tools for basic data manipulation.
 import numpy as np
 
 
-def cut_segments(rawdata, tr, start, stop):
-    """ Cut continuous signal into segments.
+def cut_segments(x2d, tr, start, stop):
+    """Cut continuous signal into segments.
 
-    This function cuts segments from a continuous signal. Segments are stop - start samples long.
+    This function cuts segments from a continuous signal.
 
     Parameters
     ----------
-    rawdata : array_like
-        Input data of shape [`n`,`m`], with `n` samples and `m` signals.
+    data : array, shape (m, n)
+        Input data with m signals and n samples.
     tr : list of int
         Trigger positions.
     start : int
-        Window start (offset relative to trigger)
+        Window start (offset relative to trigger).
     stop : int
-        Window end (offset relative to trigger)
+        Window end (offset relative to trigger).
 
     Returns
     -------
-    x : ndarray
-        Segments cut from `rawdata`. Individual segments are stacked along the third dimension.
+    x3d : array, shape (len(tr), m, stop-start)
+        Segments cut from data. Individual segments are stacked along the first
+        dimension.
 
     See also
     --------
-    cat_trials : Concatenate segments
+    cat_trials : Concatenate segments.
 
     Examples
     --------
-    >>> data = np.random.randn(1000, 5)
-    >>> tr = [250, 500, 750]
-    >>> x = cut_segments(data, tr, 50, 100)
-    >>> x.shape
-    (50, 5, 3)
+    >>> data = np.random.randn(5, 1000)  # 5 channels, 1000 samples
+    >>> tr = [750, 500, 250]  # three segments
+    >>> x3d = cut_segments(data, tr, 50, 100)  # each segment is 50 samples
+    >>> x3d.shape
+    (3, 5, 50)
     """
-    rawdata = np.atleast_2d(rawdata)
-    tr = np.array(tr, dtype='int').ravel()
-    win = range(start, stop)
-    return np.dstack([rawdata[tr[t] + win, :] for t in range(len(tr))])
+    x2d = np.atleast_2d(x2d)
+    segment = np.arange(start, stop)
+    return np.concatenate([x2d[np.newaxis, :, t + segment] for t in tr])
 
 
-def cat_trials(x):
-    """ Concatenate trials along time axis.
+def cat_trials(x3d):
+    """Concatenate trials along time axis.
 
     Parameters
     ----------
-    x : array_like
-        Segmented input data of shape [`n`,`m`,`t`], with `n` time samples, `m` signals, and `t` trials.
+    x3d : array, shape (t, m, n)
+        Segmented input data with t trials, m signals, and n samples.
 
     Returns
     -------
-    out : ndarray
-        Trials are concatenated along the first (time) axis. Shape of the output is [`n``t`,`m`].
+    x2d : array, shape (m, t * n)
+        Trials are concatenated along the second axis.
 
     See also
     --------
-    cut_segments : Cut segments from continuous data
+    cut_segments : Cut segments from continuous data.
 
     Examples
     --------
-    >>> x = np.random.randn(150, 4, 6)
+    >>> x = np.random.randn(6, 4, 150)
     >>> y = cat_trials(x)
     >>> y.shape
-    (900, 4)
+    (4, 900)
     """
-    x = np.atleast_3d(x)
-    t = x.shape[2]
-    return np.squeeze(np.vstack(np.dsplit(x, t)), axis=2)
+    x3d = assert_3d(x3d)
+    t = x3d.shape[0]
+    return np.concatenate(np.split(x3d, t, 0), axis=2).squeeze()
 
 
-def dot_special(x, a):
-    """ Trial-wise dot product.
+def dot_special(x2d, x3d):
+    """Segment-wise dot product.
 
-    This function calculates the dot product of `x[:,:,i]` with `a` for each `i`.
+    This function calculates the dot product of x2d with each trial of x3d.
 
     Parameters
     ----------
-    x : array_like
-        Segmented input data of shape [`n`,`m`,`t`], with `n` time samples, `m` signals, and `t` trials.
-        The dot product is calculated for each trial.
-    a : array_like
-        Second argument
+    x2d : array, shape (p, m)
+        Input argument.
+    x3d : array, shape (t, m, n)
+        Segmented input data with t trials, m signals, and n samples. The dot
+        product with x2d is calculated for each trial.
 
     Returns
     -------
-    out : ndarray
-        Returns the dot product of each trial.
+    out : array, shape (t, p, n)
+        Dot product of x2d with each trial of x3d.
 
     Examples
     --------
@@ -105,29 +105,32 @@ def dot_special(x, a):
     >>> y.shape
     (150, 7, 6)
     """
-    x = np.atleast_3d(x)
-    a = np.atleast_2d(a)
-    return np.dstack([x[:, :, i].dot(a) for i in range(x.shape[2])])
+    x3d = assert_3d(x3d)
+    x2d = np.atleast_2d(x2d)
+    return np.concatenate([x2d.dot(x3d[i, ...])[np.newaxis, ...]
+                           for i in range(x3d.shape[0])])
 
 
 def randomize_phase(data):
-    """ Phase randomization.
+    """Phase randomization.
 
-    This function randomizes the input array's spectral phase along the first dimension.
+    This function randomizes the spectral phase of the input data along the
+    first dimension.
 
     Parameters
     ----------
-    data : array_like
-        Input array
+    data : array
+        Input array.
 
     Returns
     -------
-    out : ndarray
-        Array of same shape as `data`.
+    out : array
+        Array of same shape as data.
 
     Notes
     -----
-    The algorithm randomizes the phase component of the input's complex fourier transform.
+    The algorithm randomizes the phase component of the input's complex Fourier
+    transform.
 
     Examples
     --------
@@ -151,3 +154,12 @@ def randomize_phase(data):
     data_freq = np.fft.rfft(data, axis=0)
     data_freq = np.abs(data_freq) * np.exp(1j*np.random.random_sample(data_freq.shape)*2*np.pi)
     return np.fft.irfft(data_freq, data.shape[0], axis=0)
+
+
+def assert_3d(x):
+    if x.ndim >= 3:
+        return x
+    elif x.ndim == 2:
+        return x[np.newaxis, ...]
+    else:
+        return x[np.newaxis, np.newaxis, :]
