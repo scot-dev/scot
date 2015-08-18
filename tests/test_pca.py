@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 
@@ -30,7 +30,7 @@ class TestFunctionality(unittest.TestCase):
         for i in range(1, 50):
             x = generate_covsig(np.eye(i), 500)
             w, v = pca(x)
-            c = np.cov(w.dot(x.T))
+            c = np.cov(np.dot(x, w.T))
             self.assertTrue(np.allclose(c, np.eye(i)))
 
     def testSorting(self):
@@ -38,10 +38,10 @@ class TestFunctionality(unittest.TestCase):
         """
         x = generate_covsig(np.diag([1, 9, 2, 6, 3, 8, 4, 5, 7]), 500)
         w, v = pca(x, sort_components=True)
-        c = np.cov(x.dot(w).T)
+        c = np.cov(np.dot(x, w.T))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5, 4, 3, 2, 1]), rtol=1e-1, atol=1e-2))
         w, v = pca(x, sort_components=True)
-        c = np.cov(x.dot(w).T)
+        c = np.cov(np.dot(x, w.T))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5, 4, 3, 2, 1]), rtol=1e-1, atol=1e-2))
 
     def testDecorrelation(self):
@@ -49,16 +49,16 @@ class TestFunctionality(unittest.TestCase):
         """
         x = generate_covsig([[3, 2, 1], [2, 3, 2], [1, 2, 3]], 500)
         w, v = pca(x)
-        c = np.cov(x.dot(w).T)
+        c = np.cov(np.dot(x, w.T))
         c -= np.diag(c.diagonal())
         self.assertTrue(np.allclose(c, np.zeros((3, 3)), rtol=1e-2, atol=1e-3))
 
 
 class TestDefaults(unittest.TestCase):
     def setUp(self):
-        self.x = np.random.rand(100, 10)
+        self.x = np.random.rand(10, 100)
         self.y = self.x.copy()
-        self.n, self.m = self.x.shape
+        self.m, self.n = self.x.shape
         self.w, self.v = pca(self.x)
 
     def tearDown(self):
@@ -87,9 +87,9 @@ class TestDefaults(unittest.TestCase):
 
 class TestDimensionalityReduction(unittest.TestCase):
     def setUp(self):
-        self.x = np.random.rand(100, 10)
+        self.x = np.random.rand(10, 100)
         self.y = self.x.copy()
-        self.n, self.m = self.x.shape
+        self.m, self.n = self.x.shape
         self.w1, self.v1 = pca(self.x, reducedim=0.9)
         self.w2, self.v2 = pca(self.x, reducedim=5)
 
@@ -118,7 +118,7 @@ class TestDimensionalityReduction(unittest.TestCase):
         """
         x = generate_covsig(np.diag([1, 9, 2, 6, 3, 8, 4, 5, 7]), 500)
         w, v = pca(x, reducedim=5)
-        c = np.cov(x.dot(w).T)
+        c = np.cov(np.dot(x, w.T))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5]), rtol=1e-1, atol=1e-2))
 
 
