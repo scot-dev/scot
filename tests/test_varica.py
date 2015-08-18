@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 from importlib import import_module
@@ -41,7 +41,7 @@ class TestMVARICA(unittest.TestCase):
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
                [0.0, 0.2, 0.5, 1.0, 0.5, 0.2, 0.0],
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
-        data = datatools.dot_special(sources, mix)
+        data = datatools.dot_special(sources, mix.T)
 
         backend_modules = [import_module('scot.' + b) for b in scot.backends]
 
