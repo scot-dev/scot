@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Use scikit-learn routines as backend.
 """
@@ -11,6 +11,7 @@ import scipy as sp
 from . import backend_builtin as builtin
 from . import config, datatools
 from .varbase import VARBase
+from .datatools import atleast_3d
 
 
 def wrapper_fastica(data):
@@ -68,14 +69,14 @@ class VAR(VARBase):
         self : :class:`VAR`
             The :class:`VAR` object.
         """
-        data = sp.atleast_3d(data)
+        data = atleast_3d(data)
         (x, y) = self._construct_eqns(data)
         self.fitting_model.fit(x, y)
 
         self.coef = self.fitting_model.coef_
 
         self.residuals = data - self.predict(data)
-        self.rescov = sp.cov(datatools.cat_trials(self.residuals[self.p:, :, :]), rowvar=False)
+        self.rescov = sp.cov(datatools.cat_trials(self.residuals[:, :, self.p:]), rowvar=False)
 
         return self
 
