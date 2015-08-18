@@ -33,7 +33,7 @@ def plainica(x, reducedim=0.99, backend=None):
 
     Parameters
     ----------
-    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
+    x : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
         data set
     reducedim : {int, float, 'no_pca'}, optional
         A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
