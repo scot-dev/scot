@@ -13,7 +13,7 @@ from .datatools import  atleast_3d
 
 
 def cuthill_mckee(matrix):
-    """ Cuthill-McKee algorithm
+    """Implementation of the Cuthill-McKee algorithm.
 
     Permute a symmetric binary matrix into a band matrix form with a small bandwidth.
 
@@ -74,13 +74,13 @@ def cuthill_mckee(matrix):
 
 
 def acm(x, l):
-    """ Autocovariance matrix at lag l
+    """Compute autocovariance matrix at lag l.
 
     This function calculates the autocovariance matrix of `x` at lag `l`.
 
     Parameters
     ----------
-    x : ndarray, shape = [(n_trials), n_channels, n_samples]
+    x : array, shape (n_trials, n_channels, n_samples)
         Signal data (2D or 3D for multiple trials)
     l : int
         Lag
@@ -115,7 +115,7 @@ def acm(x, l):
 
 #noinspection PyPep8Naming
 class memoize(object):
-    """cache the return value of a method
+    """Cache the return value of a method.
 
     This class is meant to be used as a decorator of methods. The return value
     from a given method invocation will be cached on the instance whose method
@@ -150,8 +150,7 @@ class memoize(object):
 
 
 def cartesian(arrays, out=None):
-    """
-    Generate a cartesian product of input arrays.
+    """Generate a cartesian product of input arrays.
 
     Parameters
     ----------
