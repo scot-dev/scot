@@ -19,7 +19,7 @@ def wrapper_fastica(data):
     """
     from sklearn.decomposition import FastICA
     ica = FastICA()
-    ica.fit(datatools.cat_trials(data))
+    ica.fit(datatools.cat_trials(data).T)
     u = ica.components_.T
     m = ica.mixing_.T
     return m, u
@@ -30,7 +30,7 @@ def wrapper_pca(x, reducedim):
     """
     from sklearn.decomposition import PCA
     pca = PCA(n_components=reducedim)
-    pca.fit(datatools.cat_trials(x))
+    pca.fit(datatools.cat_trials(x).T)
     d = pca.components_
     c = pca.components_.T
     y = datatools.dot_special(x,c)
@@ -61,7 +61,7 @@ class VAR(VARBase):
         
         Parameters
         ----------
-        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        data : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
             Continuous or segmented data set.
             
         Returns

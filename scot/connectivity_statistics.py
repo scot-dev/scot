@@ -17,7 +17,7 @@ from .parallel import parallel_loop
 
 def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
                            n_jobs=1, verbose=0):
-    """ Calculates surrogate connectivity for a multivariate time series by
+    """Calculates surrogate connectivity for a multivariate time series by
     phase randomization [1]_.
 
     .. note:: Parameter `var` will be modified by the function. Treat as
@@ -28,7 +28,7 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [(n_trials), n_samples, n_channels]
+    data : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
         Time series data (2D or 3D for multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -68,7 +68,7 @@ def _calc_surrogate(data, var, measure_names, nfft):
 
 def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
                            n_jobs=1, verbose=0):
-    """ Calculates Jackknife estimates of connectivity.
+    """Calculates Jackknife estimates of connectivity.
 
     For each Jackknife estimate a block of trials is left out. This is repeated
     until each trial was left out exactly once. The number of estimates depends
@@ -83,7 +83,7 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_trials, n_samples, n_channels]
+    data : array, shape (n_trials, n_channels, n_samples)
         Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -133,7 +133,7 @@ def _calc_jackknife(data_used, var, measure_names, nfft):
 
 def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
                            num_samples=None, n_jobs=1, verbose=0):
-    """ Calculates Bootstrap estimates of connectivity.
+    """Calculates Bootstrap estimates of connectivity.
 
     To obtain a bootstrap estimate trials are sampled randomly with replacement
     from the data set.
@@ -146,7 +146,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_trials, n_samples, n_channels]
+    data : array, shape (n_trials, n_channels, n_samples)
         Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -190,7 +190,7 @@ def _calc_bootstrap(data, var, measures, nfft, num_samples):
 
 
 def test_bootstrap_difference(a, b):
-    """ Test mean difference between two bootstrap estimates.
+    """Test mean difference between two bootstrap estimates.
 
     This function calculates the probability `p` of observing a more extreme
     mean difference between `a` and `b` under the null hypothesis that `a` and
@@ -248,7 +248,7 @@ def test_bootstrap_difference(a, b):
 
 
 def significance_fdr(p, alpha):
-    """ Calculate significance by controlling for the false discovery rate.
+    """Calculate significance by controlling for the false discovery rate.
 
     This function determines which of the *p*-values in `p` can be considered
     significant. Correction for multiple comparisons is performed by
