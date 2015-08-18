@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 
@@ -15,8 +15,8 @@ except ImportError:
 
 epsilon = 1e-10
 
+
 class TestFunctionality(unittest.TestCase):
-    
     def setUp(self):
         pass
     
@@ -27,15 +27,15 @@ class TestFunctionality(unittest.TestCase):
         A = generate_covsig([[10,5,2],[5,10,2],[2,2,10]], 500)
         B = generate_covsig([[10,2,2],[2,10,5],[2,5,10]], 500)
             
-        X = np.dstack([A,B])
-        W, V = csp(X,[1,2])        
-        C1a = np.cov(X[:,:,0].dot(W).T)
-        C2a = np.cov(X[:,:,1].dot(W).T)
+        X = np.concatenate([A, B], axis=0)
+        W, V = csp(X, [1, 2])
+        C1a = np.cov(X[0, :, :].dot(W.T))
+        C2a = np.cov(X[1, :, :].dot(W.T))
         
-        Y = np.dstack([B,A])
-        W, V = csp(Y,[1,2])
-        C1b = np.cov(Y[:,:,0].dot(W).T)
-        C2b = np.cov(Y[:,:,1].dot(W).T)
+        Y = np.concatenate([B, A], axis=0)
+        W, V = csp(Y, [1, 2])
+        C1b = np.cov(Y[0, :, :].dot(W).T)
+        C2b = np.cov(Y[1, :, :].dot(W).T)
         
         # check symmetric case
         self.assertTrue(np.allclose(C1a.diagonal(), C2a.diagonal()[::-1]))
@@ -58,11 +58,11 @@ class TestFunctionality(unittest.TestCase):
 class TestDefaults(unittest.TestCase):
 
     def setUp(self):
-        self.X = np.random.randn(100,5,10)
+        self.X = np.random.randn(10,5,100)
         self.C = [0,0,0,0,0,1,1,1,1,1]
         self.Y = self.X.copy()
         self.D = list(self.C)
-        self.N, self.M, self.T = self.X.shape
+        self.T, self.M, self.N = self.X.shape
         self.W, self.V = csp(self.X, self.C)
 
     def tearDown(self):
@@ -70,10 +70,10 @@ class TestDefaults(unittest.TestCase):
     
     def testInvalidInput(self):
         # pass only 2d data
-        self.assertRaises(AttributeError, csp, np.random.randn(10,3), [1,1,0,0] )
+        self.assertRaises(AttributeError, csp, np.random.randn(3,10), [1,1,0,0] )
         
         # number of class labels does not match number of trials
-        self.assertRaises(AttributeError, csp, np.random.randn(10,3,5), [1,1,0,0] )
+        self.assertRaises(AttributeError, csp, np.random.randn(5,3,10), [1,1,0,0] )
     
     def testInputSafety(self):
         # function must not change input variables
@@ -96,11 +96,11 @@ class TestDefaults(unittest.TestCase):
 class TestDimensionalityReduction(unittest.TestCase):
 
     def setUp(self):
-        self.X = np.random.rand(100,15,10)
+        self.X = np.random.rand(10,15,100)
         self.C = [0,0,0,0,0,1,1,1,1,1]
         self.Y = self.X.copy()
         self.D = list(self.C)
-        self.N, self.M, self.T = self.X.shape
+        self.T, self.M, self.N = self.X.shape
         self.W, self.V = csp(self.X, self.C, numcomp=5)
 
     def tearDown(self):
@@ -113,10 +113,10 @@ class TestDimensionalityReduction(unittest.TestCase):
 
     def testPseudoInverse(self):
         # V should be the pseudo inverse of W
-        I = self.V.dot(self.W)        
+        I = self.V.dot(self.W.T)
         self.assertTrue(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
         
-        I = self.W.dot(self.V)        
+        I = self.W.dot(self.V.T)
         self.assertFalse(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
         
 def main():
