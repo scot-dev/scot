@@ -1,3 +1,7 @@
+# Released under The MIT License (MIT)
+# http://opensource.org/licenses/MIT
+# Copyright (c) 2013-2015 SCoT Development Team
+
 """
 This example shows how to set the premixing matrix to tell the workspace about
 pre-transformed data.
