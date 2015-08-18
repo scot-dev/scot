@@ -2,8 +2,9 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013-2016 SCoT Development Team
 
-"""This example demonstrates that it is possible to reconstruct sources even if
-we include PCA in the process.
+"""
+This example demonstrates that it is possible to reconstruct sources even if we
+include a PCA step in the process.
 """
 
 from __future__ import print_function
@@ -23,10 +24,9 @@ model0.coef = np.array([[0.3, -0.6], [0, -0.9]])
 x = model0.simulate(10000).squeeze()
 
 # Transform data with PCA
-w, v = pca(x)
+w, v = pca(x.T)
 y = np.dot(w.T, x)
 
-# Verify that transformed data y is decorrelated
 print('Covariance of x:\n', np.cov(x.squeeze()))
 print('\nCovariance of y:\n', np.cov(y.squeeze()))
 
