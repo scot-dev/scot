@@ -48,7 +48,6 @@ def plainica(x, reducedim=0.99, backend=None):
     result : ResultICA
         Source decomposition
     """
-
     x = atleast_3d(x)
     t, m, l = np.shape(x)
 
