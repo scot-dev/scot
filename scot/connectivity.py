@@ -267,6 +267,23 @@ class Connectivity(object):
         return np.abs(A / np.sqrt(np.sum(A.conj() * A, axis=0, keepdims=True)))
 
     @memoize
+    def sPDC(self):
+        """Squared partial directed coherence.
+
+        .. math:: \mathrm{sPDC}{ij}(f) = \frac{\left| A{ij}(f) \right|^2}{\mathbf{1}^T \left| A_{:j}(f) \right|^2}
+
+        References
+        ----------
+        L. Astolfi, F. Cincotti, D. Mattia, M. G. Marciani, L. Baccala,
+        F. D. Fallani, S. Salinari, M. Ursino, M. Zavaglia, F. Babiloni. Partial
+        directed coherence: a new concept in neural structure determination. IEEE
+        Trans. Biomed. Eng. 53(9):1802-1812, 2006.
+        """
+        A = self.A()
+        A = np.abs(A)**2
+        return A / np.sum(A, axis=0, keepdims=True)
+
+    @memoize
     def ffPDC(self):
         """ Full frequency partial directed coherence
 
