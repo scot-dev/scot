@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2014 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 
@@ -17,6 +17,13 @@ class TestVAR(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def test_simulate(self):
+        var = VAR(2)
+        var.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = 1000
+        x = var.simulate(l)
+        self.assertEqual(x.shape, (1, 2, l))
 
     def test_fit(self):
         var0 = VAR(2)
