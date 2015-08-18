@@ -1,14 +1,15 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Utility functions """
 
 from __future__ import division
 
 import numpy as np
-
 from functools import partial
+
+from .datatools import  atleast_3d
 
 
 def cuthill_mckee(matrix):
@@ -79,7 +80,7 @@ def acm(x, l):
 
     Parameters
     ----------
-    x : ndarray, shape = [n_samples, n_channels, (n_trials)]
+    x : ndarray, shape = [(n_trials), n_channels, n_samples]
         Signal data (2D or 3D for multiple trials)
     l : int
         Lag
@@ -89,11 +90,7 @@ def acm(x, l):
     c : ndarray, shape = [nchannels, n_channels]
         Autocovariance matrix of `x` at lag `l`.
     """
-    x = np.asarray(x)
-    if x.ndim == 1:
-        x = x.reshape((-1, 1, 1))
-    elif x.ndim == 2:
-        x = x.reshape((x.shape[0], x.shape[1], 1))
+    x = atleast_3d(x)
 
     if l > x.shape[0]-1:
         raise AttributeError("lag exceeds data length")
@@ -109,9 +106,9 @@ def acm(x, l):
         b = x[0:-l, :, :]
 
     c = np.zeros((x.shape[1], x.shape[1]))
-    for t in range(x.shape[2]):
-        c += a[:, :, t].T.dot(b[:, :, t]) / a.shape[0]
-    c /= x.shape[2]
+    for t in range(x.shape[0]):
+        c += a[t, :, :].T.dot(b[t, :, :]) / a.shape[2]
+    c /= x.shape[0]
 
     return c.T
 
