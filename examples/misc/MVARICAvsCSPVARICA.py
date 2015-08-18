@@ -1,3 +1,7 @@
+# Released under The MIT License (MIT)
+# http://opensource.org/licenses/MIT
+# Copyright (c) 2013-2015 SCoT Development Team
+
 """
 This example shows how to decompose motor imagery EEG into sources using
 CSPVARICA and visualize a connectivity measure.
