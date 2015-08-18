@@ -18,13 +18,6 @@ class TestVAR(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_simulate(self):
-        var = VAR(2)
-        var.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
-        l = 1000
-        x = var.simulate(l)
-        self.assertEqual(x.shape, (1, 2, l))
-
     def test_fit(self):
         var0 = VAR(2)
         var0.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
