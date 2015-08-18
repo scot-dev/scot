@@ -80,7 +80,7 @@ def acm(x, l):
 
     Parameters
     ----------
-    x : ndarray, shape = [(n_trials), n_channels, n_samples]
+    x : array, shape (n_trials, n_channels, n_samples)
         Signal data (2D or 3D for multiple trials)
     l : int
         Lag
