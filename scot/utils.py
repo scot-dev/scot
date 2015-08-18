@@ -80,7 +80,7 @@ def acm(x, l):
 
     Parameters
     ----------
-    x : array, shape (n_trials, n_channels, n_samples)
+    x : ndarray, shape = [(n_trials), n_channels, n_samples]
         Signal data (2D or 3D for multiple trials)
     l : int
         Lag
@@ -106,9 +106,9 @@ def acm(x, l):
         b = x[:, :, 0:-l]
 
     c = np.zeros((x.shape[1], x.shape[1]))
-    for t in range(x.shape[2]):
-        c += a[:, :, t].T.dot(b[:, :, t]) / a.shape[0]
-    c /= x.shape[2]
+    for t in range(x.shape[0]):
+        c += a[t, :, :].T.dot(b[t, :, :]) / a.shape[2]
+    c /= x.shape[0]
 
     return c.T
 
