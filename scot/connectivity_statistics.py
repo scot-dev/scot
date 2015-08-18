@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2014 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Routines for statistical evaluation of connectivity.
 """
@@ -9,7 +9,7 @@ from __future__ import division
 
 import numpy as np
 import scipy as sp
-from .datatools import randomize_phase
+from .datatools import randomize_phase, atleast_3d
 from .connectivity import connectivity
 from .utils import cartesian
 from .parallel import parallel_loop
@@ -28,7 +28,7 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
+    data : ndarray, shape = [(n_trials), n_samples, n_channels]
         Time series data (2D or 3D for multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -83,8 +83,8 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
-        Time series data (2D or 3D for multiple trials)
+    data : ndarray, shape = [n_trials, n_samples, n_channels]
+        Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
     nfft : int, optional
@@ -107,8 +107,10 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
             values are ndarrays of shape
             [`repeats`, n_channels, n_channels, nfft].
     """
-    data = np.atleast_3d(data)
-    n, m, t = data.shape
+    data = atleast_3d(data)
+    t, m, n = data.shape
+
+    assert(t > 1)
 
     if leaveout < 1:
         leaveout = int(leaveout * t)
@@ -119,7 +121,7 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
                                                  i >= (block+1)*leaveout]
 
     par, func = parallel_loop(_calc_jackknife, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(data[:, :, mask(b)], var, measure_names, nfft)
+    output = par(func(data[mask(b), :, :], var, measure_names, nfft)
                  for b in range(num_blocks))
     return convert_output_(output, measure_names)
 
@@ -144,8 +146,8 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
-        Time series data (2D or 3D for multiple trials)
+    data : ndarray, shape = [n_trials, n_samples, n_channels]
+        Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
     repeats : int, optional
@@ -166,8 +168,10 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
         each key is the name of the measure, and the corresponding values are
         ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
     """
-    data = np.atleast_3d(data)
-    n, m, t = data.shape
+    data = atleast_3d(data)
+    t, m, n = data.shape
+
+    assert(t > 1)
 
     if num_samples is None:
         num_samples = t
@@ -175,7 +179,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     mask = lambda r: np.random.random_integers(0, data.shape[2]-1, num_samples)
 
     par, func = parallel_loop(_calc_bootstrap, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(data[:, :, mask(r)], var, measures, nfft, num_samples)
+    output = par(func(data[mask(r), :, :], var, measures, nfft, num_samples)
                  for r in range(repeats))
     return convert_output_(output, measures)
 
