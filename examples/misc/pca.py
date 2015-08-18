@@ -1,3 +1,7 @@
+# Released under The MIT License (MIT)
+# http://opensource.org/licenses/MIT
+# Copyright (c) 2013-2015 SCoT Development Team
+
 """
 This example demonstrates that it is possible to reconstruct sources even if we
 include a PCA step in the process.
@@ -17,11 +21,11 @@ model0.coef = np.array([[0.3, -0.6], [0, -0.9]])
 x = model0.simulate(10000).squeeze()
 
 # Transform data with PCA
-w, v = pca(x)
-y = x.dot(w)
+w, v = pca(x.T)
+y = np.dot(w.T, x)
 
-print('Covariance of x:\n', np.cov(x.squeeze().T))
-print('\nCovariance of y:\n', np.cov(y.squeeze().T))
+print('Covariance of x:\n', np.cov(x.squeeze()))
+print('\nCovariance of y:\n', np.cov(y.squeeze()))
 
 model1, model2 = VAR(1), VAR(1)
 
