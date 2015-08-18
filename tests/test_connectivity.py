@@ -1,6 +1,10 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
+<<<<<<< HEAD
 # Copyright (c) 2015 SCoT Development Team
+=======
+# Copyright (c) 2013-2015 SCoT Development Team
+>>>>>>> Data Orientation: test_connectivity.py
 
 import unittest
 
@@ -36,8 +40,13 @@ class TestFunctionality(unittest.TestCase):
             self.assertTrue(np.all(c[m] == getattr(C, m)()))
 
     def testClass(self):
+<<<<<<< HEAD
         # Three sources: a <- b <- c
         # simply test if connectivity measures are 0 where expected
+=======
+        # Three sources: a <- b <-c
+        # simply test the structure of resulting connectivity measures
+>>>>>>> Data Orientation: test_connectivity.py
         b0 = np.array([[0, 0.9, 0], [0, 0, 0.9], [0, 0, 0]])
         identity = np.eye(3)
         nfft = 5
