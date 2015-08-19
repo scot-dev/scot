@@ -9,8 +9,6 @@ from __future__ import absolute_import
 
 from . import config
 
-backends = ['backend_builtin', 'backend_sklearn']
-
 # default backend
 # TODO: set default backend in config
 from . import backend_builtin
@@ -22,3 +20,6 @@ from .connectivity import Connectivity
 from . import datatools
 
 __all__ = ['Workspace', 'Connectivity', 'datatools']
+__version__ = "0.1.0"
+
+backends = ['backend_builtin', 'backend_sklearn']

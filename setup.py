@@ -2,10 +2,8 @@
 
 from setuptools import setup
 from codecs import open
+from scot import __version__ as ver
 
-
-with open('VERSION', encoding='utf-8') as version:
-    ver = version.read().strip()
 
 with open('README.md', encoding='utf-8') as readme:
     long_description = readme.read()
