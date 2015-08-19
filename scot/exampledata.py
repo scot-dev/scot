@@ -2,7 +2,13 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2015 SCoT Development Team
 
-def load(dataset, datadir):
+from os.path import expanduser
+
+
+DEFAULT_STORAGE = expanduser("~/scot_data/")  # use config system instead
+
+
+def load(dataset, datadir=DEFAULT_STORAGE):
     """ Loads example dataset.
     
     If the requested dataset is not found in the location specified by
