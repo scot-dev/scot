@@ -100,8 +100,8 @@ def dot_special(x2d, x3d):
     Examples
     --------
     >>> x = np.random.randn(150, 40, 6)
-    >>> a = np.ones((40, 7))
-    >>> y = dot_special(x, a)
+    >>> a = np.ones((7, 40))
+    >>> y = dot_special(a, x)
     >>> y.shape
     (150, 7, 6)
     """
