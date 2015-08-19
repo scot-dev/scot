@@ -279,9 +279,7 @@ class Connectivity(object):
         directed coherence: a new concept in neural structure determination. IEEE
         Trans. Biomed. Eng. 53(9):1802-1812, 2006.
         """
-        A = self.A()
-        A = np.abs(A)**2
-        return A / np.sum(A, axis=0, keepdims=True)
+        return self.PDC()**2
 
     @memoize
     def ffPDC(self):
