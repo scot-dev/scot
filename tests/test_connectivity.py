@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2015 SCoT Development Team
 
 import unittest
 
@@ -17,8 +17,8 @@ class TestFunctionality(unittest.TestCase):
         pass
 
     def testFunction(self):
-        # Three sources: a <- b <-c
-        # simply test if connectivity measures are 0 where expected to be so
+        # Three sources: a <- b <- c
+        # simply test if connectivity measures are 0 where expected
         b0 = np.array([[0, 0.9, 0], [0, 0, 0.9], [0, 0, 0]])
         identity = np.eye(3)
         nfft = 5
@@ -29,8 +29,8 @@ class TestFunctionality(unittest.TestCase):
             self.assertTrue(np.all(c[m] == getattr(C, m)()))
 
     def testClass(self):
-        # Three sources: a <- b <-c
-        # simply test if connectivity measures are 0 where expected to be so
+        # Three sources: a <- b <- c
+        # simply test if connectivity measures are 0 where expected
         b0 = np.array([[0, 0.9, 0], [0, 0, 0.9], [0, 0, 0]])
         identity = np.eye(3)
         nfft = 5
@@ -46,7 +46,8 @@ class TestFunctionality(unittest.TestCase):
         # S should be a full matrix and symmetric
         self.assertTrue(np.all(k(c.S()) > 0))
         self.assertTrue(np.all(k(c.S()) == k(c.S()).T))
-        # g should be nonzero for direct connections only and symmetric in magnitude
+        # g should be nonzero for direct connections only and symmetric in
+        #  magnitude
         self.assertEqual(k(c.G())[0, 2], 0)
         self.assertTrue(np.all(k(c.G()) == k(c.G()).T))
         # Phase should be zero along the diagonal
@@ -56,25 +57,28 @@ class TestFunctionality(unittest.TestCase):
         # Coherence should be 1 over all frequencies along the diagonal
         self.assertTrue(np.all(k(c.COH()).diagonal() == nfft))
         self.assertLessEqual(np.max(np.abs(c.COH())), 1)
-        # pCOH should be nonzero for direct connections only and symmetric in magnitude
+        # pCOH should be nonzero for direct connections only and symmetric in
+        # magnitude
         self.assertEqual(k(c.pCOH())[0, 2], 0)
         self.assertTrue(np.all(k(c.pCOH()) == k(c.pCOH()).T))
-        # PDC should have the same structure as b,
+        # PDC should have the same structure as b
         self.assertTrue(np.all((l(c.PDC()) == 0) == ((b0 + identity) == 0)))
         self.assertFalse(np.all(l(c.PDC()) == l(c.PDC()).T))
         #     final sink should be 1 over all frequencies
         self.assertEqual(l(c.PDC())[0, 0], nfft)
         #     sources with equal outgoing connections should be equal
         self.assertEqual(l(c.PDC())[1, 1], l(c.PDC())[2, 2])
-        #     equal connections in b should be equal,
+        #     equal connections in b should be equal
         self.assertEqual(l(c.PDC())[0, 1], l(c.PDC())[1, 2])
-        # ffPDC should have the same structure as b,
+        # ffPDC should have the same structure as b
         self.assertTrue(np.all((l(c.ffPDC()) == 0) == ((b0 + identity) == 0)))
         self.assertFalse(np.all(l(c.ffPDC()) == l(c.ffPDC()).T))
         #     sources with equal outgoing connections should be equal
         self.assertEqual(l(c.ffPDC())[1, 1], l(c.ffPDC())[2, 2])
-        #     equal connections in b should be equal,
+        #     equal connections in b should be equal
         self.assertEqual(l(c.ffPDC())[0, 1], l(c.ffPDC())[1, 2])
+        # sPDC should be the square of the PDC
+        self.assertTrue(np.allclose(c.PDC()**2, c.sPDC()))
         # PDCF should equal PDC for identity noise covariance
         self.assertTrue(np.all(c.PDC() == c.PDCF()))
         # GPDC should equal PDC for identity noise covariance
