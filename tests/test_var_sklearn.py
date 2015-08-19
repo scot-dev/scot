@@ -10,7 +10,11 @@ from numpy.testing.utils import assert_equal
 import numpy as np
 from sklearn.linear_model import Ridge, RidgeCV, Lasso, LassoLars, ElasticNet
 
-from scot.backend_sklearn import VAR
+from scot.backend_sklearn import generate
+
+
+backend_sklearn = generate()
+VAR = backend_sklearn['var']
 
 
 class CommonTests(unittest.TestCase):

@@ -44,17 +44,12 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(np.transpose(mix), sources)
 
-        backend_modules = [import_module('scot.' + b) for b in scot.backends]
-        #backend_modules = [import_module('scot.backend_sklearn')]
-        #backend_modules = [import_module('scot.backend_builtin')]
-
-        for bm in backend_modules:
+        for backend_name, backend_gen in scot.backend.items():
 
             # apply MVARICA
             #  - default setting of 0.99 variance should reduce to 3 channels with this data
             #  - automatically determine delta (enough data, so it should most likely be 0)
-            result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
-            #result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
+            result = varica.mvarica(data, var, optimize_var=True, backend=backend_gen())
 
             # ICA does not define the ordering and sign of components
             # so wee need to test all combinations to find if one of them fits the original coefficients

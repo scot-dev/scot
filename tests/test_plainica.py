@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 from importlib import import_module
@@ -41,11 +41,9 @@ class TestICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(np.transpose(mix), sources)
 
-        backend_modules = [import_module('scot.' + b) for b in scot.backends]
+        for backend_name, backend_gen in scot.backend.items():
 
-        for bm in backend_modules:
-
-            result = plainica.plainica(data, backend=bm.backend)
+            result = plainica.plainica(data, backend=backend_gen())
 
             i = result.mixing.dot(result.unmixing)
             self.assertTrue(np.allclose(i, np.eye(i.shape[0]), rtol=1e-6, atol=1e-7))
