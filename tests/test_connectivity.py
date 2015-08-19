@@ -79,6 +79,15 @@ class TestFunctionality(unittest.TestCase):
         self.assertEqual(l(c.ffPDC())[0, 1], l(c.ffPDC())[1, 2])
         # sPDC should be the square of the PDC
         self.assertTrue(np.allclose(c.PDC()**2, c.sPDC()))
+        # sPDC should have the same structure as b
+        self.assertTrue(np.all((l(c.sPDC()) == 0) == ((b0 + identity) == 0)))
+        self.assertFalse(np.all(l(c.sPDC()) == l(c.sPDC()).T))
+        #     final sink should be 1 over all frequencies
+        self.assertEqual(l(c.sPDC())[0, 0], nfft)
+        #     sources with equal outgoing connections should be equal
+        self.assertEqual(l(c.sPDC())[1, 1], l(c.sPDC())[2, 2])
+        #     equal connections in b should be equal
+        self.assertEqual(l(c.sPDC())[0, 1], l(c.sPDC())[1, 2])
         # PDCF should equal PDC for identity noise covariance
         self.assertTrue(np.all(c.PDC() == c.PDCF()))
         # GPDC should equal PDC for identity noise covariance
