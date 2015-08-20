@@ -7,7 +7,7 @@
 
 from __future__ import absolute_import
 
-from . import backend, config
+from . import backend
 
 
 def generate():

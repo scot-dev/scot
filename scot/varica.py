@@ -202,7 +202,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     t, m, l = np.shape(x)
     
     if backend is None:
-        backend = config.backend
+        backend = scotbackend
     
     # pre-transform the data with CSP
     #c, d, xcsp = backend['csp'](x, cl, reducedim)

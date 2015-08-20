@@ -20,6 +20,12 @@ class TestMVARICA(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testInterface(self):
+        self.assertRaises(TypeError, varica.mvarica)
+        # simply pass in different data shapes and see if the functions runs without error
+        varica.mvarica(np.sin(np.arange(30)).reshape((10, 3)), VAR(1))    # 10 samples, 3 channels
+        varica.mvarica(np.sin(np.arange(30)).reshape((5, 3, 2)), VAR(1))  # 5 samples, 3 channels, 2 trials
+
     def testModelIdentification(self):
         """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
             do this for every backend """
@@ -73,3 +79,19 @@ class TestMVARICA(unittest.TestCase):
                         d = c
 
             assert_allclose(d, b0, rtol=1e-2, atol=1e-2)
+
+
+class TestCSPVARICA(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def testInterface(self):
+        self.assertRaises(TypeError, varica.cspvarica)
+        # simply pass in different data shapes and see if the functions runs without error
+        self.assertRaises(AttributeError, varica.cspvarica, np.sin(np.arange(30)).reshape((10, 3)), VAR(1), [0])
+        varica.cspvarica(np.sin(np.arange(30)).reshape((5, 3, 2)), VAR(1), ['A', 'B'])  # 5 samples, 3 channels, 2 trials
+
+
