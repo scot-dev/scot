@@ -184,18 +184,14 @@ class Topoplot(object):
         return self.channel_fence
 
 
-def topoplot(values, locations, headcolor=[0, 0, 0, 1], axes=None, offset=(0, 0)):
-    """ Wrapper function for :class:`Topoplot.
-
-    This function is only provided for convenience.
+def topoplot(values, locations, axes=None, offset=(0, 0), **kwargs):
+    """Wrapper function for :class:`Topoplot.
     """
-    topo = Topoplot(headcolor=headcolor)
+    topo = Topoplot(**kwargs)
     topo.set_locations(locations)
     topo.set_values(values)
     topo.create_map()
-    #h = topo.plot_map(axes, offset)
     topo.plot_map(axes=axes, offset=offset)
     topo.plot_locations(axes=axes, offset=offset)
     topo.plot_head(axes=axes, offset=offset)
-    #plot.colorbar(h)
     return topo
