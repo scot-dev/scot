@@ -78,7 +78,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         backend = config.backend
 
     # pre-transform the data with PCA
-    if reducedim == 'no pca':
+    if reducedim == 'no_pca':
         c = np.eye(m)
         d = np.eye(m)
         xpca = x
