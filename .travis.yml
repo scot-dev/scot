@@ -1,7 +1,9 @@
 language: python
 
+sudo: false
+
 virtualenv:
-  system_site_packages: true
+  system_site_packages: false
   
 env:
   matrix:
