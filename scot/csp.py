@@ -8,7 +8,7 @@ import numpy as np
 from scipy.linalg import eig
     
 
-def csp(x, cl, numcomp=np.inf):
+def csp(x, cl, numcomp=None):
     """ Calculate common spatial patterns (CSP)
 
     Parameters
@@ -18,8 +18,8 @@ def csp(x, cl, numcomp=np.inf):
     cl : list of valid dict keys
         Class labels associated with each trial. Currently only two classes are supported.
     numcomp : {int}, optional
-        Number of patterns to keep after applying the CSP. If `numcomp` is greater than n_channels, all n_channels
-        patterns are returned.
+        Number of patterns to keep after applying the CSP. If `numcomp` is
+        greater than n_channels or None, all n_channels patterns are returned.
 
     Returns
     -------
@@ -36,12 +36,12 @@ def csp(x, cl, numcomp=np.inf):
     
     if t != cl.size:
         raise AttributeError('CSP only works with multiple classes. Number of'
-                             ' elemnts in cl (%d) must equal 3rd dimension of X (%d)' % (cl.size, t))
+                             ' elements in cl (%d) must equal 3rd dimension of X (%d)' % (cl.size, t))
 
     labels = np.unique(cl)
     
     if labels.size != 2:
-        raise AttributeError('CSP is currently ipmlemented for 2 classes (got %d)' % labels.size)
+        raise AttributeError('CSP is currently implemented for 2 classes (got %d)' % labels.size)
         
     x1 = x[:, :, cl == labels[0]]
     x2 = x[:, :, cl == labels[1]]
@@ -65,6 +65,8 @@ def csp(x, cl, numcomp=np.inf):
     v = np.linalg.inv(w)
    
     # subsequently remove unwanted components from the middle of w and v
+    if numcomp is None:
+        numcomp = w.shape[1]
     while w.shape[1] > numcomp:
         i = int(np.floor(w.shape[1]/2))
         w = np.delete(w, i, 1)

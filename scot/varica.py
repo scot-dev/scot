@@ -22,11 +22,11 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         Vector autoregressive model (VAR) object that is used for model fitting.
     cl : list of valid dict keys, optional
         Class labels associated with each trial.
-    reducedim : {int, float, 'no_pca'}, optional
-        A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
+    reducedim : {int, float, 'no_pca', None}, optional
+        A number of less than 1 is interpreted as the fraction of variance that should remain in the data. All
         components that describe in total less than `1-reducedim` of the variance are removed by the PCA step.
-        An integer numer of 1 or greater is interpreted as the number of components to keep after applying the PCA.
-        If set to 'no_pca' the PCA step is skipped.
+        An integer number of 1 or greater is interpreted as the number of components to keep after applying PCA.
+        If set to None, all PCA components are retained. If set to 'no_pca', the PCA step is skipped.
     optimize_var : bool, optional
         Whether to call automatic optimization of the VAR fitting routine.
     backend : dict-like, optional
@@ -138,7 +138,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     return Result
     
     
-def cspvarica(x, var, cl, reducedim=np.inf, optimize_var=False, backend=None, varfit='ensemble'):
+def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varfit='ensemble'):
     """ Performs joint VAR model fitting and ICA source separation.
 
     This function implements the CSPVARICA procedure [1]_.
@@ -153,6 +153,7 @@ def cspvarica(x, var, cl, reducedim=np.inf, optimize_var=False, backend=None, va
         Class labels associated with each trial.
     reducedim : {int}, optional
         Number of (most discriminative) components to keep after applying the CSP.
+        If set to None, retain all components.
     optimize_var : bool, optional
         Whether to call automatic optimization of the VAR fitting routine.
     backend : dict-like, optional
