@@ -36,7 +36,7 @@ Indices and tables
 Badges
 ======
 
-* .. image:: https://travis-ci.org/scot-dev/scot.svg
+* .. image:: https://travis-ci.org/scot-dev/scot.svg?branch=master
    :target: https://travis-ci.org/scot-dev/scot
 
 * .. image:: https://coveralls.io/repos/scot-dev/scot/badge.svg?branch=master&service=github 
