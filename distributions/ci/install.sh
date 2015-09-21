@@ -6,8 +6,6 @@
 
 set -e
 
-sudo apt-get update -qq
-
 if [[ "$INSTALL_ATLAS" == "true" ]]; then
     sudo apt-get install -qq libatlas3gf-base libatlas-dev
 fi
