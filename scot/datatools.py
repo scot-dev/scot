@@ -14,8 +14,6 @@ import numpy as np
 def cut_segments(x2d, tr, start, stop):
     """Cut continuous signal into segments.
 
-    This function cuts segments from a continuous signal.
-
     Parameters
     ----------
     x2d : array, shape (m, n)
@@ -157,9 +155,9 @@ def randomize_phase(data):
         plt.show()
     """
     data = np.asarray(data)
-    data_freq = np.fft.rfft(data, axis=0)
+    data_freq = np.fft.rfft(data)
     data_freq = np.abs(data_freq) * np.exp(1j*np.random.random_sample(data_freq.shape)*2*np.pi)
-    return np.fft.irfft(data_freq, data.shape[0], axis=0)
+    return np.fft.irfft(data_freq, data.shape[-1])
 
 
 def assert_3d(x):
