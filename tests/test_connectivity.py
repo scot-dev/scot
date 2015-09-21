@@ -8,6 +8,13 @@ import numpy as np
 
 from scot import connectivity
 
+from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_equal
+
+
+def assert_zerostructure(a, b):
+    assert_array_equal(np.isclose(a, 0), np.isclose(b, 0))
+
 
 class TestFunctionality(unittest.TestCase):
     def setUp(self):
@@ -38,7 +45,7 @@ class TestFunctionality(unittest.TestCase):
         k = lambda x: np.sum(np.abs(x), 2)
         l = lambda x: np.sum(x, 2)
         # a should have the same structure as b
-        self.assertTrue(np.all((k(c.A()) == 0) == ((b0 + identity) == 0)))
+        assert_zerostructure(k(c.A()), b0 + identity)
         self.assertFalse(np.all(k(c.A()) == k(c.A()).T))
         # H should be upper triangular
         self.assertTrue(np.allclose(np.tril(k(c.H()), -1), 0))
@@ -62,7 +69,7 @@ class TestFunctionality(unittest.TestCase):
         self.assertEqual(k(c.pCOH())[0, 2], 0)
         self.assertTrue(np.all(k(c.pCOH()) == k(c.pCOH()).T))
         # PDC should have the same structure as b
-        self.assertTrue(np.all((l(c.PDC()) == 0) == ((b0 + identity) == 0)))
+        assert_zerostructure(k(c.PDC()), b0 + identity)
         self.assertFalse(np.all(l(c.PDC()) == l(c.PDC()).T))
         #     final sink should be 1 over all frequencies
         self.assertEqual(l(c.PDC())[0, 0], nfft)
@@ -71,7 +78,7 @@ class TestFunctionality(unittest.TestCase):
         #     equal connections in b should be equal
         self.assertEqual(l(c.PDC())[0, 1], l(c.PDC())[1, 2])
         # ffPDC should have the same structure as b
-        self.assertTrue(np.all((l(c.ffPDC()) == 0) == ((b0 + identity) == 0)))
+        assert_zerostructure(k(c.ffPDC()), b0 + identity)
         self.assertFalse(np.all(l(c.ffPDC()) == l(c.ffPDC()).T))
         #     sources with equal outgoing connections should be equal
         self.assertEqual(l(c.ffPDC())[1, 1], l(c.ffPDC())[2, 2])
@@ -80,7 +87,7 @@ class TestFunctionality(unittest.TestCase):
         # sPDC should be the square of the PDC
         self.assertTrue(np.allclose(c.PDC()**2, c.sPDC()))
         # sPDC should have the same structure as b
-        self.assertTrue(np.all((l(c.sPDC()) == 0) == ((b0 + identity) == 0)))
+        assert_zerostructure(k(c.sPDC()), b0 + identity)
         self.assertFalse(np.all(l(c.sPDC()) == l(c.sPDC()).T))
         #     final sink should be 1 over all frequencies
         self.assertEqual(l(c.sPDC())[0, 0], nfft)
@@ -101,7 +108,7 @@ class TestFunctionality(unittest.TestCase):
         self.assertTrue(np.allclose(np.tril(k(c.ffDTF()), -1), 0))
         self.assertFalse(np.all(k(c.ffDTF()) == k(c.ffDTF()).T))
         # dDTF should have the same structure as b,
-        self.assertTrue(np.all((l(c.dDTF()) == 0) == ((b0 + identity) == 0)))
+        assert_zerostructure(k(c.dDTF()), b0 + identity)
         self.assertFalse(np.all(l(c.dDTF()) == l(c.dDTF()).T))
         # GDTF should equal DTF for identity noise covariance
         self.assertTrue(np.all(c.DTF() == c.GDTF()))
