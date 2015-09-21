@@ -270,7 +270,7 @@ class Connectivity(object):
     def sPDC(self):
         """Squared partial directed coherence.
 
-        .. math:: \mathrm{sPDC}{ij}(f) = \frac{\left| A{ij}(f) \right|^2}{\mathbf{1}^T \left| A_{:j}(f) \right|^2}
+        .. math:: \mathrm{sPDC}_{ij}(f) = \\frac{|A_{ij}(f)|^2}{\mathbf{1}^T | A_{:j}(f) |^2}
 
         References
         ----------
