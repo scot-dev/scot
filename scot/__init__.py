@@ -20,6 +20,6 @@ from .connectivity import Connectivity
 from . import datatools
 
 __all__ = ['Workspace', 'Connectivity', 'datatools']
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 backends = ['backend_builtin', 'backend_sklearn']
