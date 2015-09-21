@@ -247,9 +247,9 @@ required_symlinks = [
 
 for link, target in required_symlinks:
     if not os.path.exists(link):
-        if hasattr(os, 'symlink'):
+        try:
             os.symlink(target, link)
-        else:
+        except OSError:
             shutil.copytree(os.path.join(link, '..', target), link)
 
 if len(sys.argv)>1:
