@@ -41,6 +41,7 @@ class TestFunctionality(unittest.TestCase):
         self.assertTrue(np.all((k(c.A()) == 0) == ((b0 + identity) == 0)))
         self.assertFalse(np.all(k(c.A()) == k(c.A()).T))
         # H should be upper triangular
+        print(k(c.H()))
         self.assertTrue(np.all(np.tril(k(c.H()), -1) == 0))
         self.assertFalse(np.all(k(c.H()) == k(c.H()).T))
         # S should be a full matrix and symmetric
