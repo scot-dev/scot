@@ -33,3 +33,12 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+Badges
+======
+
+* .. image:: https://travis-ci.org/scot-dev/scot.svg
+   :target: https://travis-ci.org/scot-dev/scot
+
+* .. image:: https://coveralls.io/repos/scot-dev/scot/badge.svg?branch=master&service=github 
+   :target: https://coveralls.io/github/scot-dev/scot?branch=master
+   
