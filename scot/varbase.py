@@ -1,5 +1,3 @@
-# coding=utf-8
-
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013-2014 SCoT Development Team
@@ -77,8 +75,8 @@ class VARBase(object):
         Parameters
         ----------
         data : array-like
-            shape = [n_samples, n_channels, n_trials] or
-            [n_samples, n_channels]
+            shape = [n_trials, n_samples, n_channels] or
+            [n_channels, n_samples]
             Continuous or segmented data set.
 
         Returns
@@ -98,8 +96,8 @@ class VARBase(object):
 
             Parameters
             ----------
-            data : array-like, shape = [n_samples, n_channels, n_trials] or
-                [n_samples, n_channels]
+            data : array-like, shape = [n_trials, n_samples, n_channels] or
+                [n_channels, n_samples]
                 Continuous or segmented data set.
         """
         raise NotImplementedError('method optimize() is not implemented in ' +
@@ -166,7 +164,7 @@ class VARBase(object):
 
             Returns
             -------
-            data : array, shape = [n_samples, n_channels, n_trials]
+            data : array, shape = [n_trials, n_samples, n_channels]
         """
         (m, n) = sp.shape(self.coef)
         p = n // m
@@ -199,7 +197,7 @@ class VARBase(object):
         self.residuals = res[10 * p:, :, :]
         self.rescov = sp.cov(cat_trials(self.residuals), rowvar=False)
 
-        return y[10 * p:, :, :]
+        return y[10 * p:, :, :].transpose([2, 1, 0])
 
     def predict(self, data):
         """ Predict samples on actual data.
@@ -209,8 +207,8 @@ class VARBase(object):
         Parameters
         ----------
         data : array-like
-            shape = [n_samples, n_channels, n_trials] or
-            [n_samples, n_channels]
+            shape = [n_trials, n_samples, n_channels] or
+            [n_channels, n_samples]
             Continuous or segmented data set.
 
         Returns
@@ -223,7 +221,7 @@ class VARBase(object):
         Residuals are obtained by r = x - var.predict(x)
         """
         data = sp.atleast_3d(data)
-        (l, m, t) = data.shape
+        (t, m, l) = data.shape
 
         p = int(sp.shape(self.coef)[1] / m)
 
@@ -232,12 +230,12 @@ class VARBase(object):
             for k in range(1, p + 1):
                 bp = self.coef[:, (k - 1)::p]
                 for n in range(p, l):
-                    y[n, :, :] += bp.dot(data[n - k, :, :])
+                    y[:, :, n] += bp.dot(data[:, :, n - k])
         else:
             for k in range(1, p + 1):
                 bp = self.coef[:, (k - 1)::p]
                 for s in range(t):
-                    y[p:, :, s] += data[(p - k):(l - k), :, s].dot(bp.T)
+                    y[s, :, p:] += data[s, :, (p - k):(l - k)].dot(bp.T)
 
         return y
 
@@ -336,18 +334,18 @@ class VARBase(object):
 def _construct_var_eqns(data, p):
         """ Construct VAR equation system
         """
-        (l, m, t) = np.shape(data)
+        (t, m, l) = np.shape(data)
         n = (l - p) * t     # number of linear relations
         # Construct matrix x (predictor variables)
         x = np.zeros((n, m * p))
         for i in range(m):
             for k in range(1, p + 1):
-                x[:, i * p + k - 1] = np.reshape(data[p - k:-k, i, :], n)
+                x[:, i * p + k - 1] = np.reshape(data[:, i, p - k:-k], n)
 
         # Construct vectors yi (response variables for each channel i)
         y = np.zeros((n, m))
         for i in range(m):
-            y[:, i] = np.reshape(data[p:, i, :], n)
+            y[:, i] = np.reshape(data[:, i, p:], n)
 
         return x, y
 
@@ -368,7 +366,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
     Parameters
     ----------
     signals : array-like
-        shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        shape = [n_trials, n_samples, n_channels] or [n_channels, n_samples]
         Continuous or segmented data set.
     h : int
         Maximum lag that is included in the test statistic.
@@ -403,8 +401,8 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
     .. [2] J.R.M. Hosking, "The Multivariate Portmanteau Statistic", 1980, J.
            Am. Statist. Assoc.
     """
-    res = data[p:, :, :]
-    (n, m, t) = res.shape
+    res = data[:, :, p:]
+    (t, m, n) = res.shape
     nt = (n - p) * t
 
     q0 = _calc_q_h0(repeats, res, h, nt)[:, 2, -1]
@@ -423,7 +421,7 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False):
 def _calc_q_statistic(x, h, nt):
     """ Calculate portmanteau statistics up to a lag of h.
     """
-    (n, m, t) = x.shape
+    (t, m, n) = x.shape
 
     # covariance matrix of x
     c0 = acm(x, 0)
