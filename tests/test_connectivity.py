@@ -93,12 +93,12 @@ class TestFunctionality(unittest.TestCase):
         # GPDC should equal PDC for identity noise covariance
         self.assertTrue(np.all(c.PDC() == c.GPDC()))
         # DTF should be upper triangular
-        self.assertTrue(np.all(np.tril(k(c.DTF()), -1) == 0))
+        self.assertTrue(np.allclose(np.tril(k(c.DTF()), -1), 0))
         self.assertFalse(np.all(k(c.DTF()) == k(c.DTF()).T))
         #     first source should be 1 over all frequencies
         self.assertEqual(l(c.DTF())[2, 2], nfft)
         # ffDTF should be upper triangular
-        self.assertTrue(np.all(np.tril(k(c.ffDTF()), -1) == 0))
+        self.assertTrue(np.allclose(np.tril(k(c.ffDTF()), -1), 0))
         self.assertFalse(np.all(k(c.ffDTF()) == k(c.ffDTF()).T))
         # dDTF should have the same structure as b,
         self.assertTrue(np.all((l(c.dDTF()) == 0) == ((b0 + identity) == 0)))
