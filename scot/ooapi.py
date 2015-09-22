@@ -40,7 +40,7 @@ class Workspace(object):
     reducedim : {int, float, 'no_pca'}, optional
         A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
         components that describe in total less than `1-reducedim` of the variance are removed by the PCA step.
-        An integer numer of 1 or greater is interpreted as the number of components to keep after applying the PCA.
+        An integer number of 1 or greater is interpreted as the number of components to keep after applying the PCA.
         If set to 'no_pca' the PCA step is skipped.
     nfft : int, optional
         Number of frequency bins for connectivity estimation.
@@ -104,7 +104,7 @@ class Workspace(object):
 
     def __str__(self):
         if self.data_ is not None:
-            datastr = '%d samples, %d channels, %d trials' % self.data_.shape
+            datastr = '%d trials, %d channels, %d samples' % self.data_.shape
         else:
             datastr = 'None'
 
@@ -163,7 +163,7 @@ class Workspace(object):
 
         Parameters
         ----------
-        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        data : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
             EEG data set
         cl : list of valid dict keys
             Class labels associated with each trial.
@@ -226,7 +226,7 @@ class Workspace(object):
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_[:, :, self.trial_mask_], cl=self.cl_[self.trial_mask_], var=self.var_,
+        result = mvarica(x=self.data_[self.trial_mask_, :, :], cl=self.cl_[self.trial_mask_], var=self.var_,
                          reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
@@ -300,7 +300,7 @@ class Workspace(object):
         """
         if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
-        result = plainica(x=self.data_[:, :, self.trial_mask_], reducedim=self.reducedim_, backend=self.backend_)
+        result = plainica(x=self.data_[self.trial_mask_, :, :], reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.activations_ = dot_special(self.data_, self.unmixing_)
@@ -349,7 +349,7 @@ class Workspace(object):
         """
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
-        self.var_.fit(data=self.activations_[:, :, self.trial_mask_])
+        self.var_.fit(data=self.activations_[self.trial_mask_, :, :])
         self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
 
     def optimize_var(self):
@@ -363,7 +363,7 @@ class Workspace(object):
         if self.activations_ is None:
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
 
-        self.var_.optimize(self.activations_[:, :, self.trial_mask_])
+        self.var_.optimize(self.activations_[self.trial_mask_, :, :])
 
     def get_connectivity(self, measure_name, plot=False):
         """ Calculate spectral connectivity measure.
@@ -489,7 +489,7 @@ class Workspace(object):
         if num_samples is None:
             num_samples = np.sum(self.trial_mask_)
 
-        cb = bootstrap_connectivity(measure_names, self.activations_[:, :, self.trial_mask_],
+        cb = bootstrap_connectivity(measure_names, self.activations_[self.trial_mask_, :, :],
                                     self.var_, self.nfft_, repeats, num_samples)
 
         if plot is None or plot:
@@ -552,7 +552,7 @@ class Workspace(object):
         """
         if self.activations_ is None:
             raise RuntimeError("Time/Frequency Connectivity requires activations (call set_data after do_mvarica)")
-        [n, m, _] = self.activations_.shape
+        _, m, n = self.activations_.shape
 
         steps = list(range(0, n - winlen, winstep))
         nstep = len(steps)
@@ -560,8 +560,8 @@ class Workspace(object):
         result = np.zeros((m, m, self.nfft_, nstep), np.complex64)
         for i, j in enumerate(steps):
             win = np.arange(winlen) + j
-            data = self.activations_[win, :, :]
-            data = data[:, :, self.trial_mask_]
+            data = self.activations_[:, :, win]
+            data = data[self.trial_mask_, :, :]
             self.var_.fit(data)
             con = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
             result[:, :, :, i] = getattr(con, measure_name)()
@@ -578,7 +578,7 @@ class Workspace(object):
         if plot is None or plot:
             fig = plot
             t0 = 0.5 * winlen / self.fs_ + self.time_offset_
-            t1 = self.data_.shape[0] / self.fs_ - 0.5 * winlen / self.fs_ + self.time_offset_
+            t1 = self.data_.shape[2] / self.fs_ - 0.5 * winlen / self.fs_ + self.time_offset_
             if self.plot_diagonal == 'fill':
                 diagonal = 0
             elif self.plot_diagonal == 'S':
