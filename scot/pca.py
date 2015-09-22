@@ -13,7 +13,7 @@ def pca_svd(data):
     
     Parameters
     ----------
-    data : array, shape = [n_samples, n_channels]
+    data : array, shape = [n_channels, n_samples]
         Two dimensional data array.
         
     Returns
@@ -24,7 +24,7 @@ def pca_svd(data):
         Eigenvalues
     """
 
-    (w, s, v) = np.linalg.svd(data.transpose())
+    (w, s, v) = np.linalg.svd(data)
 
     return w, s ** 2
 
@@ -34,7 +34,7 @@ def pca_eig(x):
     
     Parameters
     ----------
-    data : array, shape = [n_samples, n_channels]
+    data : array, shape = [n_channels, n_samples]
         Two dimensional data array.
         
     Returns
@@ -45,7 +45,7 @@ def pca_eig(x):
         Eigenvalues
     """
 
-    [s, w] = np.linalg.eigh(x.transpose().dot(x))
+    [s, w] = np.linalg.eigh(x.dot(x.T))
 
     return w, s
 
@@ -55,7 +55,7 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim
     
     Parameters
     ----------
-    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
         EEG data set
     subtract_mean : bool, optional
         Subtract sample mean from x.
