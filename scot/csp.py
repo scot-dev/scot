@@ -13,7 +13,7 @@ def csp(x, cl, numcomp=None):
 
     Parameters
     ----------
-    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
         EEG data set
     cl : list of valid dict keys
         Class labels associated with each trial. Currently only two classes are supported.
@@ -32,7 +32,7 @@ def csp(x, cl, numcomp=None):
     x = np.atleast_3d(x)
     cl = np.asarray(cl).ravel()
     
-    n, m, t = x.shape
+    t, m, n = x.shape
     
     if t != cl.size:
         raise AttributeError('CSP only works with multiple classes. Number of'
@@ -43,17 +43,17 @@ def csp(x, cl, numcomp=None):
     if labels.size != 2:
         raise AttributeError('CSP is currently implemented for 2 classes (got %d)' % labels.size)
         
-    x1 = x[:, :, cl == labels[0]]
-    x2 = x[:, :, cl == labels[1]]
+    x1 = x[cl == labels[0], :, :]
+    x2 = x[cl == labels[1], :, :]
     
     sigma1 = np.zeros((m, m))
-    for t in range(x1.shape[2]):
-        sigma1 += np.cov(x1[:, :, t].transpose()) / x1.shape[2]
+    for t in range(x1.shape[0]):
+        sigma1 += np.cov(x1[t, :, :].transpose()) / x1.shape[0]
     sigma1 /= sigma1.trace()
     
     sigma2 = np.zeros((m, m))
-    for t in range(x2.shape[2]):
-        sigma2 += np.cov(x2[:, :, t].transpose()) / x2.shape[2]
+    for t in range(x2.shape[0]):
+        sigma2 += np.cov(x2[t, :, :].transpose()) / x2.shape[0]
     sigma2 /= sigma2.trace()
         
     e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
