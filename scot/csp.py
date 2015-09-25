@@ -48,12 +48,12 @@ def csp(x, cl, numcomp=None):
     
     sigma1 = np.zeros((m, m))
     for t in range(x1.shape[0]):
-        sigma1 += np.cov(x1[t, :, :].transpose()) / x1.shape[0]
+        sigma1 += np.cov(x1[t, :, :]) / x1.shape[0]
     sigma1 /= sigma1.trace()
     
     sigma2 = np.zeros((m, m))
     for t in range(x2.shape[0]):
-        sigma2 += np.cov(x2[t, :, :].transpose()) / x2.shape[0]
+        sigma2 += np.cov(x2[t, :, :]) / x2.shape[0]
     sigma2 /= sigma2.trace()
         
     e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
