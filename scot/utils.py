@@ -9,7 +9,7 @@ from __future__ import division
 import numpy as np
 from functools import partial
 
-from .datatools import  atleast_3d
+from .datatools import atleast_3d
 
 
 def cuthill_mckee(matrix):
@@ -102,12 +102,12 @@ def acm(x, l):
     if l == 0:
         a, b = x, x
     else:
-        a = x[l:, :, :]
-        b = x[0:-l, :, :]
+        a = x[:, :, l:]
+        b = x[:, :, 0:-l]
 
     c = np.zeros((x.shape[1], x.shape[1]))
     for t in range(x.shape[0]):
-        c += a[t, :, :].T.dot(b[t, :, :]) / x.shape[2]
+        c += a[t, :, :].dot(b[t, :, :].T) / x.shape[2]
     c /= x.shape[0]
 
     return c

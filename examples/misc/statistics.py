@@ -4,6 +4,7 @@ connectivity is statistically significant.
 """
 
 import scot
+import numpy as np
 
 # The data set contains a continuous 45 channel EEG recording of a motor
 # imagery experiment. The data was preprocessed to reduce eye movement
@@ -14,8 +15,8 @@ import scot
 # approximately six seconds.
 import scotdata.motorimagery as midata
 
-raweeg = midata.eeg
-triggers = midata.triggers
+raweeg = midata.eeg.T
+triggers = np.asarray(midata.triggers, dtype=int)
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations

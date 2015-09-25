@@ -113,7 +113,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     mx, ux = backend['ica'](cat_trials(r))
 
     # driving process
-    e = dot_special(r, ux)
+    e = dot_special(ux, r)
 
     # correct AR coefficients
     b = a.copy()
