@@ -18,7 +18,7 @@ import numpy as np
 from . import config
 from .varica import mvarica, cspvarica
 from .plainica import plainica
-from .datatools import dot_special
+from .datatools import dot_special, atleast_3d
 from .connectivity import Connectivity
 from .connectivity_statistics import surrogate_connectivity, bootstrap_connectivity, test_bootstrap_difference
 from .connectivity_statistics import significance_fdr
@@ -170,8 +170,8 @@ class Workspace(object):
         time_offset : float, optional
             Trial starting time; used for labelling the x-axis of time/frequency plots.
         """
-        self.data_ = np.atleast_3d(data)
-        self.cl_ = np.asarray(cl if cl is not None else [None]*self.data_.shape[2])
+        self.data_ = atleast_3d(data)
+        self.cl_ = np.asarray(cl if cl is not None else [None]*self.data_.shape[0])
         self.time_offset_ = time_offset
         self.var_model_ = None
         self.var_cov_ = None
@@ -180,7 +180,7 @@ class Workspace(object):
         self.trial_mask_ = np.ones(self.cl_.size, dtype=bool)
 
         if self.unmixing_ is not None:
-            self.activations_ = dot_special(self.data_, self.unmixing_)
+            self.activations_ = dot_special(self.unmixing_, self.data_)
 
     def set_used_labels(self, labels):
         """ Specify which trials to use in subsequent analysis steps.
@@ -278,7 +278,7 @@ class Workspace(object):
         self.unmixing_ = result.unmixing
         self.var_ = result.b
         self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
-        self.activations_ = dot_special(self.data_, self.unmixing_)
+        self.activations_ = dot_special(self.unmixing_, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return result
