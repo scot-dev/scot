@@ -78,7 +78,7 @@ def cat_trials(x3d):
     >>> y.shape
     (4, 900)
     """
-    x3d = assert_3d(x3d)
+    x3d = atleast_3d(x3d)
     t = x3d.shape[0]
     return np.concatenate(np.split(x3d, t, 0), axis=2).squeeze()
 
@@ -109,9 +109,9 @@ def dot_special(x2d, x3d):
     >>> y.shape
     (150, 7, 6)
     """
-    x3d = assert_3d(x3d)
+    x3d = atleast_3d(x3d)
     x2d = np.atleast_2d(x2d)
-    return np.concatenate([x2d.dot(x3d[i, ...])[np.newaxis, ...]
+    return np.concatenate([x2d.T.dot(x3d[i, ...])[np.newaxis, ...]
                            for i in range(x3d.shape[0])])
 
 
@@ -160,7 +160,7 @@ def randomize_phase(data):
     return np.fft.irfft(data_freq, data.shape[-1])
 
 
-def assert_3d(x):
+def atleast_3d(x):
     if x.ndim >= 3:
         return x
     elif x.ndim == 2:
