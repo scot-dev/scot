@@ -235,7 +235,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     mx, ux = backend['ica'](cat_trials(r))
 
     # driving process
-    e = dot_special(r, ux)
+    e = dot_special(ux, r)
 
     # correct AR coefficients
     b = a.copy()

@@ -235,7 +235,7 @@ class VARBase(object):
             for k in range(1, p + 1):
                 bp = self.coef[:, (k - 1)::p]
                 for s in range(t):
-                    y[s, :, p:] += data[s, :, (p - k):(l - k)].dot(bp.T)
+                    y[s, :, p:] += np.dot(bp, data[s, :, (p - k):(l - k)])
 
         return y
 
