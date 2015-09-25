@@ -232,7 +232,7 @@ class Workspace(object):
         self.unmixing_ = result.unmixing
         self.var_ = result.b
         self.connectivity_ = Connectivity(result.b.coef, result.b.rescov, self.nfft_)
-        self.activations_ = dot_special(self.data_, self.unmixing_)
+        self.activations_ = dot_special(self.unmixing_, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return result

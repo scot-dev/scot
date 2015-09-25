@@ -25,13 +25,13 @@ def wrapper_pca(x, reducedim):
     """
     c, d = pca.pca(datatools.cat_trials(x).T,
                    subtract_mean=False, reducedim=reducedim)
-    y = datatools.dot_special(x, c)
+    y = datatools.dot_special(c, x)
     return c, d, y
 
 
 def wrapper_csp(x, cl, reducedim):
     c, d = csp.csp(x, cl, numcomp=reducedim)
-    y = datatools.dot_special(x, c)
+    y = datatools.dot_special(c, x)
     return c, d, y
 
 
