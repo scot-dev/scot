@@ -10,7 +10,7 @@ from __future__ import print_function
 import numpy as np
 import scipy as sp
 from .varbase import VARBase, _construct_var_eqns
-from .datatools import cat_trials
+from .datatools import cat_trials, atleast_3d
 from . import xvschema as xv
 from .parallel import parallel_loop
 
@@ -54,7 +54,7 @@ class VAR(VARBase):
             The :class:`VAR` object to facilitate method chaining (see usage
             example)
         """
-        data = sp.atleast_3d(data)
+        data = atleast_3d(data)
 
         if self.delta == 0 or self.delta is None:
             # ordinary least squares
