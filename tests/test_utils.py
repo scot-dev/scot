@@ -42,7 +42,7 @@ class TestUtils(unittest.TestCase):
             self.assertEqual(10, obj.squareone(3))
 
         def test_acm(self):
-            v = np.array([[1], [2], [0], [0]]*2)
+            v = np.array([1, 2, 0, 0]*2)
             acm = lambda l: scot.utils.acm(v, l)
             self.assertEqual(np.mean(v**2), acm(0))
             self.assertEqual(0.5, acm(1))
