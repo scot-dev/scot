@@ -33,7 +33,7 @@ def wrapper_pca(x, reducedim):
     pca.fit(datatools.cat_trials(x).T)
     d = pca.components_
     c = pca.components_.T
-    y = datatools.dot_special(x,c)
+    y = datatools.dot_special(c, x)
     return c, d, y
 
 
@@ -76,7 +76,7 @@ class VAR(VARBase):
         self.coef = self.fitting_model.coef_
 
         self.residuals = data - self.predict(data)
-        self.rescov = sp.cov(datatools.cat_trials(self.residuals[:, :, self.p:]), rowvar=False)
+        self.rescov = sp.cov(datatools.cat_trials(self.residuals[:, :, self.p:]))
 
         return self
 
