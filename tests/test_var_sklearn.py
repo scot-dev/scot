@@ -80,10 +80,5 @@ fmo = {'test_fit_Ridge': linear_model.Ridge(alpha=1),
 for f, o in fmo.items():
     setattr(TestVAR, f, create_func(o))
 
-
-def main():
-    unittest.main()
-
-
 if __name__ == '__main__':
-    main()
+    unittest.main()
