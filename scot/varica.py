@@ -197,7 +197,6 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     ----------
     .. [1] M. Billinger et al. "SCoT: A Python Toolbox for EEG Source Connectivity", Frontiers in Neuroinformatics, 2014
     """
-
     x = atleast_3d(x)
     t, m, l = np.shape(x)
     
