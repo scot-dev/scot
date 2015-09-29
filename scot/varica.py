@@ -251,7 +251,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         mixing = mx
         residuals = e
         var_residuals = r
-        c = np.cov(cat_trials(e), rowvar=False)
+        c = np.cov(cat_trials(e))
     Result.b = b
     Result.a = a
     Result.xcsp = xcsp
