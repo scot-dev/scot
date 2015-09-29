@@ -76,7 +76,7 @@ class VAR(VARBase):
         self.coef = self.fitting_model.coef_
 
         self.residuals = data - self.predict(data)
-        self.rescov = sp.cov(datatools.cat_trials(self.residuals[:, :, self.p:]), rowvar=False)
+        self.rescov = sp.cov(datatools.cat_trials(self.residuals[:, :, self.p:]))
 
         return self
 
