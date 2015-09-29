@@ -5,7 +5,7 @@
 import numpy as np
 
 from . import config
-from .datatools import cat_trials, dot_special
+from .datatools import cat_trials, dot_special, atleast_3d
 from . import xvschema
 
 
@@ -71,7 +71,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     .. [1] G. Gomez-Herrero et al. "Measuring directional coupling between EEG sources", NeuroImage, 2008
     """
 
-    x = np.atleast_3d(x)
+    x = atleast_3d(x)
     t, m, l = np.shape(x)
 
     if backend is None:
@@ -198,7 +198,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     .. [1] M. Billinger et al. "SCoT: A Python Toolbox for EEG Source Connectivity", Frontiers in Neuroinformatics, 2014
     """
     
-    x = np.atleast_3d(x)
+    x = atleast_3d(x)
     t, m, l = np.shape(x)
     
     if backend is None:
