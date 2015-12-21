@@ -169,7 +169,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
         ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
     """
     data = atleast_3d(data)
-    t, m, n = data.shape
+    n, m, t = data.shape
 
     assert(t > 1)
 
