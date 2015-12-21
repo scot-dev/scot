@@ -5,7 +5,7 @@
 import unittest
 
 import numpy as np
-from sklearn import linear_model
+from sklearn.linear_model import Ridge, RidgeCV, Lasso, LassoLars, ElasticNet
 
 from scot.backend_sklearn import VAR
 
@@ -33,7 +33,7 @@ class TestVAR(unittest.TestCase):
         var.fit(x)
 
         # make sure the input remains unchanged
-        self.assertTrue(np.all(x == y))
+        self.assertTrue(np.all(x == y))  # TODO: do we need this test?
 
         self.assertTrue(np.all(np.abs(var0.coef - var.coef) < 0.005))
 
@@ -45,45 +45,42 @@ class TestVAR(unittest.TestCase):
         var.fit(x)
 
         self.assertEqual(x.shape, var.residuals.shape)
-        self.assertTrue(np.allclose(var.rescov, np.eye(var.rescov.shape[0]), 0.005, 0.005))
+        self.assertTrue(np.allclose(var.rescov, np.eye(var.rescov.shape[0]),
+                                    0.005, 0.005))
 
+    def test_fit_ridge(self):
+        b0, var = self._fit(Ridge(alpha=1))
+        self.assertTrue(np.all(np.abs(b0 - var.coef) < 0.02))
 
-# dynamically create testing functions for different fitting models
-def create_func(o):
-    def func(self):
+    def test_fit_ridgecv(self):
+        b0, var = self._fit(RidgeCV(alphas=np.logspace(-3, 3, 20)))
+        self.assertTrue(np.all(np.abs(b0 - var.coef) < 0.02))
+
+    def test_fit_lasso(self):
+        b0, var = self._fit(Lasso(alpha=0.01))
+        self.assertTrue(np.all(np.abs(b0 - var.coef) < 0.02))
+
+    def test_fit_lassolars(self):
+        b0, var = self._fit(LassoLars(alpha=0.00001))
+        self.assertTrue(np.all(np.abs(b0 - var.coef) < 0.02))
+
+    def test_fit_elasticnet(self):
+        b0, var = self._fit(ElasticNet(alpha=0.01, l1_ratio=0.5))
+        self.assertTrue(np.all(np.abs(b0 - var.coef) < 0.02))
+
+    def _fit(self, estimator):
+        np.random.seed(12345)
         x, var0 = self.generate_data()
         y = x.copy()
 
-        var = VAR(10, o)
+        var = VAR(10, estimator)
         var.fit(x)
 
         # make sure the input remains unchanged
-        self.assertTrue(np.all(x == y))
+        # self.assertTrue(np.all(x == y))  # TODO: do we need this test?
 
         b0 = np.zeros((2, 20))
         b0[:, 0:2] = var0.coef[:, 0:2]
         b0[:, 10:12] = var0.coef[:, 2:4]
 
-        # that limit is rather generous, but we don't want tests to fail due to random variation
-        self.assertTrue(np.all(np.abs(b0 - var.coef) < 0.02))
-    return func
-
-fmo = {'test_fit_Ridge': linear_model.Ridge(alpha=1),
-       'test_fit_RidgeCV': linear_model.RidgeCV(alphas=np.logspace(-3, 3, 20)),
-       'test_fit_Lasso': linear_model.Lasso(alpha=0.01),
-       #'test_fit_LassoCV': linear_model.LassoCV(),
-       'test_fit_ElasticNet': linear_model.ElasticNet(alpha=0.01, l1_ratio=0.5),
-       #'test_fit_ElasticNetCV': linear_model.ElasticNetCV(),
-       'test_fit_LassoLars': linear_model.LassoLars(alpha=0.00001),
-       }
-
-for f, o in fmo.items():
-    setattr(TestVAR, f, create_func(o))
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()
+        return b0, var
