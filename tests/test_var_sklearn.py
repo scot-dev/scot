@@ -14,11 +14,6 @@ from scot.backend_sklearn import VAR
 
 
 class CommonTests(unittest.TestCase):
-    # @classmethod
-    # def setUpClass(cls):
-    #     if cls is CommonTests:
-    #         raise unittest.SkipTest("Skip Tests in Base class")
-
     def setUp(self):
         np.random.seed(12345)
         self.var0 = VAR(2)
@@ -44,13 +39,13 @@ class CommonTests(unittest.TestCase):
 
 class TestRidge(CommonTests):
     def setUp(self):
-        super().setUp()
+        super(TestRidge, self).setUp()
         self.var = VAR(10, Ridge(alpha=115))
 
 
 class TestRidgeCV(CommonTests):
     def setUp(self):
-        super().setUp()
+        super(TestRidgeCV, self).setUp()
         self.var = VAR(10, RidgeCV(alphas=np.logspace(-3, 3, 20)))
 
     def test_alpha(self):
@@ -60,17 +55,17 @@ class TestRidgeCV(CommonTests):
 
 class TestLasso(CommonTests):
     def setUp(self):
-        super().setUp()
+        super(TestLasso, self).setUp()
         self.var = VAR(10, Lasso(alpha=0.001))
 
 
 class TestLassoLars(CommonTests):
     def setUp(self):
-        super().setUp()
+        super(TestLassoLars, self).setUp()
         self.var = VAR(10, LassoLars(alpha=0.00001))
 
 
 class TestElasticNet(CommonTests):
     def setUp(self):
-        super().setUp()
+        super(TestElasticNet, self).setUp()
         self.var = VAR(10, ElasticNet(alpha=0.01, l1_ratio=0.5))
