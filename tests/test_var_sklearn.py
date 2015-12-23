@@ -5,7 +5,7 @@
 import unittest
 
 from numpy.testing.utils import assert_array_almost_equal
-from numpy.testing.utils import assert_almost_equal
+from numpy.testing.utils import assert_equal
 
 import numpy as np
 from sklearn.linear_model import Ridge, RidgeCV, Lasso, LassoLars, ElasticNet
@@ -40,17 +40,17 @@ class CommonTests(unittest.TestCase):
 class TestRidge(CommonTests):
     def setUp(self):
         super(TestRidge, self).setUp()
-        self.var = VAR(10, Ridge(alpha=115))
+        self.var = VAR(10, Ridge(alpha=100))
 
 
 class TestRidgeCV(CommonTests):
     def setUp(self):
         super(TestRidgeCV, self).setUp()
-        self.var = VAR(10, RidgeCV(alphas=np.logspace(-3, 3, 20)))
+        self.var = VAR(10, RidgeCV(alphas=[10, 100, 1000]))
 
     def test_alpha(self):
         self.var.fit(self.x)
-        assert_almost_equal(self.var.fitting_model.alpha_, 115.0, decimal=-1)
+        assert_equal(self.var.fitting_model.alpha_, 100)
 
 
 class TestLasso(CommonTests):
