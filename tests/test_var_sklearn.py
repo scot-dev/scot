@@ -46,10 +46,16 @@ class TestRidge(CommonTests):
 class TestRidgeCV(CommonTests):
     def setUp(self):
         super(TestRidgeCV, self).setUp()
+        # Provide three candidates for alpha.
         self.var = VAR(10, RidgeCV(alphas=[10, 100, 1000]))
 
     def test_alpha(self):
+        """ This test checks if RidgeCV finds the optimal `alpha`.
+        """
         self.var.fit(self.x)
+        # Currently we simply *know* empirically that from the three
+        # candidate alphas 100 is closest to the optimum.
+        # TODO: programmatically derive the optimum from the data
         assert_equal(self.var.fitting_model.alpha_, 100)
 
 
