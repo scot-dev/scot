@@ -6,6 +6,7 @@ import unittest
 from importlib import import_module
 
 import numpy as np
+from numpy.testing import assert_allclose
 
 from scot import datatools
 import scot
@@ -59,7 +60,7 @@ class TestMVARICA(unittest.TestCase):
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
                [0.0, 0.2, 0.5, 1.0, 0.5, 0.2, 0.0],
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
-        data = datatools.dot_special(sources, mix)
+        data = datatools.dot_special(np.transpose(mix), sources)
 
         backup = scot.config.backend.copy()
         backend_modules = [import_module('scot.' + b) for b in scot.backends]
@@ -98,7 +99,8 @@ class TestMVARICA(unittest.TestCase):
                         best = err
                         d = c
 
-            self.assertTrue(np.all(abs(d - b0) < 0.05))
+            #self.assertTrue(np.all(abs(d - b0) < 0.05))
+            assert_allclose(d, b0, rtol=1e-2, atol=2e-2)
 
     def testFunctionality(self):
         """ generate VAR signals, and apply the api to them
@@ -130,7 +132,7 @@ class TestMVARICA(unittest.TestCase):
         var.fit(sources1)
         var.fit(sources2)
 
-        sources = np.zeros((l,m0,t))
+        sources = np.zeros((t, m0, l))
 
         sources[cl == 0, :, :] = sources1
         sources[cl == 1, :, :] = sources2
@@ -139,7 +141,8 @@ class TestMVARICA(unittest.TestCase):
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
                [0.0, 0.2, 0.5, 1.0, 0.5, 0.2, 0.0],
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
-        data = datatools.dot_special(sources, mix.T)
+        data = datatools.dot_special(np.transpose(mix), sources)
+        data += np.random.randn(*data.shape) * 0.001  # add small noise
 
         backup = scot.config.backend.copy()
         backend_modules = [import_module('scot.' + b) for b in scot.backends]

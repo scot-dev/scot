@@ -78,31 +78,34 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim
         PCA backtransformation matrix
     """
 
-    x = cat_trials(np.atleast_3d(x))
+    x = np.asarray(x)
+    if x.ndim > 2:
+        x = cat_trials(x)
 
     if reducedim:
         sort_components = True
 
     if subtract_mean:
-        for i in range(np.shape(x)[1]):
-            x[:, i] -= np.mean(x[:, i])
+        x = x - np.mean(x, axis=1, keepdims=True)
 
     k, l = None, None
     if normalize:
-        l = np.std(x, 0, ddof=1)
+        l = np.std(x, axis=1, ddof=1)
         k = np.diag(1.0 / l)
         l = np.diag(l)
-        x = x.dot(k)
+        x = np.dot(k, x)
 
     w, latent = algorithm(x)
+
+    #print(w.shape, k.shape)
 
     #v = np.linalg.inv(w)
     # PCA is just a rotation, so inverse is equal transpose...
     v = w.T
 
     if normalize:
-        w = k.dot(w)
-        v = v.dot(l)
+        w = np.dot(k, w)
+        v = np.dot(v, l)
 
     latent /= sum(latent)
 
