@@ -19,12 +19,11 @@ import scot
 import scotdata.motorimagery as midata
 
 
-raweeg = midata.eeg
+raweeg = midata.eeg.T
 triggers = midata.triggers
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
-
 
 # Prepare data
 #

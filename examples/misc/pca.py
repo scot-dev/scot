@@ -21,7 +21,7 @@ model0.coef = np.array([[0.3, -0.6], [0, -0.9]])
 x = model0.simulate(10000).squeeze()
 
 # Transform data with PCA
-w, v = pca(x.T)
+w, v = pca(x)
 y = np.dot(w.T, x)
 
 print('Covariance of x:\n', np.cov(x.squeeze()))

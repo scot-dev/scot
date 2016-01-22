@@ -46,7 +46,7 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 # Initialize cross-validation
 nfolds = 10
-kf = KFold(len(triggers), n_folds=nfolds, indices=False)
+kf = KFold(len(triggers), n_folds=nfolds)
 
 # LDA requires numeric class labels
 cl = np.unique(midata.classes)
