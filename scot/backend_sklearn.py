@@ -33,7 +33,7 @@ def wrapper_pca(x, reducedim):
     pca.fit(datatools.cat_trials(x).T)
     d = pca.components_
     c = pca.components_.T
-    y = datatools.dot_special(c, x)
+    y = datatools.dot_special(c.T, x)
     return c, d, y
 
 

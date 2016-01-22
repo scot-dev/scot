@@ -23,15 +23,15 @@ def wrapper_infomax(data):
 def wrapper_pca(x, reducedim):
     """ Call SCoT's PCA algorithm.
     """
-    c, d = pca.pca(datatools.cat_trials(x).T,
+    c, d = pca.pca(datatools.cat_trials(x),
                    subtract_mean=False, reducedim=reducedim)
-    y = datatools.dot_special(c, x)
+    y = datatools.dot_special(c.T, x)
     return c, d, y
 
 
 def wrapper_csp(x, cl, reducedim):
     c, d = csp.csp(x, cl, numcomp=reducedim)
-    y = datatools.dot_special(c, x)
+    y = datatools.dot_special(c.T, x)
     return c, d, y
 
 

@@ -113,7 +113,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     mx, ux = backend['ica'](cat_trials(r))
 
     # driving process
-    e = dot_special(ux, r)
+    e = dot_special(ux.T, r)
 
     # correct AR coefficients
     b = a.copy()
@@ -129,7 +129,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         mixing = mx
         residuals = e
         var_residuals = r
-        c = np.cov(cat_trials(e), rowvar=False)
+        c = np.cov(cat_trials(e).T, rowvar=False)
 
     Result.b = b
     Result.a = a
@@ -205,7 +205,17 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         backend = config.backend
     
     # pre-transform the data with CSP
-    c, d, xcsp = backend['csp'](x, cl, reducedim)
+    #c, d, xcsp = backend['csp'](x, cl, reducedim)
+    from . import csp
+    c, d = csp.csp(x, cl, reducedim)
+
+    xcsp = dot_special(c.T, x)
+
+    #print(sum([np.cov(r_) for r_ in xcsp]))
+    print(sum(np.var(x[cl==0], axis=2)))
+    print(sum(np.var(x[cl==1], axis=2)))
+    print(sum(np.var(xcsp[cl==0], axis=2)))
+    print(sum(np.var(xcsp[cl==1], axis=2)))
     
     if optimize_var:
         var.optimize(xcsp)
@@ -232,10 +242,10 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         raise ValueError('unknown VAR fitting mode: {}'.format(varfit))
 
     # run on residuals ICA to estimate volume conduction    
-    mx, ux = backend['ica'](cat_trials(r))
+    mx, ux = backend['ica'](r)
 
     # driving process
-    e = dot_special(ux, r)
+    e = dot_special(ux.T, r)
 
     # correct AR coefficients
     b = a.copy()

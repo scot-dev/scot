@@ -28,10 +28,13 @@ def csp(x, cl, numcomp=None):
     v : array, shape = [n_components, n_channels]
         CSP projection matrix
     """
-    
-    x = np.atleast_3d(x)
+
+    x = np.asarray(x)
     cl = np.asarray(cl).ravel()
-    
+
+    if x.ndim != 3 or x.shape[0] < 2:
+        raise AttributeError('CSP needs at least two trials.')
+
     t, m, n = x.shape
     
     if t != cl.size:
@@ -55,7 +58,7 @@ def csp(x, cl, numcomp=None):
     for t in range(x2.shape[0]):
         sigma2 += np.cov(x2[t, :, :]) / x2.shape[0]
     sigma2 /= sigma2.trace()
-        
+
     e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
 
     order = np.argsort(e)[::-1]
