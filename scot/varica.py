@@ -210,12 +210,6 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     c, d = csp.csp(x, cl, reducedim)
 
     xcsp = dot_special(c.T, x)
-
-    #print(sum([np.cov(r_) for r_ in xcsp]))
-    print(sum(np.var(x[cl==0], axis=2)))
-    print(sum(np.var(x[cl==1], axis=2)))
-    print(sum(np.var(xcsp[cl==0], axis=2)))
-    print(sum(np.var(xcsp[cl==1], axis=2)))
     
     if optimize_var:
         var.optimize(xcsp)
