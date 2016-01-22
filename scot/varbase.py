@@ -194,8 +194,8 @@ class VARBase(object):
                 for k in range(1, p + 1):
                     y[i, :, s] += self.coef[:, (k - 1)::p].dot(y[i - k, :, s])
 
-        self.residuals = res[10 * p:, :, :]
-        self.rescov = sp.cov(cat_trials(self.residuals), rowvar=False)
+        self.residuals = res[10 * p:, :, :].T
+        self.rescov = sp.cov(cat_trials(self.residuals).T, rowvar=False)
 
         return y[10 * p:, :, :].transpose([2, 1, 0])
 
@@ -465,6 +465,6 @@ def _calc_q_h0(n, x, h, nt):
 
     q = []
     for i in range(n):
-        np.random.shuffle(x)    # shuffle along time axis
+        np.random.shuffle(x.T)    # shuffle along time axis
         q.append(_calc_q_statistic(x, h, nt))
     return np.array(q)

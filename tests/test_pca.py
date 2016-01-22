@@ -30,7 +30,7 @@ class TestFunctionality(unittest.TestCase):
         for i in range(1, 50):
             x = generate_covsig(np.eye(i), 500)
             w, v = pca(x)
-            c = np.cov(np.dot(x, w.T))
+            c = np.cov(np.dot(w.T, x))
             self.assertTrue(np.allclose(c, np.eye(i)))
 
     def testSorting(self):
@@ -38,10 +38,10 @@ class TestFunctionality(unittest.TestCase):
         """
         x = generate_covsig(np.diag([1, 9, 2, 6, 3, 8, 4, 5, 7]), 500)
         w, v = pca(x, sort_components=True)
-        c = np.cov(np.dot(x, w.T))
+        c = np.cov(np.dot(w.T, x))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5, 4, 3, 2, 1]), rtol=1e-1, atol=1e-2))
         w, v = pca(x, sort_components=True)
-        c = np.cov(np.dot(x, w.T))
+        c = np.cov(np.dot(w.T, x))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5, 4, 3, 2, 1]), rtol=1e-1, atol=1e-2))
 
     def testDecorrelation(self):
@@ -49,7 +49,7 @@ class TestFunctionality(unittest.TestCase):
         """
         x = generate_covsig([[3, 2, 1], [2, 3, 2], [1, 2, 3]], 500)
         w, v = pca(x)
-        c = np.cov(np.dot(x, w.T))
+        c = np.cov(np.dot(w.T, x))
         c -= np.diag(c.diagonal())
         self.assertTrue(np.allclose(c, np.zeros((3, 3)), rtol=1e-2, atol=1e-3))
 
@@ -118,7 +118,7 @@ class TestDimensionalityReduction(unittest.TestCase):
         """
         x = generate_covsig(np.diag([1, 9, 2, 6, 3, 8, 4, 5, 7]), 500)
         w, v = pca(x, reducedim=5)
-        c = np.cov(np.dot(x, w.T))
+        c = np.cov(np.dot(w.T, x))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5]), rtol=1e-1, atol=1e-2))
 
 

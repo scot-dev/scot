@@ -7,6 +7,7 @@ import unittest
 import numpy as np
 from numpy.testing.utils import assert_allclose
 
+from scot.datatools import dot_special
 from scot.csp import csp
 
 try:
@@ -98,8 +99,12 @@ class TestDimensionalityReduction(unittest.TestCase):
 
     def setUp(self):
         self.n_comps = 5
-        self.X = np.random.rand(10,15,100)
-        self.C = [0,0,0,0,0,1,1,1,1,1]
+        self.X = np.random.rand(10,6,100)
+        self.C = np.asarray([0,0,0,0,0,1,1,1,1,1])
+        self.X[self.C == 0, 0, :] *= 10
+        self.X[self.C == 0, 2, :] *= 5
+        self.X[self.C == 1, 1, :] *= 10
+        self.X[self.C == 1, 3, :] *= 2
         self.Y = self.X.copy()
         self.D = list(self.C)
         self.T, self.M, self.N = self.X.shape
@@ -117,6 +122,16 @@ class TestDimensionalityReduction(unittest.TestCase):
         # V should be the pseudo inverse of W
         I = self.V.dot(self.W)
         assert_allclose(I, np.eye(self.n_comps), rtol=1e-9, atol=1e-9)
+
+    def testOutput(self):
+        x = dot_special(self.W.T, self.X)
+        v1 = sum(np.var(x[np.array(self.C)==0], axis=2))
+        v2 = sum(np.var(x[np.array(self.C)==1], axis=2))
+        self.assertGreater(v1[0], v2[0])
+        self.assertGreater(v1[1], v2[1])
+        self.assertLess(v1[-2], v2[-2])
+        self.assertLess(v1[-1], v2[-1])
+
         
 def main():
     unittest.main()
