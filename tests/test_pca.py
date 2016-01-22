@@ -38,10 +38,10 @@ class TestFunctionality(unittest.TestCase):
         """
         x = generate_covsig(np.diag([1, 9, 2, 6, 3, 8, 4, 5, 7]), 500)
         w, v = pca(x, sort_components=True)
-        c = np.cov(np.dot(x, w.T))
+        c = np.cov(np.dot(w.T, x))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5, 4, 3, 2, 1]), rtol=1e-1, atol=1e-2))
         w, v = pca(x, sort_components=True)
-        c = np.cov(np.dot(x, w.T))
+        c = np.cov(np.dot(w.T, x))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5, 4, 3, 2, 1]), rtol=1e-1, atol=1e-2))
 
     def testDecorrelation(self):
