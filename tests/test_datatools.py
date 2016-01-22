@@ -55,11 +55,16 @@ class TestDataMangling(unittest.TestCase):
         xc = x.copy()
         ac = a.copy()
 
-        y = datatools.dot_special(x, a)
+        y = datatools.dot_special(a, x)
 
         self.assertTrue(np.all(x == xc))
         self.assertTrue(np.all(a == ac))
         self.assertTrue(np.all(x * 2 == y))
+
+        x = np.random.randn(150, 40, 6)
+        a = np.ones((7, 40))
+        y = datatools.dot_special(a, x)
+        self.assertEqual(y.shape, (150, 7, 6))
 
 
 class TestRegressions(unittest.TestCase):

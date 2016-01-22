@@ -105,7 +105,7 @@ def dot_special(x2d, x3d):
     """
     x3d = atleast_3d(x3d)
     x2d = np.atleast_2d(x2d)
-    return np.concatenate([x2d.T.dot(x3d[i, ...])[np.newaxis, ...]
+    return np.concatenate([x2d.dot(x3d[i, ...])[np.newaxis, ...]
                            for i in range(x3d.shape[0])])
 
 
@@ -155,6 +155,7 @@ def randomize_phase(data):
 
 
 def atleast_3d(x):
+    x = np.asarray(x)
     if x.ndim >= 3:
         return x
     elif x.ndim == 2:

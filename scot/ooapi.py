@@ -180,7 +180,7 @@ class Workspace(object):
         self.trial_mask_ = np.ones(self.cl_.size, dtype=bool)
 
         if self.unmixing_ is not None:
-            self.activations_ = dot_special(self.unmixing_, self.data_)
+            self.activations_ = dot_special(self.unmixing_.T, self.data_)
 
     def set_used_labels(self, labels):
         """ Specify which trials to use in subsequent analysis steps.
@@ -232,7 +232,7 @@ class Workspace(object):
         self.unmixing_ = result.unmixing
         self.var_ = result.b
         self.connectivity_ = Connectivity(result.b.coef, result.b.rescov, self.nfft_)
-        self.activations_ = dot_special(self.unmixing_, self.data_)
+        self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return result
@@ -278,7 +278,7 @@ class Workspace(object):
         self.unmixing_ = result.unmixing
         self.var_ = result.b
         self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
-        self.activations_ = dot_special(self.unmixing_, self.data_)
+        self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return result
@@ -303,7 +303,7 @@ class Workspace(object):
         result = plainica(x=self.data_[self.trial_mask_, :, :], reducedim=self.reducedim_, backend=self.backend_)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
-        self.activations_ = dot_special(self.data_, self.unmixing_)
+        self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None

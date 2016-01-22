@@ -119,7 +119,7 @@ class TestFunctionality(unittest.TestCase):
         np.random.seed(91)
 
         var = VARBase(0)
-        var.residuals = np.random.randn(100, 5, 10)
+        var.residuals = np.random.randn(10, 5, 100)
 
         pr = sp.plot_whiteness(var, 20, repeats=100)
 
