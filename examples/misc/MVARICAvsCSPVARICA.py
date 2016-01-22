@@ -20,7 +20,7 @@ import scot
 # approximately six seconds.
 import scotdata.motorimagery as midata
 
-raweeg = midata.eeg
+raweeg = midata.eeg.T
 triggers = midata.triggers
 classes = midata.classes
 fs = midata.samplerate
