@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013-2014 SCoT Development Team
