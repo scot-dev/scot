@@ -86,7 +86,7 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim
         sort_components = True
 
     if subtract_mean:
-        x -= np.mean(x, axis=1, keepdims=True)
+        x = x - np.mean(x, axis=1, keepdims=True)
 
     k, l = None, None
     if normalize:
