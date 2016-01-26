@@ -9,16 +9,22 @@ env:
   matrix:
     #- DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
 
+    # This environment tests compatibility with oldest supported package versions
+    - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
+      NUMPY_VERSION="1.8.0" SCIPY_VERSION="0.13.3"
+      SKLEARN_VERSION="0.15.0" MATPLOTLIB_VERSION="1.4.0"
+      INSTALL_SCOT="true" RUN_EXAMPLES="false"
+
     # This environment tests Python 2 support
     - DISTRIB="conda" PYTHON_VERSION="2.7" INSTALL_MKL="false"
-      NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.16.0"
-      SKLEARN_VERSION="0.16.1" MATPLOTLIB_VERSION="1.4.3"
+      NUMPY_VERSION="1.10.1" SCIPY_VERSION="0.16.0"
+      SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
 
     # This environment tests Python 3 support
     - DISTRIB="conda" PYTHON_VERSION="3.4" INSTALL_MKL="false"
-      NUMPY_VERSION="1.9.2" SCIPY_VERSION="0.16.0"
-      SKLEARN_VERSION="0.16.1" MATPLOTLIB_VERSION="1.4.3"
+      NUMPY_VERSION="1.10.1" SCIPY_VERSION="0.16.0"
+      SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
       COVERAGE="true"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       
