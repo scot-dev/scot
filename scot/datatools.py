@@ -16,7 +16,7 @@ def cut_segments(x2d, tr, start, stop):
 
     Parameters
     ----------
-    data : array, shape (m, n)
+    x2d : array, shape (m, n)
         Input data with m signals and n samples.
     tr : list of int
         Trigger positions.
@@ -43,9 +43,15 @@ def cut_segments(x2d, tr, start, stop):
     >>> x3d.shape
     (3, 5, 50)
     """
+    if start != int(start):
+        raise ValueError("start index must be an integer")
+    if stop != int(stop):
+        raise ValueError("stop index must be an integer")
+
     x2d = np.atleast_2d(x2d)
-    segment = np.arange(start, stop)
-    return np.concatenate([x2d[np.newaxis, :, t + segment] for t in tr])
+    tr = np.asarray(tr, dtype=int).ravel()
+    win = np.arange(start, stop, dtype=int)
+    return np.concatenate([x2d[np.newaxis, :, t + win] for t in tr])
 
 
 def cat_trials(x3d):

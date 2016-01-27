@@ -7,6 +7,8 @@ This example shows how to decompose EEG signals into source activations with
 MVARICA, and visualize a connectivity measure.
 """
 
+import numpy as np
+
 import matplotlib.pyplot as plt
 
 import scot
@@ -29,6 +31,10 @@ triggers = midata.triggers
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
+
+
+# Set random seed for repeatable results
+np.random.seed(42)
 
 
 # Prepare data
@@ -63,10 +69,10 @@ for p in [22, 33]:
                               axis=plt.subplot(2, 1, i))
 
     if pr < 0.05:
-        plt.gca().set_title('model order {}: residuals significantly'
+        plt.gca().set_title('model order {}: residuals significantly '
                             'non-white with p={:f}'.format(p, pr))
     else:
-        plt.gca().set_title('model order {}: residuals white'
+        plt.gca().set_title('model order {}: residuals white '
                             'with p={:f}'.format(p, pr))
 
 splot.show_plots()

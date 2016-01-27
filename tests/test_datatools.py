@@ -21,13 +21,20 @@ class TestDataMangling(unittest.TestCase):
         rawdata = np.random.randn(5, 1000)
         rawcopy = rawdata.copy()
 
-        start = -10
-        stop = 50
-
-        x = datatools.cut_segments(rawdata, triggers, -10, 50)
-
+        start, stop = -10, 50
+        x = datatools.cut_segments(rawdata, triggers, start, stop)
         self.assertTrue(np.all(rawdata == rawcopy))
         self.assertEqual(x.shape, (len(triggers), rawdata.shape[0], stop - start))
+
+        # test if it works with float indices
+        start, stop = -10.0, 50.0
+        x = datatools.cut_segments(rawdata, triggers, start, stop)
+        self.assertEqual(x.shape, (stop - start, x.shape[1], len(triggers)))
+
+        self.assertRaises(ValueError, datatools.cut_segments,
+                          rawdata, triggers, 0, 10.001)
+        self.assertRaises(ValueError, datatools.cut_segments,
+                          rawdata, triggers, -10.1, 50)
 
         for it in range(len(triggers)):
             a = rawdata[:, triggers[it] + start: triggers[it] + stop]

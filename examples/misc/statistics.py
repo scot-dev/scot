@@ -3,6 +3,8 @@ This example shows how to create surrogate connectivity to determine if
 connectivity is statistically significant.
 """
 
+import numpy as np
+
 import scot
 import numpy as np
 
@@ -20,6 +22,10 @@ triggers = np.asarray(midata.triggers, dtype=int)
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
+
+
+# Set random seed for repeatable results
+np.random.seed(42)
 
 
 # Prepare data

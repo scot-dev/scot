@@ -31,6 +31,10 @@ fs = midata.samplerate
 locs = midata.locations
 
 
+# Set random seed for repeatable results
+np.random.seed(42)
+
+
 # Set up analysis object
 #
 # We simply choose a VAR model order of 30, and reduction to 4 components.
