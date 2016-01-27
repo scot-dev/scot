@@ -29,9 +29,8 @@ def cut_segments(rawdata, tr, start, stop):
 
     Returns
     -------
-    x : array
-        Segments cut from `rawdata`. Individual segments are stacked along the
-        third dimension.
+    x : array, shape (t, m, e)
+        e segments of length t cut from `rawdata`.
 
     See also
     --------
