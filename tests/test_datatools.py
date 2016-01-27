@@ -29,7 +29,7 @@ class TestDataMangling(unittest.TestCase):
         # test if it works with float indices
         start, stop = -10.0, 50.0
         x = datatools.cut_segments(rawdata, triggers, start, stop)
-        self.assertEqual(x.shape, (stop - start, x.shape[1], len(triggers)))
+        self.assertEqual(x.shape, (len(triggers), x.shape[1], int(stop) - int(start)))
 
         self.assertRaises(ValueError, datatools.cut_segments,
                           rawdata, triggers, 0, 10.001)
