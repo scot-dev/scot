@@ -3,6 +3,8 @@ This example shows how to decompose EEG signals into source activations with
 CSPVARICA, and visualize a connectivity.
 """
 
+import numpy as np
+
 import scot
 
 # The data set contains a continuous 45 channel EEG recording of a motor
@@ -20,6 +22,10 @@ triggers = midata.triggers
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
+
+
+# Set random seed for repeatable results
+np.random.seed(42)
 
 
 # Prepare data

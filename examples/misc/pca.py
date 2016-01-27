@@ -11,6 +11,9 @@ from scot.pca import pca
 from scot.var import VAR
 
 
+# Set random seed for repeatable results
+np.random.seed(42)
+
 # Generate data from a VAR(1) process
 model0 = VAR(1)
 model0.coef = np.array([[0.3, -0.6], [0, -0.9]])

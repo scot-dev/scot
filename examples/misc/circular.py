@@ -28,6 +28,10 @@ fs = midata.samplerate
 locs = midata.locations
 
 
+# Set random seed for repeatable results
+np.random.seed(42)
+
+
 # Prepare data
 #
 # Here we cut out segments from 2s to 5s after each trigger. This is right in
