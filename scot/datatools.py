@@ -14,7 +14,7 @@ import numpy as np
 def cut_segments(rawdata, tr, start, stop):
     """ Cut continuous signal into segments.
 
-    This function cuts segments from a continuous signal. Segments are stop - start samples long.
+    This function cuts segments from a continuous signal.
 
     Parameters
     ----------
@@ -23,14 +23,15 @@ def cut_segments(rawdata, tr, start, stop):
     tr : list of int
         Trigger positions.
     start : int
-        Window start (offset relative to trigger)
+        Window start (offset relative to trigger).
     stop : int
-        Window end (offset relative to trigger)
+        Window end (offset relative to trigger).
 
     Returns
     -------
-    x : ndarray
-        Segments cut from `rawdata`. Individual segments are stacked along the third dimension.
+    x : array
+        Segments cut from `rawdata`. Individual segments are stacked along the
+        third dimension.
 
     See also
     --------
@@ -44,9 +45,14 @@ def cut_segments(rawdata, tr, start, stop):
     >>> x.shape
     (50, 5, 3)
     """
+    if start != int(start):
+        raise ValueError("start index must be an integer")
+    if stop != int(stop):
+        raise ValueError("stop index must be an integer")
+
     rawdata = np.atleast_2d(rawdata)
-    tr = np.array(tr, dtype='int').ravel()
-    win = range(start, stop)
+    tr = np.asarray(tr, dtype=int).ravel()
+    win = np.arange(start, stop, dtype=int)
     return np.dstack([rawdata[tr[t] + win, :] for t in range(len(tr))])
 
 
