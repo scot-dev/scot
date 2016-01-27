@@ -37,6 +37,11 @@ if [[ "$DISTRIB" == "conda" ]]; then
         conda remove --yes --features mkl || echo "MKL not installed"
     fi
 
+    if [[ "$INSTALL_FORTRAN" == "true" ]]; then
+        # Make sure that MKL is used
+        conda install --yes libgfortran
+    fi
+
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
     sudo apt-get install -qq python-scipy python-nose python-pip python-matplotlib python-sklearn
