@@ -2,6 +2,8 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013 SCoT Development Team
 
+from __future__ import division
+
 import unittest
 
 from importlib import import_module

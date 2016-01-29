@@ -43,7 +43,7 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 #
 # We simply choose a VAR model order of 35, and reduction to 4 components
 # (that's not a lot).
-ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
+ws = scot.Workspace({'model_order': 40}, reducedim=4, fs=fs, locations=locs)
 
 
 # Perform CSPVARICA and plot components
