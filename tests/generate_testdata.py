@@ -29,7 +29,7 @@ def generate_covsig(covmat, n):
 
     x = l.dot(d).dot(x)
 
-    return x.T
+    return x
 
 
 # 497 random numbers drawn from the standard normal distribution
