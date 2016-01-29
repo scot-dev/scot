@@ -5,7 +5,7 @@
 import numpy as np
 
 from . import config
-from .datatools import cat_trials, dot_special
+from .datatools import cat_trials, dot_special, atleast_3d
 from . import xvschema
 
 
@@ -16,7 +16,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     
     Parameters
     ----------
-    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
         data set
     var : :class:`~scot.var.VARBase`-like object
         Vector autoregressive model (VAR) object that is used for model fitting.
@@ -71,8 +71,8 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     .. [1] G. Gomez-Herrero et al. "Measuring directional coupling between EEG sources", NeuroImage, 2008
     """
 
-    x = np.atleast_3d(x)
-    l, m, t = np.shape(x)
+    x = atleast_3d(x)
+    t, m, l = np.shape(x)
 
     if backend is None:
         backend = config.backend
@@ -92,15 +92,15 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         r = np.zeros(xpca.shape)
         for i in range(t):
             # fit MVAR model
-            a = var.fit(xpca[:, :, i])
+            a = var.fit(xpca[i, :, :])
             # residuals
-            r[:, :, i] = xpca[:, :, i] - var.predict(xpca[:, :, i])[:, :, 0]
+            r[i, :, :] = xpca[i, :, :] - var.predict(xpca[i, :, :])[0, :, :]
     elif varfit == 'class':
         r = np.zeros(xpca.shape)
         for i in np.unique(cl):
             mask = cl == i
-            a = var.fit(xpca[:, :, mask])
-            r[:, :, mask] = xpca[:, :, mask] - var.predict(xpca[:, :, mask])
+            a = var.fit(xpca[mask, :, :])
+            r[mask, :, :] = xpca[mask, :, :] - var.predict(xpca[mask, :, :])
     elif varfit == 'ensemble':
         # fit MVAR model
         a = var.fit(xpca)
@@ -113,7 +113,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     mx, ux = backend['ica'](cat_trials(r))
 
     # driving process
-    e = dot_special(r, ux)
+    e = dot_special(ux.T, r)
 
     # correct AR coefficients
     b = a.copy()
@@ -129,7 +129,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         mixing = mx
         residuals = e
         var_residuals = r
-        c = np.cov(cat_trials(e), rowvar=False)
+        c = np.cov(cat_trials(e).T, rowvar=False)
 
     Result.b = b
     Result.a = a
@@ -145,7 +145,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
 
     Parameters
     ----------
-    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
         data set
     var : :class:`~scot.var.VARBase`-like object
         Vector autoregressive model (VAR) object that is used for model fitting.
@@ -197,15 +197,18 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     ----------
     .. [1] M. Billinger et al. "SCoT: A Python Toolbox for EEG Source Connectivity", Frontiers in Neuroinformatics, 2014
     """
-    
-    x = np.atleast_3d(x)
-    l, m, t = np.shape(x)
+    x = atleast_3d(x)
+    t, m, l = np.shape(x)
     
     if backend is None:
         backend = config.backend
     
     # pre-transform the data with CSP
-    c, d, xcsp = backend['csp'](x, cl, reducedim)
+    #c, d, xcsp = backend['csp'](x, cl, reducedim)
+    from . import csp
+    c, d = csp.csp(x, cl, reducedim)
+
+    xcsp = dot_special(c.T, x)
     
     if optimize_var:
         var.optimize(xcsp)
@@ -214,15 +217,15 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         r = np.zeros(xcsp.shape)
         for i in range(t):
             # fit MVAR model
-            a = var.fit(xcsp[:, :, i])
+            a = var.fit(xcsp[i, :, :])
             # residuals
-            r[:, :, i] = xcsp[:, :, i] - var.predict(xcsp[:, :, i])[:, :, 0]
+            r[i, :, :] = xcsp[i, :, :] - var.predict(xcsp[i, :, :])[0, :, :]
     elif varfit == 'class':
         r = np.zeros(xcsp.shape)
         for i in np.unique(cl):
             mask = cl == i
             a = var.fit(xcsp[:, :, mask])
-            r[:, :, mask] = xcsp[:, :, mask] - var.predict(xcsp[:, :, mask])
+            r[mask, :, :] = xcsp[mask, :, :] - var.predict(xcsp[mask, :, :])
     elif varfit == 'ensemble':
         # fit MVAR model
         a = var.fit(xcsp)
@@ -232,10 +235,10 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         raise ValueError('unknown VAR fitting mode: {}'.format(varfit))
 
     # run on residuals ICA to estimate volume conduction    
-    mx, ux = backend['ica'](cat_trials(r))
+    mx, ux = backend['ica'](r)
 
     # driving process
-    e = dot_special(r, ux)
+    e = dot_special(ux.T, r)
 
     # correct AR coefficients
     b = a.copy()
@@ -251,7 +254,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         mixing = mx
         residuals = e
         var_residuals = r
-        c = np.cov(cat_trials(e), rowvar=False)
+        c = np.cov(cat_trials(e))
     Result.b = b
     Result.a = a
     Result.xcsp = xcsp

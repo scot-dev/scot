@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2015 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 

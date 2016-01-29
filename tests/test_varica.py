@@ -1,11 +1,12 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 from importlib import import_module
 
 import numpy as np
+from numpy.testing import assert_allclose
 
 import scot
 from scot import varica, datatools
@@ -41,9 +42,11 @@ class TestMVARICA(unittest.TestCase):
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
                [0.0, 0.2, 0.5, 1.0, 0.5, 0.2, 0.0],
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
-        data = datatools.dot_special(sources, mix)
+        data = datatools.dot_special(np.transpose(mix), sources)
 
         backend_modules = [import_module('scot.' + b) for b in scot.backends]
+        #backend_modules = [import_module('scot.backend_sklearn')]
+        #backend_modules = [import_module('scot.backend_builtin')]
 
         for bm in backend_modules:
 
@@ -51,6 +54,7 @@ class TestMVARICA(unittest.TestCase):
             #  - default setting of 0.99 variance should reduce to 3 channels with this data
             #  - automatically determine delta (enough data, so it should most likely be 0)
             result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
+            #result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
 
             # ICA does not define the ordering and sign of components
             # so wee need to test all combinations to find if one of them fits the original coefficients
@@ -73,7 +77,7 @@ class TestMVARICA(unittest.TestCase):
                         best = err
                         d = c
 
-            self.assertTrue(np.all(abs(d - b0) < 0.05))
+            assert_allclose(d, b0, rtol=1e-2, atol=1e-2)
 
 
 def main():
