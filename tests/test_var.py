@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 
 from scot.varbase import VARBase as VAR
-from scot.datatools import dot_special
+from scot.utils import acm
 
 epsilon = 1e-10
 
@@ -79,20 +79,6 @@ class TestVAR(unittest.TestCase):
         r[3:,1,:] = r[:-3,0,:]              # create cross-correlation at lag 3
         p = var.test_whiteness(20)
         self.assertLessEqual(p, 0.01)       # now test should be significant
-
-
-def acm(x, l):
-    if l == 0:
-        a, b = x, x
-    else:
-        a = x[l:, :, :]
-        b = x[0:-l, :, :]
-
-    c = np.dot(a[:, :, 0].T, b[:, :, 0]) / a.shape[0]
-    for t in range(1, x.shape[2]):
-        c += np.dot(a[:, :, t].T, b[:, :, t]) / a.shape[0]
-
-    return c.T / x.shape[2]
 
 
 def main():
