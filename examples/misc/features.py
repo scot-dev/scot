@@ -24,8 +24,8 @@ import scot.xvschema
 # approximately six seconds.
 import scotdata.motorimagery as midata
 
-raweeg = midata.eeg
-triggers = midata.triggers
+raweeg = midata.eeg.T
+triggers = np.asarray(midata.triggers, dtype=int)
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
@@ -64,7 +64,7 @@ for train, test in kf:
     fold += 1
 
     # Perform CSPVARICA
-    ws.set_data(data[:, :, train], classes[train])
+    ws.set_data(data[train, :, :], classes[train])
     ws.do_cspvarica()
 
     # Find optimal regularization parameter for single-trial fitting
@@ -77,7 +77,7 @@ for train, test in kf:
     for t in range(len(triggers)):
         print('Fold {:2d}/{:2d}, trial: {:d}   '.format(fold, nfolds, t),
               end='\r')
-        ws.set_data(data[:, :, t])
+        ws.set_data(data[t, :, :])
         ws.fit_var()
 
         con = ws.get_connectivity('ffPDC')

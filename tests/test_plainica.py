@@ -39,7 +39,7 @@ class TestICA(unittest.TestCase):
         mix = [[0.5, 1.0, 0.5, 0.2, 0.0, 0.0, 0.0],
                [0.0, 0.2, 0.5, 1.0, 0.5, 0.2, 0.0],
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
-        data = datatools.dot_special(sources, mix)
+        data = datatools.dot_special(np.transpose(mix), sources)
 
         backend_modules = [import_module('scot.' + b) for b in scot.backends]
 

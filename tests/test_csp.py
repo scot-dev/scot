@@ -1,11 +1,13 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
 
 import numpy as np
+from numpy.testing.utils import assert_allclose
 
+from scot.datatools import dot_special
 from scot.csp import csp
 
 try:
@@ -15,8 +17,8 @@ except ImportError:
 
 epsilon = 1e-10
 
+
 class TestFunctionality(unittest.TestCase):
-    
     def setUp(self):
         pass
     
@@ -27,42 +29,42 @@ class TestFunctionality(unittest.TestCase):
         A = generate_covsig([[10,5,2],[5,10,2],[2,2,10]], 500)
         B = generate_covsig([[10,2,2],[2,10,5],[2,5,10]], 500)
             
-        X = np.dstack([A,B])
-        W, V = csp(X,[1,2])        
-        C1a = np.cov(X[:,:,0].dot(W).T)
-        C2a = np.cov(X[:,:,1].dot(W).T)
+        X = np.concatenate([A[np.newaxis], B[np.newaxis]], axis=0)
+        W, V = csp(X, [1, 2])
+        C1a = np.cov(np.dot(W.T, X[0, :, :]))
+        C2a = np.cov(np.dot(W.T, X[1, :, :]))
         
-        Y = np.dstack([B,A])
-        W, V = csp(Y,[1,2])
-        C1b = np.cov(Y[:,:,0].dot(W).T)
-        C2b = np.cov(Y[:,:,1].dot(W).T)
+        Y = np.concatenate([B[np.newaxis], A[np.newaxis]], axis=0)
+        W, V = csp(Y, [1, 2])
+        C1b = np.cov(np.dot(W.T, Y[0, :, :]))
+        C2b = np.cov(np.dot(W.T, Y[1, :, :]))
         
         # check symmetric case
-        self.assertTrue(np.allclose(C1a.diagonal(), C2a.diagonal()[::-1]))
-        self.assertTrue(np.allclose(C1b.diagonal(), C2b.diagonal()[::-1]))
+        assert_allclose(C1a.diagonal(), C2a.diagonal()[::-1])
+        assert_allclose(C1b.diagonal(), C2b.diagonal()[::-1])
         
         # swapping class labels (or in this case, trials) should not change the result
-        self.assertTrue(np.allclose(C1a, C1b))
-        self.assertTrue(np.allclose(C2a, C2b))
+        assert_allclose(C1a, C1b, rtol=1e-9, atol=1e-9)
+        assert_allclose(C2a, C2b, rtol=1e-9, atol=1e-9)
         
         # variance of first component should be greatest for class 1
-        self.assertTrue(C1a[0,0] > C2a[0,0])
+        self.assertGreater(C1a[0, 0], C2a[0, 0])
         
         # variance of last component should be greatest for class 1
-        self.assertTrue(C1a[2,2] < C2a[2,2])
+        self.assertLess(C1a[2, 2], C2a[2, 2])
         
         # variance of central component should be equal for both classes
-        self.assertTrue(np.allclose(C1a[1,1], C2a[1,1]))
+        assert_allclose(C1a[1, 1], C2a[1, 1])
         
 
 class TestDefaults(unittest.TestCase):
 
     def setUp(self):
-        self.X = np.random.randn(100,5,10)
+        self.X = np.random.randn(10,5,100)
         self.C = [0,0,0,0,0,1,1,1,1,1]
         self.Y = self.X.copy()
         self.D = list(self.C)
-        self.N, self.M, self.T = self.X.shape
+        self.T, self.M, self.N = self.X.shape
         self.W, self.V = csp(self.X, self.C)
 
     def tearDown(self):
@@ -70,10 +72,10 @@ class TestDefaults(unittest.TestCase):
     
     def testInvalidInput(self):
         # pass only 2d data
-        self.assertRaises(AttributeError, csp, np.random.randn(10,3), [1,1,0,0] )
+        self.assertRaises(AttributeError, csp, np.random.randn(3,10), [1,1,0,0] )
         
         # number of class labels does not match number of trials
-        self.assertRaises(AttributeError, csp, np.random.randn(10,3,5), [1,1,0,0] )
+        self.assertRaises(AttributeError, csp, np.random.randn(5,3,10), [1,1,0,0] )
     
     def testInputSafety(self):
         # function must not change input variables
@@ -96,12 +98,17 @@ class TestDefaults(unittest.TestCase):
 class TestDimensionalityReduction(unittest.TestCase):
 
     def setUp(self):
-        self.X = np.random.rand(100,15,10)
-        self.C = [0,0,0,0,0,1,1,1,1,1]
+        self.n_comps = 5
+        self.X = np.random.rand(10,6,100)
+        self.C = np.asarray([0,0,0,0,0,1,1,1,1,1])
+        self.X[self.C == 0, 0, :] *= 10
+        self.X[self.C == 0, 2, :] *= 5
+        self.X[self.C == 1, 1, :] *= 10
+        self.X[self.C == 1, 3, :] *= 2
         self.Y = self.X.copy()
         self.D = list(self.C)
-        self.N, self.M, self.T = self.X.shape
-        self.W, self.V = csp(self.X, self.C, numcomp=5)
+        self.T, self.M, self.N = self.X.shape
+        self.W, self.V = csp(self.X, self.C, numcomp=self.n_comps)
 
     def tearDown(self):
         pass
@@ -113,11 +120,18 @@ class TestDimensionalityReduction(unittest.TestCase):
 
     def testPseudoInverse(self):
         # V should be the pseudo inverse of W
-        I = self.V.dot(self.W)        
-        self.assertTrue(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
-        
-        I = self.W.dot(self.V)        
-        self.assertFalse(np.abs(np.mean(I.diagonal()) - 1) < epsilon)
+        I = self.V.dot(self.W)
+        assert_allclose(I, np.eye(self.n_comps), rtol=1e-9, atol=1e-9)
+
+    def testOutput(self):
+        x = dot_special(self.W.T, self.X)
+        v1 = sum(np.var(x[np.array(self.C)==0], axis=2))
+        v2 = sum(np.var(x[np.array(self.C)==1], axis=2))
+        self.assertGreater(v1[0], v2[0])
+        self.assertGreater(v1[1], v2[1])
+        self.assertLess(v1[-2], v2[-2])
+        self.assertLess(v1[-1], v2[-1])
+
         
 def main():
     unittest.main()

@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Source decomposition with ICA.
 """
@@ -8,7 +8,7 @@
 import numpy as np
 
 from . import config
-from .datatools import cat_trials
+from .datatools import cat_trials, atleast_3d
 
 
 class ResultICA(object):
@@ -33,7 +33,7 @@ def plainica(x, reducedim=0.99, backend=None):
 
     Parameters
     ----------
-    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+    x : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
         data set
     reducedim : {int, float, 'no_pca'}, optional
         A number of less than 1 in interpreted as the fraction of variance that should remain in the data. All
@@ -49,8 +49,8 @@ def plainica(x, reducedim=0.99, backend=None):
         Source decomposition
     """
 
-    x = np.atleast_3d(x)
-    l, m, t = np.shape(x)
+    x = atleast_3d(x)
+    t, m, l = np.shape(x)
 
     if backend is None:
         backend = config.backend

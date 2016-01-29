@@ -10,7 +10,7 @@ from __future__ import print_function
 import numpy as np
 import scipy as sp
 from .varbase import VARBase, _construct_var_eqns
-from .datatools import cat_trials
+from .datatools import cat_trials, atleast_3d
 from . import xvschema as xv
 from .parallel import parallel_loop
 
@@ -44,8 +44,8 @@ class VAR(VARBase):
         Parameters
         ----------
         data : array-like
-            shape = [n_samples, n_channels, n_trials] or
-            [n_samples, n_channels]
+            shape = [n_trials, n_samples, n_channels] or
+            [n_channels, n_samples]
             Continuous or segmented data set.
             
         Returns
@@ -54,7 +54,7 @@ class VAR(VARBase):
             The :class:`VAR` object to facilitate method chaining (see usage
             example)
         """
-        data = sp.atleast_3d(data)
+        data = atleast_3d(data)
 
         if self.delta == 0 or self.delta is None:
             # ordinary least squares
@@ -68,8 +68,7 @@ class VAR(VARBase):
         self.coef = b.transpose()
 
         self.residuals = data - self.predict(data)
-        self.rescov = sp.cov(cat_trials(self.residuals[self.p:, :, :]),
-                             rowvar=False)
+        self.rescov = sp.cov(cat_trials(self.residuals[:, :, self.p:]))
 
         return self
 
@@ -80,8 +79,8 @@ class VAR(VARBase):
         Parameters
         ----------
         data : array-like
-            shape = [n_samples, n_channels, n_trials] or
-            [n_samples, n_channels]
+            shape = [n_trials, n_samples, n_channels] or
+            [n_channels, n_samples]
             Continuous or segmented data set on which to optimize the model
             order.
         min_p : int
@@ -95,7 +94,7 @@ class VAR(VARBase):
             verbosity level passed to joblib.
         """
         data = np.asarray(data)
-        assert (data.shape[2] > 1)
+        assert (data.shape[0] > 1)
         msge, prange = [], []
 
         par, func = parallel_loop(_get_msge_with_gradient,
@@ -130,8 +129,8 @@ class VAR(VARBase):
         Parameters
         ----------
         data : array-like
-            shape = [n_samples, n_channels, n_trials] or
-            [n_samples, n_channels]
+            shape = [n_trials, n_samples, n_channels] or
+            [n_channels, n_samples]
             Continuous or segmented data set.
         skipstep : int, optional
             Speed up calculation by skipping samples during cost function
@@ -144,7 +143,7 @@ class VAR(VARBase):
             example)
         """
         data = sp.atleast_3d(data)
-        (l, m, t) = data.shape
+        t, m, l = data.shape
         assert (t > 1)
 
         maxsteps = 10
@@ -177,7 +176,6 @@ class VAR(VARBase):
         nsteps = 0
 
         while nsteps < maxsteps:
-
             # point where the line between a and b crosses zero
             # this is not very stable!
             #c = a + (b-a) * np.abs(ka) / np.abs(kb-ka)
@@ -206,17 +204,17 @@ class VAR(VARBase):
 
 
 def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
-    """ Calculate the mean squared generalization error and it's gradient for
+    """Calculate mean squared generalization error and its gradient for
     underdetermined equation system.
     """
-    (l, m, t) = data.shape
+    (t, m, l) = data.shape
     d = None
     j, k = 0, 0
     nt = sp.ceil(t / skipstep)
     for trainset, testset in xvschema(t, skipstep):
 
-        (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
-        (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
+        (a, b) = _construct_var_eqns(sp.atleast_3d(data[trainset, :, :]), p)
+        (c, d) = _construct_var_eqns(sp.atleast_3d(data[testset, :, :]), p)
 
         e = sp.linalg.inv(sp.eye(a.shape[0]) * delta ** 2 +
                           a.dot(a.transpose()))
@@ -237,17 +235,17 @@ def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
 
 
 def _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p):
-    """ Calculate the mean squared generalization error and it's gradient for
+    """Calculate mean squared generalization error and its gradient for
     overdetermined equation system.
     """
-    (l, m, t) = data.shape
+    (t, m, l) = data.shape
     d = None
     l, k = 0, 0
     nt = sp.ceil(t / skipstep)
     for trainset, testset in xvschema(t, skipstep):
 
-        (a, b) = _construct_var_eqns(sp.atleast_3d(data[:, :, trainset]), p)
-        (c, d) = _construct_var_eqns(sp.atleast_3d(data[:, :, testset]), p)
+        (a, b) = _construct_var_eqns(sp.atleast_3d(data[trainset, :, :]), p)
+        (c, d) = _construct_var_eqns(sp.atleast_3d(data[testset, :, :]), p)
 
         e = sp.linalg.inv(sp.eye(a.shape[1]) * delta ** 2 +
                           a.transpose().dot(a))
@@ -265,10 +263,10 @@ def _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p):
 
 
 def _get_msge_with_gradient_func(shape, p):
-    """ Select which function to use for MSGE calculation (over- or
+    """Select which function to use for MSGE calculation (over- or
     underdetermined).
     """
-    (l, m, t) = shape
+    (t, m, l) = shape
 
     n = (l - p) * t
     underdetermined = n < m * p
@@ -280,10 +278,10 @@ def _get_msge_with_gradient_func(shape, p):
 
 
 def _get_msge_with_gradient(data, delta, xvschema, skipstep, p):
-    """ Calculate the mean squared generalization error and it's gradient,
+    """Calculate mean squared generalization error and its gradient,
     automatically selecting the best function.
     """
-    (l, m, t) = data.shape
+    (t, m, l) = data.shape
 
     n = (l - p) * t
     underdetermined = n < m * p
@@ -299,18 +297,18 @@ def _get_msge_with_gradient(data, delta, xvschema, skipstep, p):
 def _construct_var_eqns_rls(data, p, delta):
         """Construct VAR equation system with RLS constraint.
         """
-        (l, m, t) = sp.shape(data)
+        (t, m, l) = sp.shape(data)
         n = (l - p) * t     # number of linear relations
         # Construct matrix x (predictor variables)
         x = sp.zeros((n + m * p, m * p))
         for i in range(m):
             for k in range(1, p + 1):
-                x[:n, i * p + k - 1] = sp.reshape(data[p - k:-k, i, :], n)
+                x[:n, i * p + k - 1] = sp.reshape(data[:, i, p - k:-k], n)
         sp.fill_diagonal(x[n:, :], delta)
 
         # Construct vectors yi (response variables for each channel i)
         y = sp.zeros((n + m * p, m))
         for i in range(m):
-            y[:n, i] = sp.reshape(data[p:, i, :], n)
+            y[:n, i] = sp.reshape(data[:, i, p:], n)
 
         return x, y
