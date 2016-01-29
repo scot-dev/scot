@@ -107,7 +107,7 @@ def acm(x, l):
 
     c = np.zeros((x.shape[1], x.shape[1]))
     for t in range(x.shape[0]):
-        c += a[t, :, :].T.dot(b[t, :, :]) / a.shape[2]
+        c += a[t, :, :].dot(b[t, :, :].T) / a.shape[2]
     c /= x.shape[0]
 
     return c.T
