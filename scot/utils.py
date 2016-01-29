@@ -89,7 +89,11 @@ def acm(x, l):
     c : ndarray, shape = [nchannels, n_channels]
         Autocovariance matrix of `x` at lag `l`.
     """
-    x = np.atleast_3d(x)
+    x = np.asarray(x)
+    if x.ndim == 1:
+        x = x.reshape((-1, 1, 1))
+    elif x.ndim == 2:
+        x = x.reshape((x.shape[0], x.shape[1], 1))
 
     if l > x.shape[0]-1:
         raise AttributeError("lag exceeds data length")
@@ -106,10 +110,10 @@ def acm(x, l):
 
     c = np.zeros((x.shape[1], x.shape[1]))
     for t in range(x.shape[2]):
-        c += a[:, :, t].T.dot(b[:, :, t]) / x.shape[0]
+        c += a[:, :, t].T.dot(b[:, :, t]) / a.shape[0]
     c /= x.shape[2]
 
-    return c
+    return c.T
 
 
 #noinspection PyPep8Naming
