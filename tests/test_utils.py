@@ -41,16 +41,15 @@ class TestUtils(unittest.TestCase):
             self.assertEqual(5, obj.squareone(2))
             self.assertEqual(10, obj.squareone(3))
 
-        def test_acm(self):
-            v = np.array([1, 2, 0, 0]*2)
+        def test_acm_1d(self):
+            """Test autocorrelation matrix for 1D input"""
+            v = np.array([1, 2, 0, 0, 1, 2, 0, 0])
             acm = lambda l: scot.utils.acm(v, l)
+
             self.assertEqual(np.mean(v**2), acm(0))
-            self.assertEqual(0.5, acm(1))
-            self.assertEqual(0, acm(2))
-            self.assertEqual(0.25, acm(3))
-            self.assertEqual(acm(0)*0.5, acm(4))
-            self.assertEqual(acm(1)*0.5, acm(5))
-            self.assertEqual(0, acm(6))
+            for l in range(1, 6):
+                self.assertEqual(np.correlate(v[l:], v[:-l]) / (len(v) - l),
+                                 acm(l))
 
         def test_cuthill(self):
             A = np.array([[0,0,1,1], [0,0,0,0], [1,0,1,0], [1,0,0,0]])
