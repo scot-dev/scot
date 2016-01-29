@@ -54,7 +54,6 @@ class TestVAR(unittest.TestCase):
         z = var.predict(x)
         self.assertTrue(np.abs(np.var(x[:, :, 100:] - z[:, :, 100:]) - 1) < 0.005)
 
-    @unittest.skip("from_yw is broken currently")
     def test_yulewalker(self):
         np.random.seed(7353)
         x, var0 = self.generate_data([[1, 2], [3, 4]])
