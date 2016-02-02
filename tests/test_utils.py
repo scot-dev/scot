@@ -50,7 +50,6 @@ class TestUtils(unittest.TestCase):
 
             self.assertEqual(np.mean(v**2), acm(0))
             for l in range(1, 6):
-                print(l)
                 self.assertEqual(np.correlate(v[l:], v[:-l]) / (len(v) - l),
                                  acm(l))
 

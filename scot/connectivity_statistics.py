@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2014 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Routines for statistical evaluation of connectivity.
 """
@@ -9,7 +9,7 @@ from __future__ import division
 
 import numpy as np
 import scipy as sp
-from .datatools import randomize_phase
+from .datatools import randomize_phase, atleast_3d
 from .connectivity import connectivity
 from .utils import cartesian
 from .parallel import parallel_loop
@@ -17,7 +17,7 @@ from .parallel import parallel_loop
 
 def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
                            n_jobs=1, verbose=0):
-    """ Calculates surrogate connectivity for a multivariate time series by
+    """Calculates surrogate connectivity for a multivariate time series by
     phase randomization [1]_.
 
     .. note:: Parameter `var` will be modified by the function. Treat as
@@ -28,7 +28,7 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
+    data : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
         Time series data (2D or 3D for multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
@@ -68,7 +68,7 @@ def _calc_surrogate(data, var, measure_names, nfft):
 
 def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
                            n_jobs=1, verbose=0):
-    """ Calculates Jackknife estimates of connectivity.
+    """Calculates Jackknife estimates of connectivity.
 
     For each Jackknife estimate a block of trials is left out. This is repeated
     until each trial was left out exactly once. The number of estimates depends
@@ -83,8 +83,8 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
-        Time series data (2D or 3D for multiple trials)
+    data : array, shape (n_trials, n_channels, n_samples)
+        Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
     nfft : int, optional
@@ -107,8 +107,10 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
             values are ndarrays of shape
             [`repeats`, n_channels, n_channels, nfft].
     """
-    data = np.atleast_3d(data)
-    n, m, t = data.shape
+    data = atleast_3d(data)
+    t, m, n = data.shape
+
+    assert(t > 1)
 
     if leaveout < 1:
         leaveout = int(leaveout * t)
@@ -119,7 +121,7 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
                                                  i >= (block+1)*leaveout]
 
     par, func = parallel_loop(_calc_jackknife, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(data[:, :, mask(b)], var, measure_names, nfft)
+    output = par(func(data[mask(b), :, :], var, measure_names, nfft)
                  for b in range(num_blocks))
     return convert_output_(output, measure_names)
 
@@ -131,7 +133,7 @@ def _calc_jackknife(data_used, var, measure_names, nfft):
 
 def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
                            num_samples=None, n_jobs=1, verbose=0):
-    """ Calculates Bootstrap estimates of connectivity.
+    """Calculates Bootstrap estimates of connectivity.
 
     To obtain a bootstrap estimate trials are sampled randomly with replacement
     from the data set.
@@ -144,8 +146,8 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     measure_names : {str, list of str}
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
-    data : ndarray, shape = [n_samples, n_channels, (n_trials)]
-        Time series data (2D or 3D for multiple trials)
+    data : array, shape (n_trials, n_channels, n_samples)
+        Time series data (multiple trials)
     var : VARBase-like object
         Instance of a VAR model.
     repeats : int, optional
@@ -166,16 +168,18 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
         each key is the name of the measure, and the corresponding values are
         ndarrays of shape [`repeats`, n_channels, n_channels, nfft].
     """
-    data = np.atleast_3d(data)
+    data = atleast_3d(data)
     n, m, t = data.shape
+
+    assert(t > 1)
 
     if num_samples is None:
         num_samples = t
 
-    mask = lambda r: np.random.random_integers(0, data.shape[2]-1, num_samples)
+    mask = lambda r: np.random.random_integers(0, data.shape[0]-1, num_samples)
 
     par, func = parallel_loop(_calc_bootstrap, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(data[:, :, mask(r)], var, measures, nfft, num_samples)
+    output = par(func(data[mask(r), :, :], var, measures, nfft, num_samples)
                  for r in range(repeats))
     return convert_output_(output, measures)
 
@@ -186,7 +190,7 @@ def _calc_bootstrap(data, var, measures, nfft, num_samples):
 
 
 def test_bootstrap_difference(a, b):
-    """ Test mean difference between two bootstrap estimates.
+    """Test mean difference between two bootstrap estimates.
 
     This function calculates the probability `p` of observing a more extreme
     mean difference between `a` and `b` under the null hypothesis that `a` and
@@ -244,7 +248,7 @@ def test_bootstrap_difference(a, b):
 
 
 def significance_fdr(p, alpha):
-    """ Calculate significance by controlling for the false discovery rate.
+    """Calculate significance by controlling for the false discovery rate.
 
     This function determines which of the *p*-values in `p` can be considered
     significant. Correction for multiple comparisons is performed by

@@ -1,3 +1,7 @@
+# Released under The MIT License (MIT)
+# http://opensource.org/licenses/MIT
+# Copyright (c) 2013-2015 SCoT Development Team
+
 """
 This example shows how to decompose EEG signals into source activations with
 MVARICA, and visualize time varying connectivity.
@@ -16,8 +20,8 @@ import scot
 # approximately six seconds.
 import scotdata.motorimagery as midata
 
-raweeg = midata.eeg
-triggers = midata.triggers
+raweeg = midata.eeg.T
+triggers = np.asarray(midata.triggers, dtype=int)
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
@@ -30,7 +34,7 @@ np.random.seed(42)
 # Set up analysis object
 #
 # We simply choose a VAR model order of 35, and reduction to 4 components.
-ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
+ws = scot.Workspace({'model_order': 40}, reducedim=4, fs=fs, locations=locs)
 
 
 # Prepare data

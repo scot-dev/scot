@@ -1,8 +1,8 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
-""" Graphical output with matplotlib
+"""Graphical output with matplotlib.
 
 This module attempts to import matplotlib for plotting functionality.
 If matplotlib is not available no error is raised, but plotting functions will not be available.
@@ -33,7 +33,7 @@ def MaxNLocator(*args, **kwargs):
 
 
 def prepare_topoplots(topo, values):
-    """ Prepare multiple topo maps for cached plotting.
+    """Prepare multiple topo maps for cached plotting.
 
     .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_values`.
 
@@ -62,7 +62,7 @@ def prepare_topoplots(topo, values):
 
 
 def plot_topo(axis, topo, topomap, crange=None, offset=(0,0)):
-    """ Draw a topoplot in given axis.
+    """Draw a topoplot in given axis.
 
     .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
 
@@ -93,7 +93,7 @@ def plot_topo(axis, topo, topomap, crange=None, offset=(0,0)):
 
 
 def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
-    """ Plot all scalp projections of mixing- and unmixing-maps.
+    """Plot all scalp projections of mixing- and unmixing-maps.
 
     .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
 
@@ -161,7 +161,7 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
 
 
 def plot_connectivity_topos(layout='diagonal', topo=None, topomaps=None, fig=None):
-    """ Place topo plots in a figure suitable for connectivity visualization.
+    """Place topo plots in a figure suitable for connectivity visualization.
 
     .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
 
@@ -208,11 +208,11 @@ def plot_connectivity_topos(layout='diagonal', topo=None, topomaps=None, fig=Non
 
 
 def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0, border=False, fig=None):
-    """ Draw connectivity plots.
+    """Draw connectivity plots.
 
     Parameters
     ----------
-    a : array, shape = [n_channels, n_channels, n_fft] or [1 or 3, n_channels, n_channels, n_fft]
+    a : array, shape (n_channels, n_channels, n_fft) or (1 or 3, n_channels, n_channels, n_fft)
         If a.ndim == 3, normal plots are created,
         If a.ndim == 4 and a.shape[0] == 1, the area between the curve and y=0 is filled transparently,
         If a.ndim == 4 and a.shape[0] == 3, a[0,:,:,:] is plotted normally and the area between a[1,:,:,:] and
@@ -309,14 +309,14 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0
 
 
 def plot_connectivity_significance(s, fs=2, freq_range=(-np.inf, np.inf), diagonal=0, border=False, fig=None):
-    """ Plot significance.
+    """Plot significance.
 
     Significance is drawn as a background image where dark vertical stripes indicate freuquencies where a evaluates to
     True.
 
     Parameters
     ----------
-    a : array, dtype=bool, shape = [n_channels, n_channels, n_fft]
+    a : array, shape (n_channels, n_channels, n_fft), dtype bool
         Significance
     fs : float
         Sampling frequency
@@ -391,7 +391,7 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
 
     Parameters
     ----------
-    a : array, shape = [n_channels, n_channels, n_fft, n_timesteps]
+    a : array, shape (n_channels, n_channels, n_fft, n_timesteps)
         Values to draw
     fs : float
         Sampling frequency
@@ -481,19 +481,19 @@ def plot_connectivity_timespectrum(a, fs=2, crange=None, freq_range=(-np.inf, np
 
 
 def plot_circular(widths, colors, curviness=0.2, mask=True, topo=None, topomaps=None, axes=None, order=None):
-    """ Circluar connectivity plot
+    """Circluar connectivity plot.
 
     Topos are arranged in a circle, with arrows indicating connectivity
 
     Parameters
     ----------
-    widths : {float or array, shape = [n_channels, n_channels]}
+    widths : float or array, shape (n_channels, n_channels)
         Width of each arrow. Can be a scalar to assign the same width to all arrows.
-    colors : array, shape = [n_channels, n_channels, 3] or [3]
+    colors : array, shape (n_channels, n_channels, 3) or (3)
         RGB color values for each arrow or one RGB color value for all arrows.
     curviness : float, optional
         Factor that determines how much arrows tend to deviate from a straight line.
-    mask : array, dtype = bool, shape = [n_channels, n_channels]
+    mask : array, dtype = bool, shape (n_channels, n_channels)
         Enable or disable individual arrows
     topo : :class:`~eegtopo.topoplot.Topoplot`
         This object draws the topo plot

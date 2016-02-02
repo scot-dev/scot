@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Use scikit-learn routines as backend.
 """
@@ -11,6 +11,7 @@ import scipy as sp
 from . import backend_builtin as builtin
 from . import config, datatools
 from .varbase import VARBase
+from .datatools import atleast_3d
 
 
 def wrapper_fastica(data):
@@ -18,7 +19,7 @@ def wrapper_fastica(data):
     """
     from sklearn.decomposition import FastICA
     ica = FastICA()
-    ica.fit(datatools.cat_trials(data))
+    ica.fit(datatools.cat_trials(data).T)
     u = ica.components_.T
     m = ica.mixing_.T
     return m, u
@@ -29,10 +30,10 @@ def wrapper_pca(x, reducedim):
     """
     from sklearn.decomposition import PCA
     pca = PCA(n_components=reducedim)
-    pca.fit(datatools.cat_trials(x))
+    pca.fit(datatools.cat_trials(x).T)
     d = pca.components_
     c = pca.components_.T
-    y = datatools.dot_special(x,c)
+    y = datatools.dot_special(c.T, x)
     return c, d, y
 
 
@@ -52,7 +53,7 @@ class VAR(VARBase):
         VARBase.__init__(self, model_order)
         if fitobj is None:
             from sklearn.linear_model import LinearRegression
-            fitobj = LinearRegression()
+            fitobj = LinearRegression(fit_intercept=False)
         self.fitting_model = fitobj
 
     def fit(self, data):
@@ -60,7 +61,7 @@ class VAR(VARBase):
         
         Parameters
         ----------
-        data : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+        data : array, shape (n_trials, n_channels, n_samples) or (n_channels, n_samples)
             Continuous or segmented data set.
             
         Returns
@@ -68,14 +69,14 @@ class VAR(VARBase):
         self : :class:`VAR`
             The :class:`VAR` object.
         """
-        data = sp.atleast_3d(data)
+        data = atleast_3d(data)
         (x, y) = self._construct_eqns(data)
         self.fitting_model.fit(x, y)
 
         self.coef = self.fitting_model.coef_
 
         self.residuals = data - self.predict(data)
-        self.rescov = sp.cov(datatools.cat_trials(self.residuals[self.p:, :, :]), rowvar=False)
+        self.rescov = sp.cov(datatools.cat_trials(self.residuals[:, :, self.p:]))
 
         return self
 

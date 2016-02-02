@@ -1,3 +1,7 @@
+# Released under The MIT License (MIT)
+# http://opensource.org/licenses/MIT
+# Copyright (c) 2013-2015 SCoT Development Team
+
 """
 This example shows how to decompose EEG signals into source activations with
 CSPVARICA, and visualize a connectivity.
@@ -17,7 +21,7 @@ import scot
 import scotdata.motorimagery as midata
 
 
-raweeg = midata.eeg
+raweeg = midata.eeg.T
 triggers = midata.triggers
 classes = midata.classes
 fs = midata.samplerate

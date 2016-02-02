@@ -13,7 +13,7 @@ def pca_svd(data):
     
     Parameters
     ----------
-    data : array, shape = [n_samples, n_channels]
+    data : array, shape = [n_channels, n_samples]
         Two dimensional data array.
         
     Returns
@@ -24,7 +24,7 @@ def pca_svd(data):
         Eigenvalues
     """
 
-    (w, s, v) = np.linalg.svd(data.transpose())
+    (w, s, v) = np.linalg.svd(data)
 
     return w, s ** 2
 
@@ -34,7 +34,7 @@ def pca_eig(x):
     
     Parameters
     ----------
-    data : array, shape = [n_samples, n_channels]
+    data : array, shape = [n_channels, n_samples]
         Two dimensional data array.
         
     Returns
@@ -45,7 +45,7 @@ def pca_eig(x):
         Eigenvalues
     """
 
-    [s, w] = np.linalg.eigh(x.transpose().dot(x))
+    [s, w] = np.linalg.eigh(x.dot(x.T))
 
     return w, s
 
@@ -55,7 +55,7 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim
     
     Parameters
     ----------
-    x : array-like, shape = [n_samples, n_channels, n_trials] or [n_samples, n_channels]
+    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
         EEG data set
     subtract_mean : bool, optional
         Subtract sample mean from x.
@@ -78,31 +78,34 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True, reducedim
         PCA backtransformation matrix
     """
 
-    x = cat_trials(np.atleast_3d(x))
+    x = np.asarray(x)
+    if x.ndim > 2:
+        x = cat_trials(x)
 
     if reducedim:
         sort_components = True
 
     if subtract_mean:
-        for i in range(np.shape(x)[1]):
-            x[:, i] -= np.mean(x[:, i])
+        x = x - np.mean(x, axis=1, keepdims=True)
 
     k, l = None, None
     if normalize:
-        l = np.std(x, 0, ddof=1)
+        l = np.std(x, axis=1, ddof=1)
         k = np.diag(1.0 / l)
         l = np.diag(l)
-        x = x.dot(k)
+        x = np.dot(k, x)
 
     w, latent = algorithm(x)
+
+    #print(w.shape, k.shape)
 
     #v = np.linalg.inv(w)
     # PCA is just a rotation, so inverse is equal transpose...
     v = w.T
 
     if normalize:
-        w = k.dot(w)
-        v = v.dot(l)
+        w = np.dot(k, w)
+        v = np.dot(v, l)
 
     latent /= sum(latent)
 
