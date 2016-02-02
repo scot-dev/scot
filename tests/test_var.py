@@ -89,3 +89,14 @@ class TestVAR(unittest.TestCase):
         r[:,1,3:] = r[:,0,:-3]              # create cross-correlation at lag 3
         p = var.test_whiteness(20)
         self.assertLessEqual(p, 0.01)       # now test should be significant
+
+    def test_stable(self):
+        var = VAR(1)
+
+        # Stable AR model -- rule of thumb: sum(coefs) < 1
+        var.coef = np.asarray([[0.5, 0.3]])
+        self.assertTrue(var.is_stable())
+
+        # Unstable AR model -- rule of thumb: sum(coefs) > 1
+        var.coef = np.asarray([[0.5, 0.7]])
+        self.assertFalse(var.is_stable())
