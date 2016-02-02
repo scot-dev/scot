@@ -4,6 +4,8 @@
 
 import unittest
 
+from scot.parallel import parallel_loop
+
 
 def f(x):
     return x**2 - 1
@@ -25,8 +27,6 @@ class TestFunctions(unittest.TestCase):
         pass
 
     def test_parallel_loop(self):
-        from scot.parallel import parallel_loop
-
         verbose = 0
 
         # reference list comprehension
@@ -87,3 +87,14 @@ class TestFunctions(unittest.TestCase):
         # multiple return values
         par, func = parallel_loop(h, n_jobs=10, verbose=verbose)
         self.assertEqual(reh, par(func(i) for i in range(10)))
+
+    def test_output(self):
+        from sys import stdout
+
+        if not hasattr(stdout, 'getvalue'):
+            self.skipTest("cannot grab stdout")
+
+        par, func = parallel_loop(f, n_jobs=None, verbose=10)
+        self.assertEqual(stdout.getvalue().strip()[-8:], 'serially')
+        par, func = parallel_loop(f, n_jobs=-1, verbose=10)
+        self.assertEqual(stdout.getvalue().strip()[-8:], 'parallel')
