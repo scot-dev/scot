@@ -95,6 +95,6 @@ class TestFunctions(unittest.TestCase):
             self.skipTest("cannot grab stdout")
 
         par, func = parallel_loop(f, n_jobs=None, verbose=10)
-        self.assertEqual(stdout.getvalue().strip()[-8:], 'serially')
+        self.assertEqual(stdout.getvalue().strip().split(' ')[-1], 'serially')
         par, func = parallel_loop(f, n_jobs=2, verbose=10)
-        self.assertEqual(stdout.getvalue().strip()[-8:], 'parallel')
+        self.assertEqual(stdout.getvalue().strip().split(' ')[-1], 'parallel')
