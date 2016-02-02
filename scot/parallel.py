@@ -18,7 +18,10 @@ def parallel_loop(func, n_jobs=1, verbose=1):
     try:
         from joblib import Parallel, delayed
     except ImportError:
-        n_jobs = None
+        try:
+            from sklearn.externals.joblib import Parallel, delayed
+        except ImportError:
+            n_jobs = None
 
     if n_jobs is None:
         if verbose >= 10:
