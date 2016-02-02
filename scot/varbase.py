@@ -341,12 +341,12 @@ def _construct_var_eqns(data, p):
         x = np.zeros((n, m * p))
         for i in range(m):
             for k in range(1, p + 1):
-                x[:, i * p + k - 1] = np.reshape(data[:, i, p - k:-k], n)
+                x[:, i * p + k - 1] = np.reshape(data[:, i, p - k:-k].T, n)
 
         # Construct vectors yi (response variables for each channel i)
         y = np.zeros((n, m))
         for i in range(m):
-            y[:, i] = np.reshape(data[:, i, p:], n)
+            y[:, i] = np.reshape(data[:, i, p:].T, n)
 
         return x, y
 

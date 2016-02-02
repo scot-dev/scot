@@ -303,12 +303,12 @@ def _construct_var_eqns_rls(data, p, delta):
         x = sp.zeros((n + m * p, m * p))
         for i in range(m):
             for k in range(1, p + 1):
-                x[:n, i * p + k - 1] = sp.reshape(data[:, i, p - k:-k], n)
+                x[:n, i * p + k - 1] = sp.reshape(data[:, i, p - k:-k].T, n)
         sp.fill_diagonal(x[n:, :], delta)
 
         # Construct vectors yi (response variables for each channel i)
         y = sp.zeros((n + m * p, m))
         for i in range(m):
-            y[:n, i] = sp.reshape(data[:, i, p:], n)
+            y[:n, i] = sp.reshape(data[:, i, p:].T, n)
 
         return x, y
