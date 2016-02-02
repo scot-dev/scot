@@ -11,7 +11,7 @@ from numpy import sort
 from functools import partial
 
 
-def singletrial(num_trials, skipstep):
+def singletrial(num_trials, skipstep=1):
     """ Single-trial cross-validation schema
 
     Use one trial for training, all others for testing.
@@ -36,7 +36,7 @@ def singletrial(num_trials, skipstep):
         yield trainset, testset
 
 
-def multitrial(num_trials, skipstep):
+def multitrial(num_trials, skipstep=1):
     """ Multi-trial cross-validation schema
 
     Use one trial for testing, all others for training.
@@ -61,7 +61,7 @@ def multitrial(num_trials, skipstep):
         yield trainset, testset
 
 
-def splitset(num_trials, skipstep):
+def splitset(num_trials, skipstep=None):
     """ Split-set cross validation
 
     Use half the trials for training, and the other half for testing. Then
@@ -105,7 +105,7 @@ def make_nfold(n):
     return partial(_nfold, n=n)
 
 
-def _nfold(num_trials, skipstep, n):
+def _nfold(num_trials, skipstep=None, n='unset'):
     blocksize = int(np.ceil(num_trials / n))
     for i in range(0, num_trials, blocksize):
         testset = [k for k in (i + np.arange(blocksize)) if k < num_trials]
