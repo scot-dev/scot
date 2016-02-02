@@ -99,7 +99,6 @@ class VARBase(object):
         """
         raise NotImplementedError('method optimize() is not implemented in ' +
                                   str(self))
-        return self
 
     def from_yw(self, acms):
         """ Determine VAR model from autocorrelation matrices by solving the
