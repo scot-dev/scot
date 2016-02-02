@@ -21,7 +21,7 @@ import scot
 import scotdata.motorimagery as midata
 
 raweeg = midata.eeg.T
-triggers = midata.triggers
+triggers = np.asarray(midata.triggers, dtype=int)
 classes = midata.classes
 fs = midata.samplerate
 locs = midata.locations
@@ -34,7 +34,7 @@ np.random.seed(42)
 # Set up analysis object
 #
 # We simply choose a VAR model order of 35, and reduction to 4 components.
-ws = scot.Workspace({'model_order': 35}, reducedim=4, fs=fs, locations=locs)
+ws = scot.Workspace({'model_order': 40}, reducedim=4, fs=fs, locations=locs)
 
 
 # Prepare data
