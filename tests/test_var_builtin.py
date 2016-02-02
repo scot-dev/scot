@@ -76,5 +76,8 @@ class TestVAR(unittest.TestCase):
 
         var = VAR(-1)
         for n_jobs in [None, -1, 1, 2]:
-            var.optimize_order(x, verbose=True, n_jobs=n_jobs)
+            var.optimize_order(x, n_jobs=n_jobs)
             self.assertEqual(var.p, 2)
+
+            var.optimize_order(x, min_p=1, max_p=1)
+            self.assertEqual(var.p, 1)
