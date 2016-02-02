@@ -103,11 +103,11 @@ def dot_special(x2d, x3d):
 
     Examples
     --------
-    >>> x = np.random.randn(150, 40, 6)
+    >>> x = np.random.randn(6, 40, 150)
     >>> a = np.ones((7, 40))
     >>> y = dot_special(a, x)
     >>> y.shape
-    (150, 7, 6)
+    (6, 7, 150)
     """
     x3d = atleast_3d(x3d)
     x2d = np.atleast_2d(x2d)
