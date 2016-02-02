@@ -53,7 +53,7 @@ class VAR(VARBase):
         VARBase.__init__(self, model_order)
         if fitobj is None:
             from sklearn.linear_model import LinearRegression
-            fitobj = LinearRegression()
+            fitobj = LinearRegression(fit_intercept=False)
         self.fitting_model = fitobj
 
     def fit(self, data):
