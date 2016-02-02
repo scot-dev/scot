@@ -96,5 +96,5 @@ class TestFunctions(unittest.TestCase):
 
         par, func = parallel_loop(f, n_jobs=None, verbose=10)
         self.assertEqual(stdout.getvalue().strip()[-8:], 'serially')
-        par, func = parallel_loop(f, n_jobs=-1, verbose=10)
+        par, func = parallel_loop(f, n_jobs=2, verbose=10)
         self.assertEqual(stdout.getvalue().strip()[-8:], 'parallel')
