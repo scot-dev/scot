@@ -33,7 +33,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-
+.idea
 
 # SCoT Specific
 scot/builtin/binica
