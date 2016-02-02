@@ -81,3 +81,40 @@ class TestVAR(unittest.TestCase):
 
             var.optimize_order(x, min_p=1, max_p=1)
             self.assertEqual(var.p, 1)
+
+    def test_bisection_overdetermined(self):
+        np.random.seed(42)
+        var0 = VAR(2)
+        var0.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        l = (100, 10)
+        x = var0.simulate(l)
+
+        var = VAR(2)
+        var.optimize_delta_bisection(x)
+
+         # nice data, so the regularization should not be too strong.
+        self.assertLess(var.delta, 10)
+
+    def test_bisection_underdetermined(self):
+        n_trials, n_samples = 10, 10
+        np.random.seed(42)
+        var0 = VAR(2)
+        var0.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
+        x = var0.simulate((n_samples, n_trials))
+        x = np.concatenate([x, np.random.randn(n_trials, 8, n_samples)], axis=1)
+
+        var = VAR(7)
+        var.optimize_delta_bisection(x)
+
+         # nice data, so the regularization should not be too weak.
+        self.assertGreater(var.delta, 10)
+
+    def test_bisection_invalid(self):
+        np.random.seed(42)
+        x = np.random.randn(10, 100, 10)
+
+        var = VAR(1)
+        var.optimize_delta_bisection(x)
+
+         # nice data, so the regularization should not be too strong.
+        self.assertEqual(var.delta, 0)
