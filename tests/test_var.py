@@ -28,6 +28,10 @@ class TestVAR(unittest.TestCase):
         self.assertEqual(x.shape, (l[1], 2, l[0]))
         return x, var
 
+    def test_abstract(self):
+        self.assertRaises(NotImplementedError, VAR(1).fit, [None])
+        self.assertRaises(NotImplementedError, VAR(1).optimize, [None])
+
     def test_simulate(self):
         noisefunc = lambda: [1, 1]   # use deterministic function instead of noise
         num_samples = 100
