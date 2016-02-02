@@ -7,7 +7,10 @@ LDA classification.
 from __future__ import print_function
 
 import numpy as np
-from sklearn.lda import LDA
+try:  # new in sklearn 0.19
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+except ImportError:
+    from sklearn.lda import LDA
 from sklearn.cross_validation import KFold
 from sklearn.metrics import confusion_matrix
 
