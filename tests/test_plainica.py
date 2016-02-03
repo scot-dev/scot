@@ -67,11 +67,3 @@ class TestICA(unittest.TestCase):
                     bestmix = estmix
 
             self.assertTrue(np.allclose(bestmix, mix, rtol=1e-1, atol=1e-1))
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()

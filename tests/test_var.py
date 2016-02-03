@@ -85,11 +85,3 @@ class TestVAR(unittest.TestCase):
         r[:,1,3:] = r[:,0,:-3]              # create cross-correlation at lag 3
         p = var.test_whiteness(20)
         self.assertLessEqual(p, 0.01)       # now test should be significant
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()

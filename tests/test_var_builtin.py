@@ -78,11 +78,3 @@ class TestVAR(unittest.TestCase):
         for n_jobs in [None, -1, 1, 2]:
             var.optimize_order(x, verbose=True, n_jobs=n_jobs)
             self.assertEqual(var.p, 2)
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()

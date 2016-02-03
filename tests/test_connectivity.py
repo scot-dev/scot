@@ -112,11 +112,3 @@ class TestFunctionality(unittest.TestCase):
         self.assertFalse(np.all(l(c.dDTF()) == l(c.dDTF()).T))
         # GDTF should equal DTF for identity noise covariance
         self.assertTrue(np.all(c.DTF() == c.GDTF()))
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()

@@ -86,6 +86,3 @@ class TestClasses(unittest.TestCase):
         ab = Construct.circle_intersect_circle(a, b)
         self.assertTrue(ab[0].vector.close(Point(0, 1, 1).vector))
         self.assertTrue(ab[1].vector.close(Point(0, 1, -1).vector))
-
-if __name__ == '__main__':
-    unittest.main()

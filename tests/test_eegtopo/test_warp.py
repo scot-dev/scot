@@ -51,4 +51,3 @@ class TestWarpLocations(unittest.TestCase):
         assert_allclose(warp_locations(eeglocs * scale + displace), eeglocs, atol=1e-10)
         warp = warp_locations(eeglocs * scale + displace + noise)
         assert_allclose(np.sum(warp**2, axis=1), 1, atol=1e-12)  # all locations on unit shpere
-

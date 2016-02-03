@@ -87,7 +87,3 @@ class TestFunctions(unittest.TestCase):
         # multiple return values
         par, func = parallel_loop(h, n_jobs=10, verbose=verbose)
         self.assertEqual(reh, par(func(i) for i in range(10)))
-
-
-if __name__ == '__main__':
-    unittest.main()

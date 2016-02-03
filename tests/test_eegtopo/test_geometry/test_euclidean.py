@@ -99,6 +99,3 @@ class TestVector(unittest.TestCase):
         self.assertTrue(v.rotate(0.5*np.pi, Vector(0, 0, 1)).close(Vector(-1, 0, 0)))
         self.assertTrue(v.rotate(0.5*np.pi, Vector(0, 0, 1)).close(Vector(0, -1, 0)))
         self.assertTrue(v.rotate(0.5*np.pi, Vector(0, 0, 1)).close(Vector(1, 0, 0)))
-
-if __name__ == '__main__':
-    unittest.main()
