@@ -78,11 +78,3 @@ class TestMVARICA(unittest.TestCase):
                         d = c
 
             assert_allclose(d, b0, rtol=1e-2, atol=1e-2)
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()

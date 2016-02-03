@@ -131,10 +131,3 @@ class TestDimensionalityReduction(unittest.TestCase):
         self.assertGreater(v1[1], v2[1])
         self.assertLess(v1[-2], v2[-2])
         self.assertLess(v1[-1], v2[-1])
-
-        
-def main():
-    unittest.main()
-
-if __name__ == '__main__':
-    main()

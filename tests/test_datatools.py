@@ -87,11 +87,3 @@ class TestRegressions(unittest.TestCase):
         self.assertEqual(datatools.cat_trials(np.random.randn(1, 2, 100)).ndim, 2)
         self.assertEqual(datatools.cat_trials(np.random.randn(2, 1, 100)).ndim, 2)
         self.assertEqual(datatools.cat_trials(np.random.randn(1, 1, 100)).ndim, 2)
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()

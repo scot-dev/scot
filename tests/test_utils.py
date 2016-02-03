@@ -89,7 +89,3 @@ def generate_backend(module):
 for bm in backend_modules:
     testname = 'TestBackend_' + bm.__name__.split('.')[-1]
     globals()[testname] = generate_backend(bm)
-
-
-if __name__ == '__main__':
-    unittest.main()

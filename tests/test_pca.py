@@ -120,11 +120,3 @@ class TestDimensionalityReduction(unittest.TestCase):
         w, v = pca(x, reducedim=5)
         c = np.cov(np.dot(w.T, x))
         self.assertTrue(np.allclose(c, np.diag([9, 8, 7, 6, 5]), rtol=1e-1, atol=1e-2))
-
-
-def main():
-    unittest.main()
-
-
-if __name__ == '__main__':
-    main()
