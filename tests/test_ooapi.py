@@ -237,3 +237,8 @@ class TestMVARICA(unittest.TestCase):
                 api.get_bootstrap_connectivity('PHI', plot=fig, repeats=5)
                 api.get_tf_connectivity('PHI', winlen=2, winstep=1, plot=fig)
                 api.compare_conditions([0], [1], 'PHI', plot=fig, repeats=5)
+
+    def testBackendRegression(self):
+        """Regression test for Github issue #103."""
+        ws = scot.Workspace({'model_order': 3}, backend=None)
+        self.assertIsNotNone(ws.backend_)

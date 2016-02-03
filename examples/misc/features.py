@@ -15,7 +15,6 @@ from sklearn.cross_validation import KFold
 from sklearn.metrics import confusion_matrix
 
 import scot
-import scot.backend_sklearn  # use scikit-learn backend
 import scot.xvschema
 
 # The data set contains a continuous 45 channel EEG recording of a motor
@@ -36,6 +35,10 @@ locs = midata.locations
 
 # Set random seed for repeatable results
 np.random.seed(42)
+
+
+# Switch backend to scikit-learn
+scot.backend.activate('sklearn')
 
 
 # Set up analysis object

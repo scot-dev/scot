@@ -52,7 +52,7 @@ for p in [22, 33]:
     print('Model order:', p)
 
     print('    Performing CSPVARICA')
-    var = scot.config.backend['var'](p)
+    var = scot.backend['var'](p)
     result = cspvarica(data, var, classes, m)
 
     if result.a.is_stable():

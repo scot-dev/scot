@@ -15,7 +15,7 @@ example usage of the low-level API.
 
 import numpy as np
 
-from . import backend
+from . import backend as global_backend
 from .varica import mvarica, cspvarica
 from .plainica import plainica
 from .datatools import dot_special, atleast_3d
@@ -76,7 +76,7 @@ class Workspace(object):
         self.locations_ = locations
         self.reducedim_ = reducedim
         self.nfft_ = nfft
-        self.backend_ = backend
+        self.backend_ = backend if backend is not None else global_backend
 
         self.trial_mask_ = []
 
@@ -93,9 +93,6 @@ class Workspace(object):
         self.plot_f_range = [0, fs/2]
 
         self._plotting = None
-
-        if self.backend_ is None:
-            self.backend_ = backend
 
         try:
             self.var_ = self.backend_['var'](**var)
