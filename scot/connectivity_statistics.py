@@ -40,7 +40,9 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
         How many surrogate samples to take.
     n_jobs : int | None
         number of jobs to run in parallel. See `joblib.Parallel` for details.
-        If set to None, joblib is not used at all.
+        If set to None, joblib is not used at all. Note that the main script
+        must be guarded with `if __name__ == '__main__':` when using
+        parallelization.
     verbose : int
         verbosity level passed to joblib.
 
@@ -96,6 +98,8 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
         Number of trials to leave out in each estimate.
     n_jobs : int | None
         number of jobs to run in parallel. See `joblib.Parallel` for details.
+        Note that the main script must be guarded with
+        `if __name__ == '__main__':` when using parallelization.
     verbose : int
         verbosity level passed to joblib.
 
@@ -158,6 +162,8 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
         same number of trials as present in the data.
     n_jobs : int | None
         number of jobs to run in parallel. See `joblib.Parallel` for details.
+        Note that the main script must be guarded with
+        `if __name__ == '__main__':` when using parallelization.
     verbose : int
         verbosity level passed to joblib.
 

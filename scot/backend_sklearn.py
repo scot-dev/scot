@@ -52,7 +52,9 @@ def generate():
             Instance of a linear model implementation.
         n_jobs : int | None
             Number of jobs to run in parallel for various tasks (e.g. whiteness
-            testing). If set to None, joblib is not used at all.
+            testing). If set to None, joblib is not used at all. Note that the
+            main script must be guarded with `if __name__ == '__main__':` when
+            using parallelization.
         verbose : int
             verbosity level passed to joblib.
         """

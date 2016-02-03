@@ -33,7 +33,9 @@ class VARBase(object):
         Autoregressive model order
     n_jobs : int | None
         Number of jobs to run in parallel for various tasks (e.g. whiteness
-        testing). If set to None, joblib is not used at all.
+        testing). If set to None, joblib is not used at all. Note that the main
+        script must be guarded with `if __name__ == '__main__':` when using
+        parallelization.
     verbose : int
         verbosity level passed to joblib.
 
@@ -390,7 +392,9 @@ def test_whiteness(data, h, p=0, repeats=100, get_q=False, n_jobs=1,
         Return Q statistic along with *p*-value
     n_jobs : int | None
         number of jobs to run in parallel. See `joblib.Parallel` for details.
-        If set to None, joblib is not used at all.
+        If set to None, joblib is not used at all. Note that the main script
+        must be guarded with `if __name__ == '__main__':` when using
+        parallelization.
     verbose : int
         verbosity level passed to joblib.
 

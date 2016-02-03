@@ -16,6 +16,10 @@ def parallel_loop(func, n_jobs=1, verbose=1):
         Number of jobs. If set to None, do not attempt to use joblib.
     verbose : int
         verbosity level
+
+    Notes
+    -----
+    Execution of the main script must be guarded with `if __name__ == '__main__':` when using parallelization.
     """
     try:
         if n_jobs:
