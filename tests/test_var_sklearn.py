@@ -25,16 +25,16 @@ class CommonTests(unittest.TestCase):
         pass
 
     def test_fit(self):
-        var = self.var
-        var.fit(self.x)
+        self.var.fit(self.x)
 
-        b0 = np.zeros_like(var.coef)
+        b0 = np.zeros_like(self.var.coef)
         b0[:, 0: 2] = self.var0.coef[:, 0:2]
-        b0[:, var.p: var.p + 2] = self.var0.coef[:, 2: 4]
+        b0[:, self.var.p: self.var.p + 2] = self.var0.coef[:, 2: 4]
 
-        assert_array_almost_equal(b0, var.coef, decimal=2)
-        self.assertEqual(self.x.shape, var.residuals.shape)
-        assert_array_almost_equal(var.rescov, np.eye(var.rescov.shape[0]), decimal=2)
+        assert_array_almost_equal(b0, self.var.coef, decimal=2)
+        self.assertEqual(self.x.shape, self.var.residuals.shape)
+        assert_array_almost_equal(self.var.rescov,
+                                  np.eye(self.var.rescov.shape[0]), decimal=2)
 
 
 class TestRidge(CommonTests):
