@@ -95,6 +95,7 @@ class Workspace(object):
         self._plotting = None
 
         if self.backend_ is None:
+            from . import backend
             self.backend_ = backend
 
         try:
