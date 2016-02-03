@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """
 Summary
@@ -15,7 +15,7 @@ example usage of the low-level API.
 
 import numpy as np
 
-from . import config
+from . import backend
 from .varica import mvarica, cspvarica
 from .plainica import plainica
 from .datatools import dot_special, atleast_3d
@@ -95,7 +95,7 @@ class Workspace(object):
         self._plotting = None
 
         if self.backend_ is None:
-            self.backend_ = config.backend
+            self.backend_ = backend
 
         try:
             self.var_ = self.backend_['var'](**var)

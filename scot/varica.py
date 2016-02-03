@@ -1,12 +1,12 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 import numpy as np
 
 from . import config
+from . import backend as scotbackend
 from .datatools import cat_trials, dot_special, atleast_3d
-from . import xvschema
 
 
 def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
@@ -75,7 +75,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
     t, m, l = np.shape(x)
 
     if backend is None:
-        backend = config.backend
+        backend = scotbackend
 
     # pre-transform the data with PCA
     if reducedim == 'no_pca':
@@ -202,7 +202,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
     t, m, l = np.shape(x)
     
     if backend is None:
-        backend = config.backend
+        backend = scotbackend
     
     # pre-transform the data with CSP
     #c, d, xcsp = backend['csp'](x, cl, reducedim)

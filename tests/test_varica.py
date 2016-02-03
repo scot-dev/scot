@@ -20,6 +20,12 @@ class TestMVARICA(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def testInterface(self):
+        self.assertRaises(TypeError, varica.mvarica)
+        # simply pass in different data shapes and see if the functions runs without error
+        varica.mvarica(np.sin(np.arange(30)).reshape((10, 3)), VAR(1))    # 10 samples, 3 channels
+        varica.mvarica(np.sin(np.arange(30)).reshape((5, 3, 2)), VAR(1))  # 5 samples, 3 channels, 2 trials
+
     def testModelIdentification(self):
         """ generate VAR signals, mix them, and see if MVARICA can reconstruct the signals
             do this for every backend """
@@ -44,17 +50,12 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(np.transpose(mix), sources)
 
-        backend_modules = [import_module('scot.' + b) for b in scot.backends]
-        #backend_modules = [import_module('scot.backend_sklearn')]
-        #backend_modules = [import_module('scot.backend_builtin')]
-
-        for bm in backend_modules:
+        for backend_name, backend_gen in scot.backend.items():
 
             # apply MVARICA
             #  - default setting of 0.99 variance should reduce to 3 channels with this data
             #  - automatically determine delta (enough data, so it should most likely be 0)
-            result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
-            #result = varica.mvarica(data, var, optimize_var=True, backend=bm.backend)
+            result = varica.mvarica(data, var, optimize_var=True, backend=backend_gen())
 
             # ICA does not define the ordering and sign of components
             # so wee need to test all combinations to find if one of them fits the original coefficients
@@ -78,3 +79,19 @@ class TestMVARICA(unittest.TestCase):
                         d = c
 
             assert_allclose(d, b0, rtol=1e-2, atol=1e-2)
+
+
+class TestCSPVARICA(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def testInterface(self):
+        self.assertRaises(TypeError, varica.cspvarica)
+        # simply pass in different data shapes and see if the functions runs without error
+        self.assertRaises(AttributeError, varica.cspvarica, np.sin(np.arange(30)).reshape((10, 3)), VAR(1), [0])
+        varica.cspvarica(np.sin(np.arange(30)).reshape((2, 3, 5)), VAR(1), ['A', 'B'])  # 5 samples, 3 channels, 2 trials
+
+

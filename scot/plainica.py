@@ -7,7 +7,7 @@
 
 import numpy as np
 
-from . import config
+from . import backend as scotbackend
 from .datatools import cat_trials, atleast_3d
 
 
@@ -53,7 +53,7 @@ def plainica(x, reducedim=0.99, backend=None):
     t, m, l = np.shape(x)
 
     if backend is None:
-        backend = config.backend
+        backend = scotbackend
 
     # pre-transform the data with PCA
     if reducedim == 'no pca':

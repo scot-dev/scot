@@ -1,12 +1,12 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2014 SCoT Development Team
+# Copyright (c) 2014-2015 SCoT Development Team
 
 import unittest
 
 import numpy as np
 
-from scot.backend_builtin import VAR
+from scot.var import VAR
 import scot.connectivity_statistics as cs
 
 

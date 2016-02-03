@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2015 SCoT Development Team
 
 """ Vector autoregressive (VAR) model implementation
 """
@@ -13,6 +13,7 @@ from .varbase import VARBase, _construct_var_eqns
 from .datatools import cat_trials, atleast_3d
 from . import xvschema as xv
 from .parallel import parallel_loop
+from . import config
 
 
 class VAR(VARBase):
@@ -123,7 +124,7 @@ class VAR(VARBase):
         self.p = prange[np.argmin(msge)]
         return zip(prange, msge)
 
-    def optimize_delta_bisection(self, data, skipstep=1):
+    def optimize_delta_bisection(self, data, skipstep=1, verbose=None):
         """ Find optimal ridge penalty with bisection search.
         
         Parameters
@@ -146,6 +147,9 @@ class VAR(VARBase):
         t, m, l = data.shape
         assert (t > 1)
 
+        if verbose is None:
+            verbose = config.getboolean('scot', 'verbose')
+
         maxsteps = 10
         maxdelta = 1e50
 
@@ -161,14 +165,15 @@ class VAR(VARBase):
 
         # before starting the real bisection, assure the interval contains 0
         while sp.sign(ka) == sp.sign(kb):
-            print('Bisection initial interval (%f,%f) does not contain zero. '
-                  'New interval: (%f,%f)' % (a, b, a * 2, b * 2))
+            if verbose:
+                print('Bisection initial interval (%f,%f) does not contain zero. '
+                      'New interval: (%f,%f)' % (a, b, a * 2, b * 2))
             a *= 2
             b *= 2
             (ja, ka) = msge(data, trform(a), self.xvschema, skipstep, self.p)
             (jb, kb) = msge(data, trform(b), self.xvschema, skipstep, self.p)
 
-            if trform(b) >= maxdelta:
+            if trform(b) >= maxdelta and verbose:
                 print('Bisection: could not find initial interval.')
                 print(' ********* Delta set to zero! ************ ')
                 return 0
@@ -188,11 +193,13 @@ class VAR(VARBase):
 
             nsteps += 1
             tmp = trform([a, b, a + (b - a) * np.abs(ka) / np.abs(kb - ka)])
-            print('%d Bisection Interval: %f - %f, (projected: %f)' %
-                  (nsteps, tmp[0], tmp[1], tmp[2]))
+            if verbose:
+                print('%d Bisection Interval: %f - %f, (projected: %f)' %
+                      (nsteps, tmp[0], tmp[1], tmp[2]))
 
         self.delta = trform(a + (b - a) * np.abs(ka) / np.abs(kb - ka))
-        print('Final point: %f' % self.delta)
+        if verbose:
+            print('Final point: %f' % self.delta)
         return self
         
     optimize = optimize_delta_bisection

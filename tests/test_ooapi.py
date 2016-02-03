@@ -62,13 +62,9 @@ class TestMVARICA(unittest.TestCase):
                [0.0, 0.0, 0.0, 0.2, 0.5, 1.0, 0.5]]
         data = datatools.dot_special(np.transpose(mix), sources)
 
-        backup = scot.config.backend.copy()
-        backend_modules = [import_module('scot.' + b) for b in scot.backends]
-        scot.config.backend = backup
+        for backend_name, backend_gen in scot.backend.items():
 
-        for bm in backend_modules:
-
-            api = scot.Workspace({'model_order': 2}, backend=bm.backend)
+            api = scot.Workspace({'model_order': 2}, backend=backend_gen())
 
             api.set_data(data)
 
@@ -144,14 +140,10 @@ class TestMVARICA(unittest.TestCase):
         data = datatools.dot_special(np.transpose(mix), sources)
         data += np.random.randn(*data.shape) * 0.001  # add small noise
 
-        backup = scot.config.backend.copy()
-        backend_modules = [import_module('scot.' + b) for b in scot.backends]
-        scot.config.backend = backup
-
-        for bm in backend_modules:
+        for backend_name, backend_gen in scot.backend.items():
             np.random.seed(3141592)  # reset random seed so we're independent of module order
 
-            api = scot.Workspace({'model_order': 2}, reducedim=3, backend=bm.backend)
+            api = scot.Workspace({'model_order': 2}, reducedim=3, backend=backend_gen())
 
             api.set_data(data)
 
