@@ -82,7 +82,7 @@ class VAR(VARBase):
 
         return self
 
-    def optimize_order(self, data, min_p=1, max_p=None, n_jobs=1, verbose=0):
+    def optimize_order(self, data, min_p=1, max_p=None):
         """ Determine optimal model order by cross-validating the mean-squared
         generalization error.
 
@@ -95,12 +95,6 @@ class VAR(VARBase):
             minimal model order to check
         max_p : int
             maximum model order to check
-        n_jobs : int | None
-            number of jobs to run in parallel. See `joblib.Parallel` for
-            details. Note that the main script must be guarded with
-            `if __name__ == '__main__':` when using parallelization.
-        verbose : int
-            verbosity level passed to joblib.
         """
         data = np.asarray(data)
         if data.shape[0] < 2:
@@ -108,14 +102,14 @@ class VAR(VARBase):
 
         msge, prange = [], []
 
-        par, func = parallel_loop(_get_msge_with_gradient,
-                                  n_jobs=n_jobs, verbose=verbose)
-        if not n_jobs:
+        par, func = parallel_loop(_get_msge_with_gradient, n_jobs=self.n_jobs,
+                                  verbose=self.verbose)
+        if self.n_jobs is None:
             npar = 1
-        elif n_jobs < 0:
+        elif self.n_jobs < 0:
                 npar = 4  # is this a sane default?
         else:
-            npar = n_jobs
+            npar = self.n_jobs
 
         p = min_p
         while True:
