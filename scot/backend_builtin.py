@@ -5,17 +5,15 @@
 """Use internally implemented functions as backend."""
 
 from __future__ import absolute_import
+import scipy as sp
 
 from . import backend
+from . import datatools, pca, csp
+from .var import VAR
+from .external.infomax_ import infomax
 
 
 def generate():
-    import scipy as sp
-
-    from . import datatools, pca, csp
-    from .var import VAR
-    from .external.infomax_ import infomax
-
     def wrapper_infomax(data):
         """Call Infomax (adapted from MNE) for ICA calculation."""
         u = infomax(datatools.cat_trials(data).T).T
