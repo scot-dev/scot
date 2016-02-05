@@ -14,7 +14,7 @@ from .utils import cartesian
 from .parallel import parallel_loop
 
 
-def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
+def surrogate_connectivity(measures, data, var, nfft=512, repeats=100,
                            n_jobs=1, verbose=0):
     """Calculate surrogate connectivity for a multivariate time series by phase
     randomization [1]_.
@@ -24,7 +24,7 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
 
     Parameters
     ----------
-    measure_names : str or list of str
+    measures : str or list of str
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
     data : array, shape (trials, channels, samples) or (channels, samples)
@@ -54,9 +54,9 @@ def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
            method of surrogate data. Physica D, 58: 77-94, 1992.
     """
     par, func = parallel_loop(_calc_surrogate, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(randomize_phase(data), var, measure_names, nfft)
+    output = par(func(randomize_phase(data), var, measures, nfft)
                  for _ in range(repeats))
-    return convert_output_(output, measure_names)
+    return convert_output_(output, measures)
 
 
 def _calc_surrogate(data, var, measure_names, nfft):
@@ -64,7 +64,7 @@ def _calc_surrogate(data, var, measure_names, nfft):
     return connectivity(measure_names, var.coef, var.rescov, nfft)
 
 
-def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
+def jackknife_connectivity(measures, data, var, leaveout=1, nfft=512,
                            n_jobs=1, verbose=0):
     """Calculate jackknife estimates of connectivity.
 
@@ -78,13 +78,15 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
 
     Parameters
     ----------
-    measure_names : str or list of str
+    measures : str or list of str
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
     data : array, shape (trials, channels, samples)
         Time series data (multiple trials).
     var : VARBase-like object
         Instance of a VAR model.
+    leaveout : int, optional
+        Number of trials to leave out in each estimate.
     nfft : int, optional
         Number of frequency bins to calculate. Note that these points cover the
         range between 0 and half the sampling rate.
@@ -118,9 +120,9 @@ def jackknife_connectivity(measure_names, data, var, nfft=512, leaveout=1,
                                                  i >= (block + 1) * leaveout]
 
     par, func = parallel_loop(_calc_jackknife, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(data[mask(b), :, :], var, measure_names, nfft)
+    output = par(func(data[mask(b), :, :], var, measures, nfft)
                  for b in range(num_blocks))
-    return convert_output_(output, measure_names)
+    return convert_output_(output, measures)
 
 
 def _calc_jackknife(data_used, var, measure_names, nfft):
@@ -128,8 +130,8 @@ def _calc_jackknife(data_used, var, measure_names, nfft):
     return connectivity(measure_names, var.coef, var.rescov, nfft)
 
 
-def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
-                           num_samples=None, n_jobs=1, verbose=0):
+def bootstrap_connectivity(measures, data, var, num_samples=None, repeats=100,
+                           nfft=512, n_jobs=1, verbose=0):
     """Calculate bootstrap estimates of connectivity.
 
     To obtain a bootstrap estimate trials are sampled randomly with replacement
@@ -140,18 +142,21 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
 
     Parameters
     ----------
-    measure_names : str or list of str
+    measures : str or list of str
         Name(s) of the connectivity measure(s) to calculate. See
         :class:`Connectivity` for supported measures.
     data : array, shape (trials, channels, samples)
         Time series data (multiple trials).
     var : VARBase-like object
         Instance of a VAR model.
-    repeats : int, optional
-        Number of bootstrap estimates to take.
     num_samples : int, optional
         Number of samples to take for each bootstrap estimates. Defaults to the
         same number of trials as present in the data.
+    repeats : int, optional
+        Number of bootstrap estimates to take.
+    nfft : int, optional
+        Number of frequency bins to calculate. Note that these points cover the
+        range between 0 and half the sampling rate.
     n_jobs : int | None, optional
         Number of jobs to run in parallel. If set to None, joblib is not used
         at all. See `joblib.Parallel` for details.
