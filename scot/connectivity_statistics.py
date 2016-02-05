@@ -64,8 +64,8 @@ def _calc_surrogate(data, var, measure_names, nfft):
     return connectivity(measure_names, var.coef, var.rescov, nfft)
 
 
-def jackknife_connectivity(measures, data, var, leaveout=1, nfft=512,
-                           n_jobs=1, verbose=0):
+def jackknife_connectivity(measures, data, var, nfft=512, leaveout=1, n_jobs=1,
+                           verbose=0):
     """Calculate jackknife estimates of connectivity.
 
     For each jackknife estimate a block of trials is left out. This is repeated
@@ -85,8 +85,6 @@ def jackknife_connectivity(measures, data, var, leaveout=1, nfft=512,
         Time series data (multiple trials).
     var : VARBase-like object
         Instance of a VAR model.
-    leaveout : int, optional
-        Number of trials to leave out in each estimate.
     nfft : int, optional
         Number of frequency bins to calculate. Note that these points cover the
         range between 0 and half the sampling rate.
@@ -130,8 +128,8 @@ def _calc_jackknife(data_used, var, measure_names, nfft):
     return connectivity(measure_names, var.coef, var.rescov, nfft)
 
 
-def bootstrap_connectivity(measures, data, var, num_samples=None, repeats=100,
-                           nfft=512, n_jobs=1, verbose=0):
+def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
+                           num_samples=None, n_jobs=1, verbose=0):
     """Calculate bootstrap estimates of connectivity.
 
     To obtain a bootstrap estimate trials are sampled randomly with replacement
@@ -149,15 +147,16 @@ def bootstrap_connectivity(measures, data, var, num_samples=None, repeats=100,
         Time series data (multiple trials).
     var : VARBase-like object
         Instance of a VAR model.
-    num_samples : int, optional
-        Number of samples to take for each bootstrap estimates. Defaults to the
-        same number of trials as present in the data.
-    repeats : int, optional
-        Number of bootstrap estimates to take.
     nfft : int, optional
         Number of frequency bins to calculate. Note that these points cover the
         range between 0 and half the sampling rate.
-    n_jobs : int | None, optional
+    repeats : int, optional
+        Number of bootstrap estimates to take.
+    num_samples : int, optional
+        Number of samples to take for each bootstrap estimates. Defaults to the
+        same number of trials as present in the data.
+    n_jobs : int, optional
+        n_jobs : int | None, optional
         Number of jobs to run in parallel. If set to None, joblib is not used
         at all. See `joblib.Parallel` for details.
     verbose : int, optional

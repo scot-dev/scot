@@ -40,8 +40,8 @@ class TestFunctions(unittest.TestCase):
         np.random.seed(31415)
         x, var0 = self.generate_data()
 
-        result = cs.jackknife_connectivity('PDC', x, VAR(2), leaveout=1,
-                                           nfft=4)
+        result = cs.jackknife_connectivity('PDC', x, VAR(2), nfft=4,
+                                           leaveout=1)
         self.assertEqual(result.shape, (100, 2, 2, 4))
 
         structure = np.mean(np.mean(result, axis=3), axis=0)
@@ -52,8 +52,8 @@ class TestFunctions(unittest.TestCase):
         np.random.seed(31415)
         x, var0 = self.generate_data()
 
-        result = cs.bootstrap_connectivity('PDC', x, VAR(2), repeats=100,
-                                           nfft=4)
+        result = cs.bootstrap_connectivity('PDC', x, VAR(2), nfft=4,
+                                           repeats=100)
         self.assertEqual(result.shape, (100, 2, 2, 4))
 
         structure = np.mean(np.mean(result, axis=3), axis=0)
@@ -64,12 +64,12 @@ class TestFunctions(unittest.TestCase):
         # Generate reference data
         np.random.seed(31415)
         x, var0 = self.generate_data()
-        a = cs.bootstrap_connectivity('PDC', x, VAR(2), repeats=100, nfft=4)
+        a = cs.bootstrap_connectivity('PDC', x, VAR(2), nfft=4, repeats=100)
 
         # Similar to reference data ==> no significant differences expected
         np.random.seed(12345)
         x, var0 = self.generate_data()
-        b = cs.bootstrap_connectivity('PDC', x, VAR(2), repeats=100, nfft=4)
+        b = cs.bootstrap_connectivity('PDC', x, VAR(2), nfft=4, repeats=100)
         p = cs.test_bootstrap_difference(a, b)
         self.assertFalse(np.any(p < 0.01))  # TODO: np.all?
         self.assertFalse(np.any(cs.significance_fdr(p, 0.05)))  # TODO: np.all?
@@ -77,8 +77,8 @@ class TestFunctions(unittest.TestCase):
         # Trials rearranged ==> no significant differences expected
         np.random.seed(12345)
         x, var0 = self.generate_data()
-        b = cs.bootstrap_connectivity('PDC', x[::-1, :, :], VAR(2),
-                                      repeats=100, nfft=4)
+        b = cs.bootstrap_connectivity('PDC', x[::-1, :, :], VAR(2), nfft=4,
+                                      repeats=100)
         p = cs.test_bootstrap_difference(a, b)
         self.assertFalse(np.any(p < 0.01))
         self.assertFalse(np.any(cs.significance_fdr(p, 0.05)))
@@ -86,8 +86,8 @@ class TestFunctions(unittest.TestCase):
         # Channels rearranged ==> highly significant differences expected
         np.random.seed(12345)
         x, var0 = self.generate_data()
-        b = cs.bootstrap_connectivity('PDC', x[1, ::-1, :], VAR(2),
-                                      repeats=100, nfft=4)
+        b = cs.bootstrap_connectivity('PDC', x[1, ::-1, :], VAR(2), nfft=4,
+                                      repeats=100)
         p = cs.test_bootstrap_difference(a, b)
         self.assertTrue(np.all(p < 0.0001))
         self.assertTrue(np.all(cs.significance_fdr(p, 0.01)))
@@ -95,8 +95,8 @@ class TestFunctions(unittest.TestCase):
         # Time reversed ==> highly significant differences expected
         np.random.seed(12345)
         x, var0 = self.generate_data()
-        b = cs.bootstrap_connectivity('PDC', x[1, :, ::-1], VAR(2),
-                                      repeats=100, nfft=4)
+        b = cs.bootstrap_connectivity('PDC', x[1, :, ::-1], VAR(2), nfft=4,
+                                      repeats=100)
         p = cs.test_bootstrap_difference(a, b)
         self.assertTrue(np.all(p < 0.0001))
         self.assertTrue(np.all(cs.significance_fdr(p, 0.01)))
