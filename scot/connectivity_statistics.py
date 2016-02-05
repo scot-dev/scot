@@ -182,7 +182,7 @@ def bootstrap_connectivity(measures, data, var, num_samples=None, repeats=100,
     mask = lambda r: np.random.random_integers(0, data.shape[0]-1, num_samples)
 
     par, func = parallel_loop(_calc_bootstrap, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(data[mask(r), :, :], var, measures, nfft, num_samples)
+    output = par(func(data[mask(r), :, :], var, measures, nfft)
                  for r in range(repeats))
     return convert_output_(output, measures)
 
