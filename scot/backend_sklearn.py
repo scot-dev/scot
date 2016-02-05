@@ -5,19 +5,17 @@
 """Use scikit-learn routines as backend."""
 
 from __future__ import absolute_import
+import scipy as sp
 
-from .datatools import atleast_3d, cat_trials
+from .datatools import atleast_3d, cat_trials, dot_special
 from . import backend
+from . import backend_builtin as builtin
+from .varbase import VARBase
 
 
 def generate():
     from sklearn.decomposition import FastICA
     from sklearn.decomposition import PCA
-
-    import scipy as sp
-    from . import backend_builtin as builtin
-    from . import datatools
-    from .varbase import VARBase
 
     def wrapper_fastica(data):
         """Call FastICA implementation from scikit-learn."""
@@ -33,7 +31,7 @@ def generate():
         pca.fit(cat_trials(x).T)
         d = pca.components_
         c = pca.components_.T
-        y = datatools.dot_special(c.T, x)
+        y = dot_special(c.T, x)
         return c, d, y
 
     class VAR(VARBase):
