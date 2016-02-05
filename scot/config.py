@@ -1,6 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2015 SCoT Development Team
+# Copyright (c) 2013-2016 SCoT Development Team
 
 import os
 
@@ -20,5 +20,5 @@ def load_configuration():
     config = ConfigParser()
     files = config.read(config_files)
     if not files:
-        raise ValueError('Could not parse configuration!')
+        raise ValueError('Could not parse configuration.')
     return config
