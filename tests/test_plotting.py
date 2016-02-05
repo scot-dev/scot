@@ -24,7 +24,7 @@ class TestFunctionality(unittest.TestCase):
         self.maps = sp.prepare_topoplots(self.topo, self.vals)
 
     def tearDown(self):
-        pass
+        plt.close('all')
 
     def test_topoplots(self):
         locs, vals, topo, maps = self.locs, self.vals, self.topo, self.maps
