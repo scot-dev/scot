@@ -41,6 +41,10 @@ if [[ "$DISTRIB" == "conda" ]]; then
         # Make sure that MKL is used
         conda install --yes libgfortran
     fi
+    
+    echo "*** DEBUG ***"
+    echo `mdfind -name libmkl_avx`
+    echo `mdfind -name libmkl_avx.no`
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
