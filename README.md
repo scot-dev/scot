@@ -50,3 +50,7 @@ etc.
 
 
 Note that you need to obtain the example data from https://github.com/SCoT-dev/scot-data. The scot-data package must be on Python's search path.
+
+Note
+----
+As of version 0.2, the data format in all SCoT routines has changed. It is now consistent with Scipy and MNE-Python. Specifically, epoched input data is now arranged in three-dimensional arrays of shape `(epochs, channels, samples)`. In addition, continuous data is now arranged in two-dimensional arrays of shape `(channels, samples)`.
