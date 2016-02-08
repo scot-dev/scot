@@ -31,10 +31,10 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     if [[ "$INSTALL_MKL" == "true" ]]; then
         # Make sure that MKL is used
-        conda install --yes mkl
+        conda install --yes mkl mkl-rt
     else
         # Make sure that MKL is not used
-        conda remove --yes --features mkl || echo "MKL not installed"
+        conda remove --yes --features mkl mkl-rt || echo "MKL not installed"
     fi
 
     if [[ "$INSTALL_FORTRAN" == "true" ]]; then
