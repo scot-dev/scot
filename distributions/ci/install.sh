@@ -42,9 +42,9 @@ if [[ "$DISTRIB" == "conda" ]]; then
         conda install --yes libgfortran
     fi
     
-    conda install numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION \
-          scikit-learn=$SKLEARN_VERSION \
-          matplotlib=$MATPLOTLIB_VERSION
+    conda --yes install numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION \
+                scikit-learn=$SKLEARN_VERSION \
+                matplotlib=$MATPLOTLIB_VERSION
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
