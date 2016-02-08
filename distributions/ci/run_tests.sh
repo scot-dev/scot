@@ -4,7 +4,7 @@
 # The behavior of the script is controlled by environment variabled defined
 # in the .travis.yml in the top level folder of the project.
 
-echo "Running tests..."
+echo "Entering run_tests.sh"
 
 if [[ "$INSTALL_SCOT" == "true" ]]; then
     python setup.py install
@@ -14,12 +14,15 @@ fi
 export LD_LIBRARY_PATH=/home/travis/miniconda3/envs/testenv/lib:$LD_LIBRARY_PATH
 
 if [[ "$COVERAGE" == "true" ]]; then
+    echo "Running tests with coverage."
     xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
 else
+    echo "Running tests without coverage."
     xvfb-run --server-args="-screen 0 1024x768x24" nosetests;
 fi
 
 if [[ "$RUN_EXAMPLES" == "true" ]]; then
+    echo "Running examples."
     if [[ "$INSTALL_SCOT" == "true" ]]; then
         xvfb-run --server-args="-screen 0 1024x768x24" find ../examples -type f -iname "*\.py" -exec python {} \;
     else
@@ -27,4 +30,4 @@ if [[ "$RUN_EXAMPLES" == "true" ]]; then
     fi
 fi
 
-echo "Running tests... done."
+echo "Leaving run_tests.sh"
