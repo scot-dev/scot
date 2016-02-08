@@ -79,11 +79,9 @@ class VAR(VARBase):
 
         Parameters
         ----------
-        data : array-like
-            shape = [n_trials, n_samples, n_channels] or
-            [n_channels, n_samples]
-            Continuous or segmented data set on which to optimize the model
-            order.
+        data : array-like, shape (n_trials, n_samples, n_channels)
+            Segmented data set on which to optimize the model order. At least 2
+            trials are required.
         min_p : int
             minimal model order to check
         max_p : int
@@ -95,7 +93,9 @@ class VAR(VARBase):
             verbosity level passed to joblib.
         """
         data = np.asarray(data)
-        assert (data.shape[0] > 1)
+        if data.shape[0] < 2:
+            raise ValueError("At least 2 trials are required.")
+
         msge, prange = [], []
 
         par, func = parallel_loop(_get_msge_with_gradient,
@@ -129,10 +129,8 @@ class VAR(VARBase):
         
         Parameters
         ----------
-        data : array-like
-            shape = [n_trials, n_samples, n_channels] or
-            [n_channels, n_samples]
-            Continuous or segmented data set.
+        data : array, shape (n_trials, n_samples, n_channels)
+            Segmented data set. At least 2 trials are required.
         skipstep : int, optional
             Speed up calculation by skipping samples during cost function
             calculation
@@ -143,9 +141,9 @@ class VAR(VARBase):
             The :class:`VAR` object to facilitate method chaining (see usage
             example)
         """
-        data = sp.atleast_3d(data)
-        t, m, l = data.shape
-        assert (t > 1)
+        data = atleast_3d(data)
+        if data.shape[0] < 2:
+            raise ValueError("At least 2 trials are required.")
 
         if verbose is None:
             verbose = config.getboolean('scot', 'verbose')
