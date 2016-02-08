@@ -22,6 +22,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
     chmod +x miniconda.sh && ./miniconda.sh -b
     export PATH=/home/travis/miniconda3/bin:$PATH
     conda update --yes conda
+    
+    conda info
 
     # Configure the conda environment and put it in the path using the
     # provided versions
@@ -42,9 +44,13 @@ if [[ "$DISTRIB" == "conda" ]]; then
         conda install --yes libgfortran
     fi
     
+    conda info
+    
     conda install --yes numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION \
                         scikit-learn=$SKLEARN_VERSION \
                         matplotlib=$MATPLOTLIB_VERSION
+                        
+    conda info
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
