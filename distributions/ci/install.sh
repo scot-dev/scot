@@ -51,6 +51,9 @@ if [[ "$DISTRIB" == "conda" ]]; then
                         matplotlib=$MATPLOTLIB_VERSION
                         
     conda info
+    
+    ls /home/travis/miniconda3
+    ls /home/travis/miniconda3/libs
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
