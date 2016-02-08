@@ -4,6 +4,7 @@
 # The behavior of the script is controlled by environment variabled defined
 # in the .travis.yml in the top level folder of the project.
 
+echo "Running tests..."
 
 if [[ "$INSTALL_SCOT" == "true" ]]; then
     python setup.py install
@@ -25,3 +26,5 @@ if [[ "$RUN_EXAMPLES" == "true" ]]; then
         PYTHONPATH=. xvfb-run --server-args="-screen 0 1024x768x24" find examples -type f -iname "*\.py" -exec python {} \;
     fi
 fi
+
+echo "Running tests... done."
