@@ -205,7 +205,7 @@ class VAR(VARBase):
     def _construct_eqns_rls(self, data):
         """Construct VAR equation system with RLS constraint.
         """
-        return _construct_var_eqns_rls(data, self.p, self.delta)
+        return _construct_var_eqns(data, self.p, self.delta)
 
 
 def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
@@ -297,23 +297,3 @@ def _get_msge_with_gradient(data, delta, xvschema, skipstep, p):
     else:
         return _msge_with_gradient_overdetermined(data, delta, xvschema,
                                                   skipstep, p)
-
-
-def _construct_var_eqns_rls(data, p, delta):
-        """Construct VAR equation system with RLS constraint.
-        """
-        (t, m, l) = sp.shape(data)
-        n = (l - p) * t     # number of linear relations
-        # Construct matrix x (predictor variables)
-        x = sp.zeros((n + m * p, m * p))
-        for i in range(m):
-            for k in range(1, p + 1):
-                x[:n, i * p + k - 1] = sp.reshape(data[:, i, p - k:-k].T, n)
-        sp.fill_diagonal(x[n:, :], delta)
-
-        # Construct vectors yi (response variables for each channel i)
-        y = sp.zeros((n + m * p, m))
-        for i in range(m):
-            y[:n, i] = sp.reshape(data[:, i, p:].T, n)
-
-        return x, y

@@ -7,13 +7,9 @@
 
 from __future__ import division
 
-import numbers
-from functools import partial
-
 import numpy as np
 import scipy as sp
 
-from . import datatools
 from . import xvschema as xv
 from .utils import acm
 from .datatools import cat_trials
@@ -332,21 +328,25 @@ class VARBase(object):
 ############################################################################
 
 
-def _construct_var_eqns(data, p):
-        """ Construct VAR equation system
+def _construct_var_eqns(data, p, delta=None):
+        """Construct VAR equation system (optionally with RLS constraint).
         """
-        (t, m, l) = np.shape(data)
-        n = (l - p) * t     # number of linear relations
+        t, m, l = np.shape(data)
+        n = (l - p) * t  # number of linear relations
+        rows = n if delta is None else n + m * p
+
         # Construct matrix x (predictor variables)
-        x = np.zeros((n, m * p))
+        x = np.zeros((rows, m * p))
         for i in range(m):
             for k in range(1, p + 1):
-                x[:, i * p + k - 1] = np.reshape(data[:, i, p - k:-k].T, n)
+                x[:n, i * p + k - 1] = np.reshape(data[:, i, p - k:-k].T, n)
+        if delta is not None:
+            np.fill_diagonal(x[n:, :], delta)
 
         # Construct vectors yi (response variables for each channel i)
-        y = np.zeros((n, m))
+        y = np.zeros((rows, m))
         for i in range(m):
-            y[:, i] = np.reshape(data[:, i, p:].T, n)
+            y[:n, i] = np.reshape(data[:, i, p:].T, n)
 
         return x, y
 
