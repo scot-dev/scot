@@ -31,6 +31,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # Configure the conda environment and put it in the path using the
     # provided versions
     
+    conda remove --yes --features mkl || echo "MKL feature removed"
+    
     if [[ "$INSTALL_MKL" == "true" ]]; then
         conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
             numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
