@@ -25,8 +25,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     # Configure the conda environment and put it in the path using the
     # provided versions
-    conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-        numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
+    conda create -n testenv --yes python=$PYTHON_VERSION pip nose
     source activate testenv
 
     if [[ "$INSTALL_MKL" == "true" ]]; then
@@ -42,6 +41,10 @@ if [[ "$DISTRIB" == "conda" ]]; then
         # Make sure that MKL is used
         conda install --yes libgfortran
     fi
+    
+    conda install numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION \
+          scikit-learn=$SKLEARN_VERSION \
+          matplotlib=$MATPLOTLIB_VERSION
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
