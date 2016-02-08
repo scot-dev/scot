@@ -34,17 +34,14 @@ if [[ "$DISTRIB" == "conda" ]]; then
         conda install --yes mkl mkl-rt
     else
         # Make sure that MKL is not used
-        conda remove --yes --features mkl mkl-rt || echo "MKL not installed"
+        conda remove --yes --features mkl || echo "MKL feature removed"
+        conda remove --yes mkl mkl-rt || echo "MKL libraries removed"
     fi
 
     if [[ "$INSTALL_FORTRAN" == "true" ]]; then
         # Make sure that MKL is used
         conda install --yes libgfortran
     fi
-    
-    echo "*** DEBUG ***"
-    echo `mdfind -name libmkl_avx`
-    echo `mdfind -name libmkl_avx.no`
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
