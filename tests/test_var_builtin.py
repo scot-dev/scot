@@ -116,5 +116,5 @@ class TestVAR(unittest.TestCase):
         var = VAR(1)
         var.optimize_delta_bisection(x)
 
-         # nice data, so the regularization should not be too strong.
+        # totally ugly data, should be unable to find reasonable regularization.
         self.assertEqual(var.delta, 0)
