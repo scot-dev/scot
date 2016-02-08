@@ -14,33 +14,57 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # Deactivate the travis-provided virtual environment and setup a
     # conda-based environment instead
     deactivate
+    
+    pushd .
 
     # Use the miniconda installer for faster download / install of conda
     # itself
-    wget http://repo.continuum.io/miniconda/Miniconda-2.2.2-Linux-x86_64.sh \
+    wget http://repo.continuum.io/miniconda/Miniconda-3.6.0-Linux-x86_64.sh \
         -O miniconda.sh
     chmod +x miniconda.sh && ./miniconda.sh -b
-    export PATH=/home/travis/anaconda/bin:$PATH
+    cd ..
+    export PATH=/home/travis/miniconda/bin:$PATH
     conda update --yes conda
+    
+    popd
 
     # Configure the conda environment and put it in the path using the
     # provided versions
-    conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-        numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
+    
+    conda remove --yes --features mkl || echo "MKL feature removed"
+    
+    if [[ "$INSTALL_MKL" == "true" ]]; then
+        conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
+            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
+            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
+            libgfortran mkl
+    else
+        conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
+            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
+            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
+            libgfortran
+    fi
     source activate testenv
 
-    if [[ "$INSTALL_MKL" == "true" ]]; then
-        # Make sure that MKL is used
-        conda install --yes mkl
-    else
-        # Make sure that MKL is not used
-        conda remove --yes --features mkl || echo "MKL not installed"
-    fi
+    #if [[ "$INSTALL_MKL" == "true" ]]; then
+    #    # Make sure that MKL is used
+    #    conda install --yes mkl mkl-rt
+    #else
+    #    # Make sure that MKL is not used
+    #    conda remove --yes --features mkl || echo "MKL feature removed"
+    #    conda remove --yes mkl mkl-rt || echo "MKL libraries removed"
+    #fi
 
-    if [[ "$INSTALL_FORTRAN" == "true" ]]; then
-        # Make sure that MKL is used
-        conda install --yes libgfortran
-    fi
+    #if [[ "$INSTALL_FORTRAN" == "true" ]]; then
+    #    # Make sure that MKL is used
+    #    conda install --yes libgfortran
+    #fi
+                        
+    conda info
+    
+    #echo `ls /home/travis/miniconda3`
+    #echo `ls /home/travis/miniconda3/envs/testenv/lib -lha`
+    #echo `find /home/travis/miniconda3 | grep .so`
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
@@ -57,3 +81,9 @@ if [[ "$RUN_EXAMPLES" == "true" ]]; then
     python setup.py install
     cd ..
 fi
+
+python --version
+python -c "import numpy; print('numpy %s' % numpy.__version__)"
+python -c "import scipy; print('scipy %s' % scipy.__version__)"
+python -c "import sklearn; print('sklearn %s' % sklearn.__version__)"
+python -c "import matplotlib; print('matplotlib %s' % matplotlib.__version__)"
