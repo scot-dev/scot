@@ -52,8 +52,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
                         
     conda info
     
-    ls /home/travis/miniconda3
-    ls /home/travis/miniconda3/libs
+    echo `ls /home/travis/miniconda3`
+    echo `find /home/travis/miniconda3`
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
