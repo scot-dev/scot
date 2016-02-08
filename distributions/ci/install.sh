@@ -17,30 +17,26 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     # Use the miniconda installer for faster download / install of conda
     # itself
-    wget http://repo.continuum.io/miniconda/Miniconda-2.2.2-Linux-x86_64.sh \
+    wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
         -O miniconda.sh
     chmod +x miniconda.sh && ./miniconda.sh -b
-    export PATH=/home/travis/anaconda/bin:$PATH
+    export PATH=/home/travis/miniconda3/bin:$PATH
     conda update --yes conda
 
     # Configure the conda environment and put it in the path using the
     # provided versions
-    conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-        numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
-    source activate testenv
-
     if [[ "$INSTALL_MKL" == "true" ]]; then
-        # Make sure that MKL is used
-        conda install --yes mkl
+        conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
+            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
+            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
+            libgfortran mkl
     else
-        # Make sure that MKL is not used
-        conda remove --yes --features mkl || echo "MKL not installed"
+        conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
+            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
+            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
+            libgfortran
     fi
-
-    if [[ "$INSTALL_FORTRAN" == "true" ]]; then
-        # Make sure that MKL is used
-        conda install --yes libgfortran
-    fi
+    source activate testenv
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
