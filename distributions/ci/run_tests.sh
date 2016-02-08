@@ -10,6 +10,8 @@ if [[ "$INSTALL_SCOT" == "true" ]]; then
     cd tests
 fi
 
+export LD_LIBRARY_PATH=/home/travis/miniconda3/envs/testenv/lib:$LD_LIBRARY_PATH
+
 if [[ "$COVERAGE" == "true" ]]; then
     xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
 else
