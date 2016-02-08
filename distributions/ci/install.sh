@@ -53,7 +53,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda info
     
     echo `ls /home/travis/miniconda3`
-    echo `find /home/travis/miniconda3`
+    echo `find /home/travis/miniconda3` | grep .so
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
     # Use standard ubuntu packages in their default version
