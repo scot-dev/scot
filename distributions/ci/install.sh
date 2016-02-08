@@ -55,6 +55,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda info
     
     echo `ls /home/travis/miniconda3`
+    echo `ls /home/travis/miniconda3/envs/testenv/lib -lha`
     echo `find /home/travis/miniconda3 | grep .so`
 
 elif [[ "$DISTRIB" == "ubuntu" ]]; then
