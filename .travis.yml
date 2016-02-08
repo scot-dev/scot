@@ -3,7 +3,7 @@ language: python
 sudo: false
 
 virtualenv:
-  system_site_packages: false
+  system_site_packages: true
   
 env:
   matrix:
