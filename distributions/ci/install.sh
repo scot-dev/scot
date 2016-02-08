@@ -40,7 +40,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
             libgfortran mkl
     else
         conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION \
+            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
             scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
             libgfortran
     fi
