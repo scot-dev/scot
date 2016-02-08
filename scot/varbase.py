@@ -335,7 +335,7 @@ class VARBase(object):
 def _construct_var_eqns(data, p, delta=None):
         """Construct VAR equation system (optionally with RLS constraint).
         """
-        t, m, l = sp.shape(data)
+        t, m, l = np.shape(data)
         n = (l - p) * t  # number of linear relations
         rows = n if delta is None else n + m * p
 
@@ -348,9 +348,9 @@ def _construct_var_eqns(data, p, delta=None):
             np.fill_diagonal(x[n:, :], delta)
 
         # Construct vectors yi (response variables for each channel i)
-        y = sp.zeros((rows, m))
+        y = np.zeros((rows, m))
         for i in range(m):
-            y[:n, i] = sp.reshape(data[:, i, p:].T, n)
+            y[:n, i] = np.reshape(data[:, i, p:].T, n)
 
         return x, y
 
