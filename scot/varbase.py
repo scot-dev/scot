@@ -7,13 +7,9 @@
 
 from __future__ import division
 
-import numbers
-from functools import partial
-
 import numpy as np
 import scipy as sp
 
-from . import datatools
 from . import xvschema as xv
 from .utils import acm
 from .datatools import cat_trials
