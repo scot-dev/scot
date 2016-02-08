@@ -29,6 +29,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
     # provided versions
     conda create -n testenv --yes python=$PYTHON_VERSION pip nose
     source activate testenv
+    
+    export LD_LIBRARY_PATH=/home/travis/miniconda3/evns/testenv/lib:$PATH
 
     if [[ "$INSTALL_MKL" == "true" ]]; then
         # Make sure that MKL is used
