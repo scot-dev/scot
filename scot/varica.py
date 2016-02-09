@@ -225,7 +225,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         r = np.zeros(xcsp.shape)
         for i in np.unique(cl):
             mask = cl == i
-            a = var.fit(xcsp[:, :, mask])
+            a = var.fit(xcsp[mask, :, :])
             r[mask, :, :] = xcsp[mask, :, :] - var.predict(xcsp[mask, :, :])
     elif varfit == 'ensemble':
         # fit MVAR model
