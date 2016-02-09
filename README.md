@@ -1,3 +1,9 @@
+![Python 2.7](https://img.shields.io/badge/python-2.7-green.svg)
+![Python 3.5](https://img.shields.io/badge/python-3.5-green.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Build Status](https://travis-ci.org/scot-dev/scot.svg?branch=master)](https://travis-ci.org/scot-dev/scot)
+[![Coverage Status](https://coveralls.io/repos/scot-dev/scot/badge.svg)](https://coveralls.io/r/scot-dev/scot)
+
 SCoT
 ====
 
