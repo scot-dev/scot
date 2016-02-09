@@ -50,7 +50,7 @@ class TestMVARICA(unittest.TestCase):
         l, t = 1000, 100
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
-        noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
+        noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3 / 1e3
 
         var = VAR(2)
         var.coef = b0
@@ -117,7 +117,7 @@ class TestMVARICA(unittest.TestCase):
         t = len(cl)
 
         # generate VAR sources with non-gaussian innovation process, otherwise ICA won't work
-        noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3
+        noisefunc = lambda: np.random.normal(size=(1, m0)) ** 3 / 1e3
 
         var = VAR(2)
         var.coef = b01
