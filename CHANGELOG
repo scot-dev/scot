@@ -1,0 +1,7 @@
+0.2
+===
+- SCoT now uses a different data shape. Epoched data is now arranged in three-dimensional arrays of shape `(epochs, channels, samples)`. Continuous data is now arranged in two-dimensional arrays of shape `(channels, samples)`.
+- The configuration backend has been revamped and is now based on .ini files.
+- The functions for building VAR equations have been unified into `_construct_var_eqns` in `varbase.py`.
+- Tests producing figures now automatically close open figures for increased efficiency.
+- Some docstrings are now more consistent with actual behavior.
