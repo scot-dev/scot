@@ -26,4 +26,4 @@ from . import datatools
 
 __all__ = ['Workspace', 'Connectivity', 'datatools']
 
-__version__ = "0.2.dev0"
+__version__ = "0.2"
