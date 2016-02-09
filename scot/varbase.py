@@ -12,7 +12,7 @@ import scipy as sp
 
 from . import xvschema as xv
 from .utils import acm
-from .datatools import cat_trials
+from .datatools import cat_trials, atleast_3d
 
 
 class Defaults(object):
@@ -216,7 +216,7 @@ class VARBase(object):
         -----
         Residuals are obtained by r = x - var.predict(x)
         """
-        data = sp.atleast_3d(data)
+        data = atleast_3d(data)
         (t, m, l) = data.shape
 
         p = int(sp.shape(self.coef)[1] / m)
