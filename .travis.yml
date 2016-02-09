@@ -16,7 +16,7 @@ env:
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
 
     # This environment tests Python 2 support
-    - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="false"
+    - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="true"
       NUMPY_VERSION="1.10.4" SCIPY_VERSION="0.17.0"
       SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
