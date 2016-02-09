@@ -171,9 +171,10 @@ class VAR(VARBase):
             (ja, ka) = msge(data, trform(a), self.xvschema, skipstep, self.p)
             (jb, kb) = msge(data, trform(b), self.xvschema, skipstep, self.p)
 
-            if trform(b) >= maxdelta and verbose:
-                print('Bisection: could not find initial interval.')
-                print(' ********* Delta set to zero! ************ ')
+            if trform(b) >= maxdelta:
+                if verbose:
+                    print('Bisection: could not find initial interval.')
+                    print(' ********* Delta set to zero! ************ ')
                 return 0
 
         nsteps = 0
