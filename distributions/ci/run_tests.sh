@@ -22,9 +22,9 @@ if [[ "$INSTALL_SCOT" == "true" ]]; then
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
-    xvfb-run --server-args="-screen 0 1024x768x24" nosetests --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
+    xvfb-run --server-args="-screen 0 1024x768x24" nosetests -v --with-coverage --cover-package=scot,eegtopo --cover-inclusive --cover-branches;
 else
-    xvfb-run --server-args="-screen 0 1024x768x24" nosetests;
+    xvfb-run --server-args="-screen 0 1024x768x24" nosetests -v;
 fi
 
 if [[ "$RUN_EXAMPLES" == "true" ]]; then

@@ -25,13 +25,13 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     # Configure the conda environment and put it in the path using the
     # provided versions
-    if [[ "$INSTALL_MKL" == "true" ]]; then
+    if [[ "$USE_MKL" == "true" ]]; then
         conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
             numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
             scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
-            libgfortran mkl
+            libgfortran
     else
-        conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
+        conda create -n testenv --yes python=$PYTHON_VERSION nomkl pip nose \
             numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
             scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
             libgfortran
