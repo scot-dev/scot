@@ -30,5 +30,6 @@ setup(
         'Programming Language :: Python :: 3.4',
     ],
     keywords='source connectivity EEG MEG ICA',
-    packages=['scot', 'scot.eegtopo', 'scot.external']
+    packages=['scot', 'scot.eegtopo', 'scot.external'],
+    package_data={'scot': ['scot.ini']}
 )
