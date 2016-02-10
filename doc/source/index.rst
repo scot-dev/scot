@@ -1,8 +1,3 @@
-.. SCoT documentation master file, created by
-   sphinx-quickstart on Thu Jan 23 12:52:18 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Overview
 ========
 
@@ -29,21 +24,3 @@ Contents
    manual.rst
    api_reference.rst
    misc.rst
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-Badges
-======
-
-* .. image:: https://travis-ci.org/scot-dev/scot.svg?branch=master
-   :target: https://travis-ci.org/scot-dev/scot
-
-* .. image:: https://coveralls.io/repos/scot-dev/scot/badge.svg?branch=master&service=github 
-   :target: https://coveralls.io/github/scot-dev/scot?branch=master
-   
