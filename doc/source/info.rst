@@ -9,3 +9,4 @@ About SCoT
    introduction.rst
    acknowledgments.rst
    examples/index.rst
+   gallery.rst
