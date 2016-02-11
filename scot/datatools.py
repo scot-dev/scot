@@ -119,7 +119,7 @@ def randomize_phase(data):
     """Phase randomization.
 
     This function randomizes the spectral phase of the input data along the
-    first dimension.
+    last dimension.
 
     Parameters
     ----------
