@@ -207,11 +207,6 @@ class Workspace(object):
             'class' fits a different model for each class, and
             'trial' fits a different model for each individual trial.
 
-        Returns
-        -------
-        result : class
-            see :func:`mvarica` for a description of the return value.
-
         Raises
         ------
         RuntimeError
@@ -232,7 +227,6 @@ class Workspace(object):
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
-        return result
 
     def do_cspvarica(self, varfit='ensemble'):
         """ Perform CSPVARICA
@@ -246,11 +240,6 @@ class Workspace(object):
             'ensemble' (default) fits one model to the whole data set,
             'class' fits a different model for each class, and
             'trial' fits a different model for each individual trial.
-
-        Returns
-        -------
-        result : class
-            see :func:`cspvarica` for a description of the return value.
 
         Raises
         ------
@@ -278,17 +267,11 @@ class Workspace(object):
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
-        return result
 
     def do_ica(self):
         """ Perform ICA
 
         Perform plain ICA source decomposition.
-
-        Returns
-        -------
-        result : class
-            see :func:`plainica` for a description of the return value.
 
         Raises
         ------
@@ -306,7 +289,6 @@ class Workspace(object):
         self.connectivity_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
-        return result
 
     def remove_sources(self, sources):
         """ Remove sources from the decomposition.
