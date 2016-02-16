@@ -135,8 +135,14 @@ class Workspace(object):
         ----------
         locations : array_like
             3D Electrode locations. Each row holds the x, y, and z coordinates of an electrode.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
         """
         self.locations_ = locations
+        return self
 
     def set_premixing(self, premixing):
         """ Set premixing matrix.
@@ -149,8 +155,14 @@ class Workspace(object):
         ----------
         premixing : array_like, shape = [n_signals, n_channels]
             Matrix that maps data signals to physical channels.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
         """
         self.premixing_ = premixing
+        return self
 
     def set_data(self, data, cl=None, time_offset=0):
         """ Assign data to the workspace.
@@ -166,6 +178,11 @@ class Workspace(object):
             Class labels associated with each trial.
         time_offset : float, optional
             Trial starting time; used for labelling the x-axis of time/frequency plots.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
         """
         self.data_ = atleast_3d(data)
         self.cl_ = np.asarray(cl if cl is not None else [None]*self.data_.shape[0])
@@ -179,6 +196,8 @@ class Workspace(object):
         if self.unmixing_ is not None:
             self.activations_ = dot_special(self.unmixing_.T, self.data_)
 
+        return self
+
     def set_used_labels(self, labels):
         """ Specify which trials to use in subsequent analysis steps.
 
@@ -188,11 +207,17 @@ class Workspace(object):
         ----------
         labels : list of class labels
             Marks all trials that have a label that is in the `labels` list for further processing.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
         """
         mask = np.zeros(self.cl_.size, dtype=bool)
         for l in labels:
             mask = np.logical_or(mask, self.cl_ == l)
         self.trial_mask_ = mask
+        return self
 
     def do_mvarica(self, varfit='ensemble'):
         """ Perform MVARICA
@@ -206,6 +231,11 @@ class Workspace(object):
             'ensemble' (default) fits one model to the whole data set,
             'class' fits a different model for each class, and
             'trial' fits a different model for each individual trial.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
 
         Raises
         ------
@@ -227,6 +257,7 @@ class Workspace(object):
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return self
 
     def do_cspvarica(self, varfit='ensemble'):
         """ Perform CSPVARICA
@@ -240,6 +271,11 @@ class Workspace(object):
             'ensemble' (default) fits one model to the whole data set,
             'class' fits a different model for each class, and
             'trial' fits a different model for each individual trial.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
 
         Raises
         ------
@@ -267,11 +303,17 @@ class Workspace(object):
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return self
 
     def do_ica(self):
         """ Perform ICA
 
         Perform plain ICA source decomposition.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
 
         Raises
         ------
@@ -289,6 +331,7 @@ class Workspace(object):
         self.connectivity_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return self
 
     def remove_sources(self, sources):
         """ Remove sources from the decomposition.
@@ -300,6 +343,11 @@ class Workspace(object):
         ----------
         sources : {slice, int, array of ints}
             Indices of components to remove.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
 
         Raises
         ------
@@ -317,9 +365,15 @@ class Workspace(object):
         self.connectivity_ = None
         self.mixmaps_ = []
         self.unmixmaps_ = []
+        return self
 
     def fit_var(self):
-        """ Fit a var model to the source activations.
+        """ Fit a VAR model to the source activations.
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
 
         Raises
         ------
@@ -330,9 +384,15 @@ class Workspace(object):
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
         self.var_.fit(data=self.activations_[self.trial_mask_, :, :])
         self.connectivity_ = Connectivity(self.var_.coef, self.var_.rescov, self.nfft_)
+        return self
 
     def optimize_var(self):
-        """ Optimize the var model's hyperparameters (such as regularization).
+        """ Optimize the VAR model's hyperparameters (such as regularization).
+
+        Returns
+        -------
+        self : Workspace
+            The Workspace object.
 
         Raises
         ------
@@ -343,6 +403,7 @@ class Workspace(object):
             raise RuntimeError("VAR fitting requires source activations (run do_mvarica first)")
 
         self.var_.optimize(self.activations_[self.trial_mask_, :, :])
+        return self
 
     def get_connectivity(self, measure_name, plot=False):
         """ Calculate spectral connectivity measure.
