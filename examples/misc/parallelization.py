@@ -37,9 +37,6 @@ if __name__ == "__main__":
     fs = midata.samplerate
     locs = midata.locations
 
-    # Set random seed for repeatable results
-    np.random.seed(42)
-
     # Prepare data
     #
     # Here we cut out segments from 3s to 4s after each trigger. This is right
@@ -49,13 +46,17 @@ if __name__ == "__main__":
     # only use every 10th trial to make the example run faster
     data = data[::10]
 
-    var = VAR(model_order=10)
+    var = VAR(model_order=5)
     var.fit(data)
     for n_jobs in [-1, None, 1, 2, 3, 4, 5, 6, 7, 8]:
+        # Set random seed for repeatable results
+        np.random.seed(42)
         var.n_jobs = n_jobs
-        start = time.clock()
-        var.optimize_order(data, min_p=1, max_p=5)
-        time1 = time.clock()
-        p = var.test_whiteness(50)
-        time2 = time.clock()
-        print('n_jobs: {:>4s}, optimization: {:.2f}s, whiteness: {:.2f}s'.format(str(n_jobs), time1 - start, time2 - time1))
+        start = time.perf_counter()
+        var.optimize_order(data, min_p=1, max_p=8)
+        time1 = time.perf_counter()
+        var.fit(data)
+        time2 = time.perf_counter()
+        p = var.test_whiteness(10, repeats=1000)
+        time3 = time.perf_counter()
+        print('n_jobs: {:>4s}, optimization: {:.2f}s, whiteness: {:.2f}s, p = {}'.format(str(n_jobs), time1 - start, time3 - time2, p))
