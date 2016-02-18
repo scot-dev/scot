@@ -21,14 +21,14 @@ def parallel_loop(func, n_jobs=1, verbose=1):
     -----
     Execution of the main script must be guarded with `if __name__ == '__main__':` when using parallelization.
     """
-    try:
-        if n_jobs:
-            from joblib import Parallel, delayed
-    except ImportError:
+    if n_jobs:
         try:
-            from sklearn.externals.joblib import Parallel, delayed
+            from joblib import Parallel, delayed
         except ImportError:
-            n_jobs = None
+            try:
+                from sklearn.externals.joblib import Parallel, delayed
+            except ImportError:
+                n_jobs = None
 
     if not n_jobs:
         if verbose is not None and verbose >= 10:
