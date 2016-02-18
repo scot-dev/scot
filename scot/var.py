@@ -38,11 +38,12 @@ class VAR(VARBase):
         testing). If set to None, joblib is not used at all. Note that the main
         script must be guarded with `if __name__ == '__main__':` when using
         parallelization.
-    verbose : int
-        verbosity level passed to joblib.
+    verbose : bool
+        Whether to print informations to stdout.
+        Default: None - use verbosity from global configuration.
     """
     def __init__(self, model_order, delta=0, xvschema=xv.multitrial, n_jobs=1,
-                 verbose=0):
+                 verbose=None):
         VARBase.__init__(self, model_order=model_order, n_jobs=n_jobs,
                          verbose=verbose)
         self.delta = delta

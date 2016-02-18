@@ -31,11 +31,11 @@ def parallel_loop(func, n_jobs=1, verbose=1):
                 n_jobs = None
 
     if not n_jobs:
-        if verbose is not None and verbose >= 10:
+        if verbose:
             print('running ', func, ' serially')
         par = lambda x: list(x)
     else:
-        if verbose is not None and verbose >= 10:
+        if verbose:
             print('running ', func, ' in parallel')
         func = delayed(func)
         par = Parallel(n_jobs=n_jobs, verbose=verbose)

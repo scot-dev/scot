@@ -10,6 +10,7 @@ from __future__ import division
 import numpy as np
 import scipy as sp
 
+from . import config
 from . import xvschema as xv
 from .utils import acm
 from .datatools import cat_trials, atleast_3d
@@ -36,8 +37,9 @@ class VARBase(object):
         testing). If set to None, joblib is not used at all. Note that the main
         script must be guarded with `if __name__ == '__main__':` when using
         parallelization.
-    verbose : int
-        verbosity level passed to joblib.
+    verbose : bool
+        Whether to print informations to stdout.
+        Default: None - use verbosity from global configuration.
 
     Notes
     -----
@@ -58,13 +60,16 @@ class VARBase(object):
     filter coefficients from channel j (source) to channel i (sink).
     """
 
-    def __init__(self, model_order, n_jobs=1, verbose=0):
+    def __init__(self, model_order, n_jobs=1, verbose=None):
         self.p = model_order
         self.coef = None
         self.residuals = None
         self.rescov = None
         self.n_jobs = n_jobs
-        self.verbose = verbose
+        if verbose is None:
+            self.verbose = config.getboolean('scot', 'verbose')
+        else:
+            self.verbose = verbose
 
     def copy(self):
         """ Create a copy of the VAR model."""
