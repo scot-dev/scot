@@ -91,7 +91,7 @@ class Workspace(object):
         self.plot_diagonal = 'topo'
         self.plot_outside_topo = False
         self.plot_f_range = [0, fs/2]
-        self.clipping = "electrodes"
+        self.topo_clipping = "electrodes"
 
         self._plotting = None
 
@@ -832,7 +832,7 @@ class Workspace(object):
 
         if self.topo_ is None:
             from scot.eegtopo.topoplot import Topoplot
-            self.topo_ = Topoplot(clipping=self.clipping)
+            self.topo_ = Topoplot(clipping=self.topo_clipping)
             self.topo_.set_locations(self.locations_)
 
         if mixing and not self.mixmaps_:
