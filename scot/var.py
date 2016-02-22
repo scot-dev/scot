@@ -33,9 +33,19 @@ class VAR(VARBase):
         function takes two parameters: the current cross-validation run (int)
         and the numer of trials (int). It returns a tuple of two arrays: the
         training set and the testing set.
+    n_jobs : int | None
+        Number of jobs to run in parallel for various tasks (e.g. whiteness
+        testing). If set to None, joblib is not used at all. Note that the main
+        script must be guarded with `if __name__ == '__main__':` when using
+        parallelization.
+    verbose : bool
+        Whether to print informations to stdout.
+        Default: None - use verbosity from global configuration.
     """
-    def __init__(self, model_order, delta=0, xvschema=xv.multitrial):
-        VARBase.__init__(self, model_order)
+    def __init__(self, model_order, delta=0, xvschema=xv.multitrial, n_jobs=1,
+                 verbose=None):
+        VARBase.__init__(self, model_order=model_order, n_jobs=n_jobs,
+                         verbose=verbose)
         self.delta = delta
         self.xvschema = xvschema
 
@@ -73,7 +83,7 @@ class VAR(VARBase):
 
         return self
 
-    def optimize_order(self, data, min_p=1, max_p=None, n_jobs=1, verbose=0):
+    def optimize_order(self, data, min_p=1, max_p=None):
         """ Determine optimal model order by cross-validating the mean-squared
         generalization error.
 
@@ -86,11 +96,6 @@ class VAR(VARBase):
             minimal model order to check
         max_p : int
             maximum model order to check
-        n_jobs : int | None
-            number of jobs to run in parallel. See `joblib.Parallel` for
-            details.
-        verbose : int
-            verbosity level passed to joblib.
         """
         data = np.asarray(data)
         if data.shape[0] < 2:
@@ -98,14 +103,14 @@ class VAR(VARBase):
 
         msge, prange = [], []
 
-        par, func = parallel_loop(_get_msge_with_gradient,
-                                  n_jobs=n_jobs, verbose=verbose)
-        if not n_jobs:
+        par, func = parallel_loop(_get_msge_with_gradient, n_jobs=self.n_jobs,
+                                  verbose=self.verbose)
+        if self.n_jobs is None:
             npar = 1
-        elif n_jobs < 0:
+        elif self.n_jobs < 0:
                 npar = 4  # is this a sane default?
         else:
-            npar = n_jobs
+            npar = self.n_jobs
 
         p = min_p
         while True:
@@ -120,6 +125,9 @@ class VAR(VARBase):
                     break
             else:
                 if prange[-1] >= max_p:
+                    i = prange.index(max_p) + 1
+                    prange = prange[:i]
+                    msge = msge[:i]
                     break
         self.p = prange[np.argmin(msge)]
         return zip(prange, msge)

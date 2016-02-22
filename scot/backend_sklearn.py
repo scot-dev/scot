@@ -32,7 +32,6 @@ def generate():
     def wrapper_pca(x, reducedim):
         """ Call PCA implementation from scikit-learn.
         """
-        from sklearn.decomposition import PCA
         pca = PCA(n_components=reducedim)
         pca.fit(datatools.cat_trials(x).T)
         d = pca.components_
@@ -51,9 +50,18 @@ def generate():
             Autoregressive model order
         fitobj : class, optional
             Instance of a linear model implementation.
+        n_jobs : int | None
+            Number of jobs to run in parallel for various tasks (e.g. whiteness
+            testing). If set to None, joblib is not used at all. Note that the
+            main script must be guarded with `if __name__ == '__main__':` when
+            using parallelization.
+        verbose : bool
+            Whether to print informations to stdout.
+            Default: None - use verbosity from global configuration.
         """
-        def __init__(self, model_order, fitobj=None):
-            VARBase.__init__(self, model_order)
+        def __init__(self, model_order, fitobj=None, n_jobs=1, verbose=None):
+            VARBase.__init__(self, model_order=model_order, n_jobs=n_jobs,
+                             verbose=verbose)
             if fitobj is None:
                 from sklearn.linear_model import LinearRegression
                 fitobj = LinearRegression(fit_intercept=False)

@@ -75,10 +75,10 @@ class TestVAR(unittest.TestCase):
 
     def test_whiteness(self):
         np.random.seed(91)
-        r = np.random.randn(10, 5, 100)     # gaussian white noise
+        r = np.random.randn(80, 15, 100)     # gaussian white noise
         r0 = r.copy()
 
-        var = VAR(0)
+        var = VAR(0, n_jobs=-1)
         var.residuals = r
 
         p = var.test_whiteness(20)
@@ -86,7 +86,7 @@ class TestVAR(unittest.TestCase):
         self.assertTrue(np.all(r == r0))    # make sure we don't modify the input
         self.assertGreater(p, 0.01)         # test should be non-significant for white noise
 
-        r[:,1,3:] = r[:,0,:-3]              # create cross-correlation at lag 3
+        r[:, 1, 3:] = r[:, 0, :-3]          # create cross-correlation at lag 3
         p = var.test_whiteness(20)
         self.assertLessEqual(p, 0.01)       # now test should be significant
 
