@@ -125,6 +125,9 @@ class VAR(VARBase):
                     break
             else:
                 if prange[-1] >= max_p:
+                    i = prange.index(max_p) + 1
+                    prange = prange[:i]
+                    msge = msge[:i]
                     break
         self.p = prange[np.argmin(msge)]
         return zip(prange, msge)
