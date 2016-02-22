@@ -53,10 +53,6 @@ if __name__ == "__main__":
         np.random.seed(42)
         var.n_jobs = n_jobs
         start = time.perf_counter()
-        var.optimize_order(data, min_p=1, max_p=8)
-        time1 = time.perf_counter()
-        var.fit(data)
-        time2 = time.perf_counter()
         p = var.test_whiteness(10, repeats=1000)
-        time3 = time.perf_counter()
-        print('n_jobs: {:>4s}, optimization: {:.2f}s, whiteness: {:.2f}s, p = {}'.format(str(n_jobs), time1 - start, time3 - time2, p))
+        time1 = time.perf_counter()
+        print('n_jobs: {:>4s}, whiteness test: {:.2f}s, p = {}'.format(str(n_jobs), time1 - start, p))
