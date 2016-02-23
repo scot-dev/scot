@@ -1,5 +1,6 @@
 [run]
 branch = True
+source = scot
 include = */scot/*
 omit = 
     */setup.py
