@@ -1,0 +1,6 @@
+[run]
+branch = True
+include = */scot/*
+omit = 
+    */setup.py
+    */scot/external/*
