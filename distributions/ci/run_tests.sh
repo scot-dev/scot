@@ -19,18 +19,17 @@ echo "============================"
 
 if [[ "$INSTALL_SCOT" == "true" ]]; then
     python setup.py install
-    cd scot/tests
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
-    xvfb-run --server-args="-screen 0 1024x768x24" nosetests -v --with-coverage;
+    xvfb-run --server-args="-screen 0 1024x768x24" nosetests -v --with-coverage scot;
 else
     xvfb-run --server-args="-screen 0 1024x768x24" nosetests -v;
 fi
 
 if [[ "$RUN_EXAMPLES" == "true" ]]; then
     if [[ "$INSTALL_SCOT" == "true" ]]; then
-        xvfb-run --server-args="-screen 0 1024x768x24" find ../../examples -type f -iname "*\.py" -exec python {} \;
+        xvfb-run --server-args="-screen 0 1024x768x24" find examples -type f -iname "*\.py" -exec python {} \;
     else
         PYTHONPATH=. xvfb-run --server-args="-screen 0 1024x768x24" find examples -type f -iname "*\.py" -exec python {} \;
     fi
