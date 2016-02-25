@@ -238,6 +238,28 @@ class TestMVARICA(unittest.TestCase):
                 api.get_tf_connectivity('PHI', winlen=2, winstep=1, plot=fig)
                 api.compare_conditions([0], [1], 'PHI', plot=fig, repeats=5)
 
+    def test_source_selection(self):
+        var = VAR(2)
+        var.coef = np.random.randn(16, 4)
+        x = var.simulate([500, 50],
+                         lambda: np.random.randn(16).dot(np.eye(16, 16)))
+        api = scot.Workspace({'model_order': 2})
+        api.set_data(x)
+        self.assertRaises(RuntimeError, api.keep_sources, [0, 5, 11, 12])
+        self.assertRaises(RuntimeError, api.remove_sources, [1, 2, 8, 14])
+
+        # keep sources
+        api.do_mvarica()
+        api.keep_sources([0, 5, 11, 12])
+        self.assertEqual(api.mixing_.shape, (4, 16))
+        self.assertEqual(api.unmixing_.shape, (16, 4))
+
+        # remove sources
+        api.do_mvarica()
+        api.remove_sources([1, 2, 8, 14])
+        self.assertEqual(api.mixing_.shape, (12, 16))
+        self.assertEqual(api.unmixing_.shape, (16, 12))
+
     def testBackendRegression(self):
         """Regression test for Github issue #103."""
         ws = scot.Workspace({'model_order': 3}, backend=None)
