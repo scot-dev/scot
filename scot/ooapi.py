@@ -368,6 +368,15 @@ class Workspace(object):
         self.unmixmaps_ = []
         return self
 
+    def keep_sources(self, keep):
+        """Keep only the specified sources in the decomposition.
+        """
+        if self.unmixing_ is None or self.mixing_ is None:
+            raise RuntimeError("No sources available (run do_mvarica first)")
+        n_sources = self.mixing_.shape[0]
+        self.remove_sources(np.setdiff1d(np.arange(n_sources), np.array(keep)))
+        return self
+
     def fit_var(self):
         """ Fit a VAR model to the source activations.
 
