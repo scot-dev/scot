@@ -245,6 +245,8 @@ class TestMVARICA(unittest.TestCase):
                          lambda: np.random.randn(16).dot(np.eye(16, 16)))
         api = scot.Workspace({'model_order': 2})
         api.set_data(x)
+        self.assertRaises(RuntimeError, api.keep_sources, [0, 5, 11, 12])
+        self.assertRaises(RuntimeError, api.remove_sources, [1, 2, 8, 14])
 
         # keep sources
         api.do_mvarica()
