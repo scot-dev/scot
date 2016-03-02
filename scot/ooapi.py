@@ -220,7 +220,7 @@ class Workspace(object):
         self.trial_mask_ = mask
         return self
 
-    def do_mvarica(self, varfit='ensemble'):
+    def do_mvarica(self, varfit='ensemble', random_state=None):
         """ Perform MVARICA
 
         Perform MVARICA source decomposition and VAR model fitting.
@@ -249,12 +249,15 @@ class Workspace(object):
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_[self.trial_mask_, :, :], cl=self.cl_[self.trial_mask_], var=self.var_,
-                         reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
+        result = mvarica(x=self.data_[self.trial_mask_, :, :],
+                         cl=self.cl_[self.trial_mask_], var=self.var_,
+                         reducedim=self.reducedim_, backend=self.backend_,
+                         varfit=varfit, random_state=random_state)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
-        self.connectivity_ = Connectivity(result.b.coef, result.b.rescov, self.nfft_)
+        self.connectivity_ = Connectivity(result.b.coef, result.b.rescov,
+                                          self.nfft_)
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []

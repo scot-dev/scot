@@ -17,9 +17,9 @@ def generate():
     from sklearn.decomposition import FastICA
     from sklearn.decomposition import PCA
 
-    def wrapper_fastica(data):
+    def wrapper_fastica(data, random_state=None):
         """Call FastICA implementation from scikit-learn."""
-        ica = FastICA()
+        ica = FastICA(random_state)
         ica.fit(cat_trials(data).T)
         u = ica.components_.T
         m = ica.mixing_.T

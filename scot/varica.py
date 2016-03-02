@@ -4,12 +4,12 @@
 
 import numpy as np
 
-from . import config
 from . import backend as scotbackend
 from .datatools import cat_trials, dot_special, atleast_3d
 
 
-def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, varfit='ensemble'):
+def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None,
+            varfit='ensemble', random_state=None):
     """ Performs joint VAR model fitting and ICA source separation.
     
     This function implements the MVARICA procedure [1]_.
@@ -110,7 +110,7 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None, v
         raise ValueError('unknown VAR fitting mode: {}'.format(varfit))
 
     # run on residuals ICA to estimate volume conduction    
-    mx, ux = backend['ica'](cat_trials(r))
+    mx, ux = backend['ica'](cat_trials(r), random_state=random_state)
 
     # driving process
     e = dot_special(ux.T, r)
