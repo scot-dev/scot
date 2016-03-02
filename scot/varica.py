@@ -138,7 +138,8 @@ def mvarica(x, var, cl=None, reducedim=0.99, optimize_var=False, backend=None,
     return Result
     
     
-def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varfit='ensemble'):
+def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None,
+              varfit='ensemble', random_state=None):
     """ Performs joint VAR model fitting and ICA source separation.
 
     This function implements the CSPVARICA procedure [1]_.
@@ -236,7 +237,7 @@ def cspvarica(x, var, cl, reducedim=None, optimize_var=False, backend=None, varf
         raise ValueError('unknown VAR fitting mode: {}'.format(varfit))
 
     # run on residuals ICA to estimate volume conduction    
-    mx, ux = backend['ica'](r)
+    mx, ux = backend['ica'](r, random_state=random_state)
 
     # driving process
     e = dot_special(ux.T, r)

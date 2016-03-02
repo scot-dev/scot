@@ -263,7 +263,7 @@ class Workspace(object):
         self.unmixmaps_ = []
         return self
 
-    def do_cspvarica(self, varfit='ensemble'):
+    def do_cspvarica(self, varfit='ensemble', random_state=None):
         """ Perform CSPVARICA
 
         Perform CSPVARICA source decomposition and VAR model fitting.
@@ -299,7 +299,8 @@ class Workspace(object):
         except (TypeError, AssertionError):
             raise RuntimeError("CSPVARICA requires orderable and hashable class labels that are not None")
         result = cspvarica(x=self.data_, var=self.var_, cl=self.cl_,
-                           reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
+                           reducedim=self.reducedim_, backend=self.backend_,
+                           varfit=varfit, random_state=random_state)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
