@@ -5,7 +5,7 @@
 """Common spatial patterns (CSP) implementation."""
 
 import numpy as np
-from scipy.linalg import eig
+from scipy.linalg import eigh
     
 
 def csp(x, cl, numcomp=None):
@@ -62,8 +62,8 @@ def csp(x, cl, numcomp=None):
         sigma2 += np.cov(x2[t, :, :]) / x2.shape[0]
     sigma2 /= sigma2.trace()
 
-    e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True,
-               check_finite=False)
+    e, w = eigh(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True,
+                check_finite=False)
 
     order = np.argsort(e)[::-1]
     w = w[:, order]

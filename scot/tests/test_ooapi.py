@@ -241,7 +241,7 @@ class TestMVARICA(unittest.TestCase):
 
     def test_random_state(self):
         np.random.seed(10)
-        api = scot.Workspace(VAR(1), locations=[[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]])
+        api = scot.Workspace(VAR(1),locations=[[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]], reducedim=None)
         api.set_data(np.random.randn(10, 5, 10), [1, 0] * 5)
 
         # test MVARICA
@@ -249,14 +249,14 @@ class TestMVARICA(unittest.TestCase):
         mixing1 = api.mixing_
         api.do_mvarica(random_state=1)
         mixing2 = api.mixing_
-        self.assertEqual(mixing1, mixing2)
+        assert_allclose(mixing1, mixing2)
 
         # test CSPVARICA
         api.do_cspvarica(random_state=1)
         mixing1 = api.mixing_
         api.do_cspvarica(random_state=1)
         mixing2 = api.mixing_
-        self.assertEqual(mixing1, mixing2)
+        assert_allclose(mixing1, mixing2)
 
     def test_source_selection(self):
         var = VAR(2)
