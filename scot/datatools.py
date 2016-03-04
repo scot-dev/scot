@@ -10,6 +10,8 @@ Tools for basic data manipulation.
 
 import numpy as np
 
+from .utils import check_random_state
+
 
 def cut_segments(x2d, tr, start, stop):
     """Cut continuous signal into segments.
@@ -115,7 +117,7 @@ def dot_special(x2d, x3d):
                            for i in range(x3d.shape[0])])
 
 
-def randomize_phase(data):
+def randomize_phase(data, random_state=None):
     """Phase randomization.
 
     This function randomizes the spectral phase of the input data along the
@@ -154,9 +156,10 @@ def randomize_phase(data):
         plot(y.T + [1.5, -1.5]), axis([0,1000,-3,3])
         plt.show()
     """
+    rng = check_random_state(random_state)
     data = np.asarray(data)
     data_freq = np.fft.rfft(data)
-    data_freq = np.abs(data_freq) * np.exp(1j*np.random.random_sample(data_freq.shape)*2*np.pi)
+    data_freq = np.abs(data_freq) * np.exp(1j*rng.random_sample(data_freq.shape)*2*np.pi)
     return np.fft.irfft(data_freq, data.shape[-1])
 
 
