@@ -310,7 +310,7 @@ class Workspace(object):
         self.unmixmaps_ = []
         return self
 
-    def do_ica(self):
+    def do_ica(self, random_state=None):
         """ Perform ICA
 
         Perform plain ICA source decomposition.
@@ -327,7 +327,7 @@ class Workspace(object):
         """
         if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
-        result = plainica(x=self.data_[self.trial_mask_, :, :], reducedim=self.reducedim_, backend=self.backend_)
+        result = plainica(x=self.data_[self.trial_mask_, :, :], reducedim=self.reducedim_, backend=self.backend_, random_state=random_state)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
