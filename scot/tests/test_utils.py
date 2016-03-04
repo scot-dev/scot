@@ -9,6 +9,7 @@ import unittest
 import numpy as np
 
 import scot
+import scot.datatools
 from scot import utils
 
 
@@ -43,7 +44,7 @@ class TestUtils(unittest.TestCase):
         def test_acm_1d(self):
             """Test autocorrelation matrix for 1D input"""
             v = np.array([1, 2, 0, 0, 1, 2, 0, 0])
-            acm = lambda l: scot.utils.acm(v, l)
+            acm = lambda l: scot.datatools.acm(v, l)
 
             self.assertEqual(np.mean(v**2), acm(0))
             for l in range(1, 6):

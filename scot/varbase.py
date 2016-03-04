@@ -12,7 +12,7 @@ import scipy as sp
 
 from . import config
 from . import xvschema as xv
-from .utils import acm
+from scot.datatools import acm
 from .datatools import cat_trials, atleast_3d
 from .parallel import parallel_loop
 

@@ -8,7 +8,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 
 from scot.varbase import VARBase as VAR
-from scot.utils import acm
+from scot.datatools import acm
 
 epsilon = 1e-10
 
