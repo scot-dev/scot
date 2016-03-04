@@ -10,12 +10,12 @@ import numpy as np
 
 from .datatools import randomize_phase, atleast_3d
 from .connectivity import connectivity
-from .utils import cartesian
+from .utils import cartesian, check_random_state
 from .parallel import parallel_loop
 
 
-def surrogate_connectivity(measures, data, var, nfft=512, repeats=100,
-                           n_jobs=1, verbose=0):
+def surrogate_connectivity(measure_names, data, var, nfft=512, repeats=100,
+                           n_jobs=1, verbose=0, random_state=None):
     """Calculate surrogate connectivity for a multivariate time series by phase
     randomization [1]_.
 
@@ -54,9 +54,9 @@ def surrogate_connectivity(measures, data, var, nfft=512, repeats=100,
            method of surrogate data. Physica D, 58: 77-94, 1992.
     """
     par, func = parallel_loop(_calc_surrogate, n_jobs=n_jobs, verbose=verbose)
-    output = par(func(randomize_phase(data), var, measures, nfft)
-                 for _ in range(repeats))
-    return convert_output_(output, measures)
+    output = par(func(randomize_phase(data, random_state=random_state), var,
+                      measure_names, nfft) for _ in range(repeats))
+    return convert_output_(output, measure_names)
 
 
 def _calc_surrogate(data, var, measure_names, nfft):
@@ -129,7 +129,8 @@ def _calc_jackknife(data_used, var, measure_names, nfft):
 
 
 def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
-                           num_samples=None, n_jobs=1, verbose=0):
+                           num_samples=None, n_jobs=1, verbose=0,
+                           random_state=None):
     """Calculate bootstrap estimates of connectivity.
 
     To obtain a bootstrap estimate trials are sampled randomly with replacement
@@ -170,6 +171,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
         each key is the name of the measure, and the corresponding values are
         arrays of shape (`repeats`, n_channels, n_channels, nfft).
     """
+    rng = check_random_state(random_state)
     data = atleast_3d(data)
     n, m, t = data.shape
 
@@ -178,7 +180,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     if num_samples is None:
         num_samples = t
 
-    mask = lambda r: np.random.random_integers(0, data.shape[0]-1, num_samples)
+    mask = lambda r: rng.random_integers(0, data.shape[0]-1, num_samples)
 
     par, func = parallel_loop(_calc_bootstrap, n_jobs=n_jobs, verbose=verbose)
     output = par(func(data[mask(r), :, :], var, measures, nfft)
