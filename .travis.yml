@@ -7,11 +7,9 @@ virtualenv:
   
 env:
   matrix:
-    #- DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
-
     # This environment tests compatibility with oldest supported package versions
     - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="false"
-      NUMPY_VERSION="1.8.0" SCIPY_VERSION="0.13.3"
+      NUMPY_VERSION="1.8.2" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.15.0" MATPLOTLIB_VERSION="1.4.0"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
