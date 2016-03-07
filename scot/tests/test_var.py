@@ -81,7 +81,7 @@ class TestVAR(unittest.TestCase):
         var = VAR(0, n_jobs=-1)
         var.residuals = r
 
-        p = var.test_whiteness(20)
+        p = var.test_whiteness(20, random_state=1)
 
         self.assertTrue(np.all(r == r0))    # make sure we don't modify the input
         self.assertGreater(p, 0.01)         # test should be non-significant for white noise
