@@ -155,7 +155,7 @@ class VARBase(object):
         self.rescov = r
         return self
 
-    def simulate(self, l, noisefunc=None):
+    def simulate(self, l, noisefunc=None, random_state=None):
         """Simulate vector autoregressive (VAR) model.
 
         This function generates data from the VAR model.
@@ -184,7 +184,8 @@ class VARBase(object):
             t = 1
 
         if noisefunc is None:
-            noisefunc = lambda: np.random.normal(size=(1, m))
+            rng = check_random_state(random_state)
+            noisefunc = lambda: rng.normal(size=(1, m))
 
         n = l + 10 * p
 
