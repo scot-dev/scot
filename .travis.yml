@@ -1,40 +1,41 @@
-language: python
+language:
+  python
 
-sudo: false
+sudo:
+  false
 
 virtualenv:
-  system_site_packages: false
+  system_site_packages:
+    false
   
 env:
   matrix:
-    #- DISTRIB="ubuntu" PYTHON_VERSION="2.7" INSTALL_ATLAS="true"
-
-    # This environment tests compatibility with oldest supported package versions
+    # oldest supported package versions on Python 2
     - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="false"
-      NUMPY_VERSION="1.8.0" SCIPY_VERSION="0.13.3"
+      NUMPY_VERSION="1.8.2" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.15.0" MATPLOTLIB_VERSION="1.4.0"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
 
-    # This environment tests Python 2 support
+    # Python 2
     - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="true"
       NUMPY_VERSION="1.10.4" SCIPY_VERSION="0.17.0"
       SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
 
-    # This environment tests Python 3 support
+    # Python 3
     - DISTRIB="conda" PYTHON_VERSION="3.5" USE_MKL="true"
       NUMPY_VERSION="1.10.4" SCIPY_VERSION="0.17.0"
       SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="true"
       
-install: source distributions/ci/install.sh
+install:
+  source distributions/ci/install.sh
 
-script: source distributions/ci/run_tests.sh
+script:
+  source distributions/ci/run_tests.sh
 
 after_success:
-    - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
-
-cache: apt
+  - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
