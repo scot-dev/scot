@@ -8,6 +8,8 @@ Summary
 Tools for basic data manipulation.
 """
 
+from __future__ import division
+
 import numpy as np
 
 from .utils import check_random_state
