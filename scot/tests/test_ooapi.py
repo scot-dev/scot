@@ -6,7 +6,7 @@ import unittest
 from importlib import import_module
 
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal
 
 from scot import datatools
 import scot
@@ -249,14 +249,14 @@ class TestMVARICA(unittest.TestCase):
         mixing1 = api.mixing_
         api.do_mvarica(random_state=1)
         mixing2 = api.mixing_
-        assert_allclose(mixing1, mixing2)
+        assert_array_equal(mixing1, mixing2)
 
         # test CSPVARICA
         api.do_cspvarica(random_state=1)
         mixing1 = api.mixing_
         api.do_cspvarica(random_state=1)
         mixing2 = api.mixing_
-        assert_allclose(mixing1, mixing2)
+        assert_array_equal(mixing1, mixing2)
 
     def test_source_selection(self):
         var = VAR(2)
