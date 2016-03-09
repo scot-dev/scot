@@ -63,7 +63,7 @@ class Workspace(object):
     `plot_f_range` : (int, int)
         Lower and upper frequency limits for plotting. Defaults to [0, fs/2].
     """
-    def __init__(self, var, locations=None, reducedim=0.99, nfft=512, fs=2, backend=None):
+    def __init__(self, var, locations=None, reducedim=None, nfft=512, fs=2, backend=None):
         self.data_ = None
         self.cl_ = None
         self.fs_ = fs

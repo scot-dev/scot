@@ -64,7 +64,8 @@ class TestMVARICA(unittest.TestCase):
 
         for backend_name, backend_gen in scot.backend.items():
 
-            api = scot.Workspace({'model_order': 2}, backend=backend_gen())
+            api = scot.Workspace({'model_order': 2}, backend=backend_gen(),
+                                 reducedim=0.99)
 
             api.set_data(data)
 
