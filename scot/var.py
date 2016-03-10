@@ -44,7 +44,7 @@ class VAR(VARBase):
     """
     def __init__(self, model_order, delta=0, xvschema=xv.multitrial, n_jobs=1,
                  verbose=None):
-        super(VAR, self).__init__(self, model_order=model_order, n_jobs=n_jobs,
+        super(VAR, self).__init__(model_order=model_order, n_jobs=n_jobs,
                          verbose=verbose)
         self.delta = delta
         self.xvschema = xvschema
