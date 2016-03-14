@@ -1,7 +1,6 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2015 SCoT Development Team
-
+# Copyright (c) 2013-2016 SCoT Development Team
 
 from . import config
 
@@ -11,14 +10,14 @@ class BackendManager:
         self.backends = {}
         self.current = None
 
-    def register(self, name, activationfunction):
+    def register(self, name, activation_function):
         if config.getboolean('scot', 'verbose'):
-            print('Registering scot backend:', name)
-        self.backends[name] = activationfunction
+            print('Registering backend:', name)
+        self.backends[name] = activation_function
 
     def activate(self, name):
         if config.getboolean('scot', 'verbose'):
-            print('Activating scot backend:', name)
+            print('Activating backend:', name)
         self.current = self.backends[name]()
 
     def names(self):

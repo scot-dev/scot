@@ -1,14 +1,14 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2015 SCoT Development Team
+# Copyright (c) 2013-2016 SCoT Development Team
 
-""" Vector autoregressive (VAR) model implementation
-"""
+"""Vector autoregressive (VAR) model implementation."""
 
 from __future__ import print_function
 
 import numpy as np
 import scipy as sp
+
 from .varbase import VARBase, _construct_var_eqns
 from .datatools import cat_trials, atleast_3d
 from . import xvschema as xv
@@ -17,7 +17,7 @@ from . import config
 
 
 class VAR(VARBase):
-    """ Builtin implementation of VARBase.
+    """Builtin VAR implementation.
 
     This class provides least squares VAR model fitting with optional ridge
     regression.
@@ -25,56 +25,54 @@ class VAR(VARBase):
     Parameters    
     ----------
     model_order : int
-        Autoregressive model order
+        Autoregressive model order.
     delta : float, optional
-        Ridge penalty parameter
+        Ridge penalty parameter.
     xvschema : func, optional
         Function that creates training and test sets for cross-validation. The
         function takes two parameters: the current cross-validation run (int)
-        and the numer of trials (int). It returns a tuple of two arrays: the
+        and the number of trials (int). It returns a tuple of two arrays: the
         training set and the testing set.
-    n_jobs : int | None
+    n_jobs : int | None, optional
         Number of jobs to run in parallel for various tasks (e.g. whiteness
         testing). If set to None, joblib is not used at all. Note that the main
         script must be guarded with `if __name__ == '__main__':` when using
         parallelization.
-    verbose : bool
-        Whether to print informations to stdout.
-        Default: None - use verbosity from global configuration.
+    verbose : bool | None, optional
+        Whether to print information to stdout. The default is None, which
+        means the verbosity setting from the global configuration is used.
     """
     def __init__(self, model_order, delta=0, xvschema=xv.multitrial, n_jobs=1,
                  verbose=None):
-        VARBase.__init__(self, model_order=model_order, n_jobs=n_jobs,
+        super(VAR, self).__init__(model_order=model_order, n_jobs=n_jobs,
                          verbose=verbose)
         self.delta = delta
         self.xvschema = xvschema
 
     def fit(self, data):
-        """ Fit VAR model to data.
+        """Fit VAR model to data.
         
         Parameters
         ----------
-        data : array-like
-            shape = [n_trials, n_samples, n_channels] or
-            [n_channels, n_samples]
-            Continuous or segmented data set.
+        data : array, shape (trials, channels, samples) or (channels, samples)
+            Epoched or continuous data set.
             
         Returns
         -------
         self : :class:`VAR`
             The :class:`VAR` object to facilitate method chaining (see usage
-            example)
+            example).
         """
         data = atleast_3d(data)
 
         if self.delta == 0 or self.delta is None:
             # ordinary least squares
-            (x, y) = self._construct_eqns(data)
+            x, y = self._construct_eqns(data)
         else:
             # regularized least squares (ridge regression)
-            (x, y) = self._construct_eqns_rls(data)
+            x, y = self._construct_eqns_rls(data)
 
-        (b, res, rank, s) = sp.linalg.lstsq(x, y)
+        b, res, rank, s = sp.linalg.lstsq(x, y)
 
         self.coef = b.transpose()
 
@@ -84,22 +82,22 @@ class VAR(VARBase):
         return self
 
     def optimize_order(self, data, min_p=1, max_p=None):
-        """ Determine optimal model order by cross-validating the mean-squared
+        """Determine optimal model order by minimizing the mean squared
         generalization error.
 
         Parameters
         ----------
-        data : array-like, shape (n_trials, n_samples, n_channels)
-            Segmented data set on which to optimize the model order. At least 2
+        data : array, shape (n_trials, n_samples, n_channels)
+            Epoched data set on which to optimize the model order. At least two
             trials are required.
         min_p : int
-            minimal model order to check
+            Minimal model order to check.
         max_p : int
-            maximum model order to check
+            Maximum model order to check
         """
         data = np.asarray(data)
         if data.shape[0] < 2:
-            raise ValueError("At least 2 trials are required.")
+            raise ValueError("At least two trials are required.")
 
         msge, prange = [], []
 
@@ -133,25 +131,25 @@ class VAR(VARBase):
         return zip(prange, msge)
 
     def optimize_delta_bisection(self, data, skipstep=1, verbose=None):
-        """ Find optimal ridge penalty with bisection search.
+        """Find optimal ridge penalty with bisection search.
         
         Parameters
         ----------
         data : array, shape (n_trials, n_samples, n_channels)
-            Segmented data set. At least 2 trials are required.
+            Epoched data set. At least two trials are required.
         skipstep : int, optional
             Speed up calculation by skipping samples during cost function
-            calculation
+            calculation.
             
         Returns
         -------
         self : :class:`VAR`
             The :class:`VAR` object to facilitate method chaining (see usage
-            example)
+            example).
         """
         data = atleast_3d(data)
         if data.shape[0] < 2:
-            raise ValueError("At least 2 trials are required.")
+            raise ValueError("At least two trials are required.")
 
         if verbose is None:
             verbose = config.getboolean('scot', 'verbose')
@@ -162,22 +160,22 @@ class VAR(VARBase):
         a = -10
         b = 10
 
-        trform = lambda x: sp.sqrt(sp.exp(x))
+        trform = lambda x: np.sqrt(np.exp(x))
 
         msge = _get_msge_with_gradient_func(data.shape, self.p)
 
-        (ja, ka) = msge(data, trform(a), self.xvschema, skipstep, self.p)
-        (jb, kb) = msge(data, trform(b), self.xvschema, skipstep, self.p)
+        ja, ka = msge(data, trform(a), self.xvschema, skipstep, self.p)
+        jb, kb = msge(data, trform(b), self.xvschema, skipstep, self.p)
 
         # before starting the real bisection, assure the interval contains 0
-        while sp.sign(ka) == sp.sign(kb):
+        while np.sign(ka) == np.sign(kb):
             if verbose:
-                print('Bisection initial interval (%f,%f) does not contain zero. '
+                print('Bisection initial interval (%f,%f) does not contain 0. '
                       'New interval: (%f,%f)' % (a, b, a * 2, b * 2))
             a *= 2
             b *= 2
-            (ja, ka) = msge(data, trform(a), self.xvschema, skipstep, self.p)
-            (jb, kb) = msge(data, trform(b), self.xvschema, skipstep, self.p)
+            ja, ka = msge(data, trform(a), self.xvschema, skipstep, self.p)
+            jb, kb = msge(data, trform(b), self.xvschema, skipstep, self.p)
 
             if trform(b) >= maxdelta:
                 if verbose:
@@ -192,8 +190,8 @@ class VAR(VARBase):
             # this is not very stable!
             #c = a + (b-a) * np.abs(ka) / np.abs(kb-ka)
             c = (a + b) / 2
-            (j, k) = msge(data, trform(c), self.xvschema, skipstep, self.p)
-            if sp.sign(k) == sp.sign(ka):
+            j, k = msge(data, trform(c), self.xvschema, skipstep, self.p)
+            if np.sign(k) == np.sign(ka):
                 a, ka = c, k
             else:
                 b, kb = c, k
@@ -221,17 +219,16 @@ def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
     """Calculate mean squared generalization error and its gradient for
     underdetermined equation system.
     """
-    (t, m, l) = data.shape
+    t, m, l = data.shape
     d = None
     j, k = 0, 0
-    nt = sp.ceil(t / skipstep)
+    nt = np.ceil(t / skipstep)
     for trainset, testset in xvschema(t, skipstep):
 
-        (a, b) = _construct_var_eqns(sp.atleast_3d(data[trainset, :, :]), p)
-        (c, d) = _construct_var_eqns(sp.atleast_3d(data[testset, :, :]), p)
+        a, b = _construct_var_eqns(atleast_3d(data[trainset, :, :]), p)
+        c, d = _construct_var_eqns(atleast_3d(data[testset, :, :]), p)
 
-        e = sp.linalg.inv(sp.eye(a.shape[0]) * delta ** 2 +
-                          a.dot(a.transpose()))
+        e = sp.linalg.inv(np.eye(a.shape[0]) * delta ** 2 + a.dot(a.T))
 
         cc = c.transpose().dot(c)
 
@@ -242,8 +239,8 @@ def _msge_with_gradient_underdetermined(data, delta, xvschema, skipstep, p):
         beacc = bea.dot(cc)
         dc = d.transpose().dot(c)
 
-        j += sp.sum(beacc * bea - 2 * bea * dc) + sp.sum(d ** 2)
-        k += sp.sum(beea * dc - beacc * beea) * 4 * delta
+        j += np.sum(beacc * bea - 2 * bea * dc) + np.sum(d ** 2)
+        k += np.sum(beea * dc - beacc * beea) * 4 * delta
 
     return j / (nt * d.size), k / (nt * d.size)
 
@@ -252,17 +249,16 @@ def _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p):
     """Calculate mean squared generalization error and its gradient for
     overdetermined equation system.
     """
-    (t, m, l) = data.shape
+    t, m, l = data.shape
     d = None
     l, k = 0, 0
-    nt = sp.ceil(t / skipstep)
+    nt = np.ceil(t / skipstep)
     for trainset, testset in xvschema(t, skipstep):
 
-        (a, b) = _construct_var_eqns(sp.atleast_3d(data[trainset, :, :]), p)
-        (c, d) = _construct_var_eqns(sp.atleast_3d(data[testset, :, :]), p)
+        a, b = _construct_var_eqns(atleast_3d(data[trainset, :, :]), p)
+        c, d = _construct_var_eqns(atleast_3d(data[testset, :, :]), p)
 
-        e = sp.linalg.inv(sp.eye(a.shape[1]) * delta ** 2 +
-                          a.transpose().dot(a))
+        e = sp.linalg.inv(np.eye(a.shape[1]) * delta ** 2 + a.T.dot(a))
 
         ba = b.transpose().dot(a)
         dc = d.transpose().dot(c)
@@ -270,8 +266,8 @@ def _msge_with_gradient_overdetermined(data, delta, xvschema, skipstep, p):
         baee = bae.dot(e)
         baecc = bae.dot(c.transpose().dot(c))
 
-        l += sp.sum(baecc * bae - 2 * bae * dc) + sp.sum(d ** 2)
-        k += sp.sum(baee * dc - baecc * baee) * 4 * delta
+        l += np.sum(baecc * bae - 2 * bae * dc) + np.sum(d ** 2)
+        k += np.sum(baee * dc - baecc * baee) * 4 * delta
 
     return l / (nt * d.size), k / (nt * d.size)
 
@@ -280,7 +276,7 @@ def _get_msge_with_gradient_func(shape, p):
     """Select which function to use for MSGE calculation (over- or
     underdetermined).
     """
-    (t, m, l) = shape
+    t, m, l = shape
 
     n = (l - p) * t
     underdetermined = n < m * p
@@ -295,7 +291,7 @@ def _get_msge_with_gradient(data, delta, xvschema, skipstep, p):
     """Calculate mean squared generalization error and its gradient,
     automatically selecting the best function.
     """
-    (t, m, l) = data.shape
+    t, m, l = data.shape
 
     n = (l - p) * t
     underdetermined = n < m * p

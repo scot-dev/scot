@@ -1,50 +1,53 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013 SCoT Development Team
+# Copyright (c) 2013-2016 SCoT Development Team
 
-"""common spatial patterns (CSP) implementation"""
+"""Common spatial patterns (CSP) implementation."""
 
 import numpy as np
 from scipy.linalg import eig
     
 
 def csp(x, cl, numcomp=None):
-    """ Calculate common spatial patterns (CSP)
+    """Calculate common spatial patterns (CSP).
 
     Parameters
     ----------
-    x : array-like, shape = [n_trials, n_channels, n_samples] or [n_channels, n_samples]
-        EEG data set
+    x : array, shape (trials, channels, samples) or (channels, samples)
+        EEG data set.
     cl : list of valid dict keys
-        Class labels associated with each trial. Currently only two classes are supported.
-    numcomp : {int}, optional
-        Number of patterns to keep after applying the CSP. If `numcomp` is
-        greater than n_channels or None, all n_channels patterns are returned.
+        Class labels associated with each trial. Currently, only two classes
+        are supported.
+    numcomp : int, optional
+        Number of patterns to keep after applying CSP. If `numcomp` is greater
+        than channels or None, all patterns are returned.
 
     Returns
     -------
-    w : array, shape = [n_channels, n_components]
-        CSP weight matrix
-    v : array, shape = [n_components, n_channels]
-        CSP projection matrix
+    w : array, shape (channels, components)
+        CSP weight matrix.
+    v : array, shape (components, channels)
+        CSP projection matrix.
     """
 
     x = np.asarray(x)
     cl = np.asarray(cl).ravel()
 
     if x.ndim != 3 or x.shape[0] < 2:
-        raise AttributeError('CSP needs at least two trials.')
+        raise AttributeError('CSP requires at least two trials.')
 
     t, m, n = x.shape
     
     if t != cl.size:
-        raise AttributeError('CSP only works with multiple classes. Number of'
-                             ' elements in cl (%d) must equal 3rd dimension of X (%d)' % (cl.size, t))
+        raise AttributeError('CSP only works with multiple classes. Number of '
+                             'elements in cl ({}) must equal the first '
+                             'dimension of x ({})'.format(cl.size, t))
 
     labels = np.unique(cl)
     
     if labels.size != 2:
-        raise AttributeError('CSP is currently implemented for 2 classes (got %d)' % labels.size)
+        raise AttributeError('CSP is currently implemented for two classes '
+                             'only (got {}).'.format(labels.size))
         
     x1 = x[cl == labels[0], :, :]
     x2 = x[cl == labels[1], :, :]
@@ -59,12 +62,11 @@ def csp(x, cl, numcomp=None):
         sigma2 += np.cov(x2[t, :, :]) / x2.shape[0]
     sigma2 /= sigma2.trace()
 
-    e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True, check_finite=False)
+    e, w = eig(sigma1, sigma1 + sigma2, overwrite_a=True, overwrite_b=True,
+               check_finite=False)
 
     order = np.argsort(e)[::-1]
     w = w[:, order]
-    # e = e[order]
-        
     v = np.linalg.inv(w)
    
     # subsequently remove unwanted components from the middle of w and v

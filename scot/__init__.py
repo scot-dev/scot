@@ -1,9 +1,8 @@
 # Released under The MIT License (MIT)
 # http://opensource.org/licenses/MIT
-# Copyright (c) 2013-2015 SCoT Development Team
+# Copyright (c) 2013-2016 SCoT Development Team
 
-""" SCoT: The Source Connectivity Toolbox
-"""
+"""SCoT: The Source Connectivity Toolbox."""
 
 from __future__ import absolute_import
 
@@ -13,7 +12,7 @@ config = config.load_configuration()
 from .backendmanager import BackendManager
 backend = BackendManager()
 
-# register backends that come shipped with scot
+# register backends shipped with SCoT
 from . import backend_builtin
 from . import backend_sklearn
 backend.activate(config.get('scot', 'backend'))
