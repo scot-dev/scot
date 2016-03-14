@@ -6,7 +6,7 @@ import unittest
 from importlib import import_module
 
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_array_equal
 
 from scot import datatools
 import scot
@@ -222,7 +222,7 @@ class TestMVARICA(unittest.TestCase):
 
         api = scot.Workspace(VAR(1), locations=[[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]])
 
-        api.set_data(np.random.randn(10, 5, 10), [1, 0]*5)
+        api.set_data(np.random.randn(10, 5, 10), [1, 0] * 5)
         api.do_mvarica()
 
         api.plot_source_topos()
@@ -238,6 +238,25 @@ class TestMVARICA(unittest.TestCase):
                 api.get_bootstrap_connectivity('PHI', plot=fig, repeats=5)
                 api.get_tf_connectivity('PHI', winlen=2, winstep=1, plot=fig)
                 api.compare_conditions([0], [1], 'PHI', plot=fig, repeats=5)
+
+    def test_random_state(self):
+        np.random.seed(10)
+        api = scot.Workspace(VAR(1),locations=[[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]], reducedim=None)
+        api.set_data(np.random.randn(10, 5, 10), [1, 0] * 5)
+
+        # test MVARICA
+        api.do_mvarica(random_state=1)
+        mixing1 = api.mixing_
+        api.do_mvarica(random_state=1)
+        mixing2 = api.mixing_
+        assert_array_equal(mixing1, mixing2)
+
+        # test CSPVARICA
+        api.do_cspvarica(random_state=1)
+        mixing1 = api.mixing_
+        api.do_cspvarica(random_state=1)
+        mixing2 = api.mixing_
+        assert_array_equal(mixing1, mixing2)
 
     def test_source_selection(self):
         var = VAR(2)

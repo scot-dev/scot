@@ -220,7 +220,7 @@ class Workspace(object):
         self.trial_mask_ = mask
         return self
 
-    def do_mvarica(self, varfit='ensemble'):
+    def do_mvarica(self, varfit='ensemble', random_state=None):
         """ Perform MVARICA
 
         Perform MVARICA source decomposition and VAR model fitting.
@@ -249,18 +249,21 @@ class Workspace(object):
         """
         if self.data_ is None:
             raise RuntimeError("MVARICA requires data to be set")
-        result = mvarica(x=self.data_[self.trial_mask_, :, :], cl=self.cl_[self.trial_mask_], var=self.var_,
-                         reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
+        result = mvarica(x=self.data_[self.trial_mask_, :, :],
+                         cl=self.cl_[self.trial_mask_], var=self.var_,
+                         reducedim=self.reducedim_, backend=self.backend_,
+                         varfit=varfit, random_state=random_state)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
-        self.connectivity_ = Connectivity(result.b.coef, result.b.rescov, self.nfft_)
+        self.connectivity_ = Connectivity(result.b.coef, result.b.rescov,
+                                          self.nfft_)
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
         self.mixmaps_ = []
         self.unmixmaps_ = []
         return self
 
-    def do_cspvarica(self, varfit='ensemble'):
+    def do_cspvarica(self, varfit='ensemble', random_state=None):
         """ Perform CSPVARICA
 
         Perform CSPVARICA source decomposition and VAR model fitting.
@@ -296,7 +299,8 @@ class Workspace(object):
         except (TypeError, AssertionError):
             raise RuntimeError("CSPVARICA requires orderable and hashable class labels that are not None")
         result = cspvarica(x=self.data_, var=self.var_, cl=self.cl_,
-                           reducedim=self.reducedim_, backend=self.backend_, varfit=varfit)
+                           reducedim=self.reducedim_, backend=self.backend_,
+                           varfit=varfit, random_state=random_state)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.var_ = result.b
@@ -306,7 +310,7 @@ class Workspace(object):
         self.unmixmaps_ = []
         return self
 
-    def do_ica(self):
+    def do_ica(self, random_state=None):
         """ Perform ICA
 
         Perform plain ICA source decomposition.
@@ -323,7 +327,7 @@ class Workspace(object):
         """
         if self.data_ is None:
             raise RuntimeError("ICA requires data to be set")
-        result = plainica(x=self.data_[self.trial_mask_, :, :], reducedim=self.reducedim_, backend=self.backend_)
+        result = plainica(x=self.data_[self.trial_mask_, :, :], reducedim=self.reducedim_, backend=self.backend_, random_state=random_state)
         self.mixing_ = result.mixing
         self.unmixing_ = result.unmixing
         self.activations_ = dot_special(self.unmixing_.T, self.data_)
@@ -465,7 +469,7 @@ class Workspace(object):
 
         return cm
 
-    def get_surrogate_connectivity(self, measure_name, repeats=100, plot=False):
+    def get_surrogate_connectivity(self, measure_name, repeats=100, plot=False, random_state=None):
         """ Calculate spectral connectivity measure under the assumption of no actual connectivity.
 
         Repeatedly samples connectivity from phase-randomized data. This provides estimates of the connectivity
@@ -488,7 +492,7 @@ class Workspace(object):
         :func:`scot.connectivity_statistics.surrogate_connectivity` : Calculates surrogate connectivity
         """
         cs = surrogate_connectivity(measure_name, self.activations_[:, :, self.trial_mask_],
-                                    self.var_, self.nfft_, repeats)
+                                    self.var_, self.nfft_, repeats, random_state=random_state)
 
         if plot is None or plot:
             fig = plot
@@ -510,7 +514,7 @@ class Workspace(object):
 
         return cs
 
-    def get_bootstrap_connectivity(self, measure_names, repeats=100, num_samples=None, plot=False):
+    def get_bootstrap_connectivity(self, measure_names, repeats=100, num_samples=None, plot=False, random_state=None):
         """ Calculate bootstrap estimates of spectral connectivity measures.
 
         Bootstrapping is performed on trial level.
@@ -540,7 +544,7 @@ class Workspace(object):
             num_samples = np.sum(self.trial_mask_)
 
         cb = bootstrap_connectivity(measure_names, self.activations_[self.trial_mask_, :, :],
-                                    self.var_, self.nfft_, repeats, num_samples)
+                                    self.var_, self.nfft_, repeats, num_samples, random_state=random_state)
 
         if plot is None or plot:
             fig = plot
@@ -656,7 +660,7 @@ class Workspace(object):
 
         return result
 
-    def compare_conditions(self, labels1, labels2, measure_name, alpha=0.01, repeats=100, num_samples=None, plot=False):
+    def compare_conditions(self, labels1, labels2, measure_name, alpha=0.01, repeats=100, num_samples=None, plot=False, random_state=None):
         """ Test for significant difference in connectivity of two sets of class labels.
 
         Connectivity estimates are obtained by bootstrapping. Correction for multiple testing is performed by
@@ -690,9 +694,9 @@ class Workspace(object):
             Instance of the figure in which was plotted. This is only returned if `plot` is not **False**.
         """
         self.set_used_labels(labels1)
-        ca = self.get_bootstrap_connectivity(measure_name, repeats, num_samples)
+        ca = self.get_bootstrap_connectivity(measure_name, repeats, num_samples, random_state=random_state)
         self.set_used_labels(labels2)
-        cb = self.get_bootstrap_connectivity(measure_name, repeats, num_samples)
+        cb = self.get_bootstrap_connectivity(measure_name, repeats, num_samples, random_state=random_state)
 
         p = test_bootstrap_difference(ca, cb)
         s = significance_fdr(p, alpha)

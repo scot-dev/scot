@@ -26,7 +26,7 @@ class ResultICA(object):
         self.unmixing = ux
 
 
-def plainica(x, reducedim=0.99, backend=None):
+def plainica(x, reducedim=0.99, backend=None, random_state=None):
     """ Source decomposition with ICA.
 
     Apply ICA to the data x, with optional PCA dimensionality reduction.
@@ -64,7 +64,7 @@ def plainica(x, reducedim=0.99, backend=None):
         c, d, xpca = backend['pca'](x, reducedim)
 
     # run on residuals ICA to estimate volume conduction
-    mx, ux = backend['ica'](cat_trials(xpca))
+    mx, ux = backend['ica'](cat_trials(xpca), random_state=random_state)
 
     # correct (un)mixing matrix estimatees
     mx = mx.dot(d)

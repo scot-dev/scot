@@ -8,7 +8,21 @@ Summary
 Tools for basic data manipulation.
 """
 
+from __future__ import division
+
 import numpy as np
+
+from .utils import check_random_state
+
+
+def atleast_3d(x):
+    x = np.asarray(x)
+    if x.ndim >= 3:
+        return x
+    elif x.ndim == 2:
+        return x[np.newaxis, ...]
+    else:
+        return x[np.newaxis, np.newaxis, :]
 
 
 def cut_segments(x2d, tr, start, stop):
@@ -115,7 +129,7 @@ def dot_special(x2d, x3d):
                            for i in range(x3d.shape[0])])
 
 
-def randomize_phase(data):
+def randomize_phase(data, random_state=None):
     """Phase randomization.
 
     This function randomizes the spectral phase of the input data along the
@@ -154,17 +168,48 @@ def randomize_phase(data):
         plot(y.T + [1.5, -1.5]), axis([0,1000,-3,3])
         plt.show()
     """
+    rng = check_random_state(random_state)
     data = np.asarray(data)
     data_freq = np.fft.rfft(data)
-    data_freq = np.abs(data_freq) * np.exp(1j*np.random.random_sample(data_freq.shape)*2*np.pi)
+    data_freq = np.abs(data_freq) * np.exp(1j*rng.random_sample(data_freq.shape)*2*np.pi)
     return np.fft.irfft(data_freq, data.shape[-1])
 
 
-def atleast_3d(x):
-    x = np.asarray(x)
-    if x.ndim >= 3:
-        return x
-    elif x.ndim == 2:
-        return x[np.newaxis, ...]
+def acm(x, l):
+    """Compute autocovariance matrix at lag l.
+
+    This function calculates the autocovariance matrix of `x` at lag `l`.
+
+    Parameters
+    ----------
+    x : array, shape (n_trials, n_channels, n_samples)
+        Signal data (2D or 3D for multiple trials)
+    l : int
+        Lag
+
+    Returns
+    -------
+    c : ndarray, shape = [nchannels, n_channels]
+        Autocovariance matrix of `x` at lag `l`.
+    """
+    x = atleast_3d(x)
+
+    if l > x.shape[2]-1:
+        raise AttributeError("lag exceeds data length")
+
+    ## subtract mean from each trial
+    #for t in range(x.shape[2]):
+    #    x[:, :, t] -= np.mean(x[:, :, t], axis=0)
+
+    if l == 0:
+        a, b = x, x
     else:
-        return x[np.newaxis, np.newaxis, :]
+        a = x[:, :, l:]
+        b = x[:, :, 0:-l]
+
+    c = np.zeros((x.shape[1], x.shape[1]))
+    for t in range(x.shape[0]):
+        c += a[t, :, :].dot(b[t, :, :].T) / a.shape[2]
+    c /= x.shape[0]
+
+    return c.T

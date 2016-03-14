@@ -14,9 +14,9 @@ from .external.infomax_ import infomax
 
 
 def generate():
-    def wrapper_infomax(data):
+    def wrapper_infomax(data, random_state=None):
         """Call Infomax (adapted from MNE) for ICA calculation."""
-        u = infomax(datatools.cat_trials(data).T).T
+        u = infomax(datatools.cat_trials(data).T, random_state=random_state).T
         m = sp.linalg.pinv(u)
         return m, u
 

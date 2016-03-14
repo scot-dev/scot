@@ -2,8 +2,9 @@
 # http://opensource.org/licenses/MIT
 # Copyright (c) 2013-2015 SCoT Development Team
 
-import unittest
+from __future__ import division
 
+import unittest
 import numpy as np
 
 from scot import datatools
@@ -72,6 +73,16 @@ class TestDataMangling(unittest.TestCase):
         a = np.ones((7, 40))
         y = datatools.dot_special(a, x)
         self.assertEqual(y.shape, (150, 7, 6))
+
+    def test_acm_1d(self):
+        """Test autocorrelation matrix for 1D input"""
+        v = np.array([1, 2, 0, 0, 1, 2, 0, 0])
+        acm = lambda l: datatools.acm(v, l)
+
+        self.assertEqual(np.mean(v**2), acm(0))
+        for l in range(1, 6):
+            self.assertEqual(np.correlate(v[l:], v[:-l]) / (len(v) - l),
+                             acm(l))
 
 
 class TestRegressions(unittest.TestCase):
