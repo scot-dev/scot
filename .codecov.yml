@@ -19,5 +19,5 @@ coverage:
             if_ci_failed: error
 
 comment:
-    layout: ""
+    layout: "diff, changes"
     behavior: default
