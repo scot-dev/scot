@@ -32,6 +32,7 @@ fi
 
 if [[ "$COVERAGE" == "true" ]]; then
     pip install coverage coveralls
+    pip install codecov
 fi
 
 if [[ "$RUN_EXAMPLES" == "true" ]]; then
