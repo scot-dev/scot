@@ -38,4 +38,4 @@ script:
   source distributions/ci/run_tests.sh
 
 after_success:
-  - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
+  - if [[ "$COVERAGE" == "true" ]]; then codecov; fi
