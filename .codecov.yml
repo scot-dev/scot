@@ -20,4 +20,4 @@ coverage:
 
 comment:
     layout: "diff, changes"
-    behavior: default
+    behavior: spammy
