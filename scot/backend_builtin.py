@@ -16,7 +16,8 @@ from .external.infomax_ import infomax
 def generate():
     def wrapper_infomax(data, random_state=None):
         """Call Infomax (adapted from MNE) for ICA calculation."""
-        u = infomax(datatools.cat_trials(data).T, random_state=random_state).T
+        u = infomax(datatools.cat_trials(data).T, extended=True,
+                    random_state=random_state).T
         m = sp.linalg.pinv(u)
         return m, u
 
@@ -28,6 +29,7 @@ def generate():
         return c, d, y
 
     def wrapper_csp(x, cl, reducedim):
+        """Call SCoT's CSP algorithm."""
         c, d = csp.csp(x, cl, numcomp=reducedim)
         y = datatools.dot_special(c.T, x)
         return c, d, y
