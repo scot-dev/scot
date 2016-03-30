@@ -26,8 +26,10 @@ def generate():
         """Call MNE CSP algorithm."""
         from mne.decoding import CSP
         csp = CSP(n_components=reducedim, cov_est="epoch")
-        y = csp.fit_transform(x, cl)
-        return csp.filters_, csp.patterns_, y
+        csp.fit(x, cl)
+        c, d = csp.filters_.T[:, :reducedim], csp.patterns_[:reducedim, :]
+        y = datatools.dot_special(c.T, x)
+        return c, d, y
 
     backend = builtin.generate()
     backend.update({'ica': wrapper_infomax, 'csp': wrapper_csp})
