@@ -28,7 +28,7 @@ if [[ "$DISTRIB" == "conda" ]]; then
             scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
     fi
     source activate testenv
-    pip install mne=$MNE_VERSION
+    pip install mne==$MNE_VERSION
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
