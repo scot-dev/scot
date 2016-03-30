@@ -21,15 +21,14 @@ if [[ "$DISTRIB" == "conda" ]]; then
     if [[ "$USE_MKL" == "true" ]]; then
         conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
             numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
-            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
-            mne=$MNE_VERSION
+            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
     else
         conda create -n testenv --yes python=$PYTHON_VERSION nomkl pip nose \
             numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
-            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION \
-            mne=$MNE_VERSION
+            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
     fi
     source activate testenv
+    pip install mne=$MNE_VERSION
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
