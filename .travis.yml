@@ -14,21 +14,21 @@ env:
     - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="false"
       NUMPY_VERSION="1.8.2" SCIPY_VERSION="0.13.3"
       SKLEARN_VERSION="0.15.0" MATPLOTLIB_VERSION="1.4.0"
-      INSTALL_SCOT="true" RUN_EXAMPLES="false"
+      MNE_VERSION="0.11.0" INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
 
     # Python 2
     - DISTRIB="conda" PYTHON_VERSION="2.7" USE_MKL="true"
       NUMPY_VERSION="1.10.4" SCIPY_VERSION="0.17.0"
       SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
-      INSTALL_SCOT="true" RUN_EXAMPLES="false"
+      MNE_VERSION="0.11.0" INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
 
     # Python 3
     - DISTRIB="conda" PYTHON_VERSION="3.5" USE_MKL="true"
       NUMPY_VERSION="1.10.4" SCIPY_VERSION="0.17.0"
       SKLEARN_VERSION="0.17.0" MATPLOTLIB_VERSION="1.5.1"
-      INSTALL_SCOT="true" RUN_EXAMPLES="false"
+      MNE_VERSION="0.11.0" INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="true"
       
 install:

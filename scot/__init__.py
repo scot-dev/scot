@@ -15,6 +15,7 @@ backend = BackendManager()
 # register backends shipped with SCoT
 from . import backend_builtin
 from . import backend_sklearn
+from . import backend_mne
 backend.activate(config.get('scot', 'backend'))
 
 from .ooapi import Workspace
