@@ -15,10 +15,9 @@ try:
     sklearn_failed = False
 except ImportError:
     sklearn_failed = True
-
-
-backend_sklearn = generate()
-VAR = backend_sklearn['var']
+else:
+    backend_sklearn = generate()
+    VAR = backend_sklearn['var']
 
 
 class CommonTests(unittest.TestCase):
