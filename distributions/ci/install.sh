@@ -22,13 +22,21 @@ if [[ "$DISTRIB" == "conda" ]]; then
     source activate testenv
 
     if [[ "$PACKAGES" == "current" ]]; then
-        conda install --yes numpy scipy scikit-learn matplotlib
+        conda install --yes numpy scipy
+        if [[ "$DEPS" == "true" ]]; then
+            conda install --yes scikit-learn matplotlib
+        fi
     elif [[ "$PACKAGES" == "oldest" ]]; then
-        conda install --yes numpy=1.8.2 scipy=0.13.3 scikit-learn=0.15.0 \
-            matplotlib=1.4.0
+        conda install --yes numpy=1.8.2 scipy=0.13.3
+        if [[ "$DEPS" == "true" ]]; then
+            conda install --yes scikit-learn=0.15.0 matplotlib=1.4.0
+        fi
     fi
 
-    pip install mne
+    if [[ "$DEPS" == "true" ]]; then
+        pip install mne
+    fi
+
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then

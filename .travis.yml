@@ -24,6 +24,13 @@ env:
     - DISTRIB="conda" PYTHON="3.5" PACKAGES="current"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="true"
+
+    # environment without optional dependencies
+    - DISTRIB="conda" PYTHON_VERSION="3.5" USE_MKL="true"
+      NUMPY_VERSION="1.10.4" SCIPY_VERSION="0.17.0"
+      SKLEARN_VERSION="none" MATPLOTLIB_VERSION="none"
+      MNE_VERSION="none" INSTALL_SCOT="true" RUN_EXAMPLES="false"
+      COVERAGE="false"
       
 install:
   source distributions/ci/install.sh
