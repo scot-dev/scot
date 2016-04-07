@@ -3,14 +3,18 @@
 # Copyright (c) 2013-2015 SCoT Development Team
 
 import unittest
-
+import numpy as np
 from numpy.testing.utils import assert_array_almost_equal
 from numpy.testing.utils import assert_equal
 
-import numpy as np
-from sklearn.linear_model import Ridge, RidgeCV, Lasso, LassoLars, ElasticNet
-
 from scot.backend_sklearn import generate
+
+try:
+    from sklearn.linear_model import (Ridge, RidgeCV, Lasso, LassoLars,
+                                      ElasticNet)
+    sklearn_failed = False
+except ImportError:
+    sklearn_failed = True
 
 
 backend_sklearn = generate()
@@ -19,6 +23,8 @@ VAR = backend_sklearn['var']
 
 class CommonTests(unittest.TestCase):
     def setUp(self):
+        if sklearn_failed:
+            self.skipTest("sklearn not found.")
         np.random.seed(12345)
         self.var0 = VAR(2)
         self.var0.coef = np.array([[0.2, 0.1, 0.4, -0.1], [0.3, -0.2, 0.1, 0]])
