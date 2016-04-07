@@ -76,7 +76,13 @@ class Workspace(object):
         self.locations_ = locations
         self.reducedim_ = reducedim
         self.nfft_ = nfft
-        self.backend_ = backend if backend is not None else global_backend
+
+        if backend is None:
+            self.backend_ = global_backend
+        elif isinstance(backend, str):
+            self.backend_ = global_backend.get_backend(backend)
+        else:
+            self.backend_ = backend
 
         self.trial_mask_ = []
 
