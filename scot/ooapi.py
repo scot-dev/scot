@@ -100,6 +100,12 @@ class Workspace(object):
         except TypeError:
             self.var_ = var
 
+    def __repr__(self):
+        s = ("Workspace(var={}, locations={}, reducedim={}, nfft={}, fs={}, "
+             "backend={})".format(self.var_, self.locations_, self.reducedim_,
+                                  self.nfft_, self.fs_, self.backend_))
+        return s
+
     def __str__(self):
         if self.data_ is not None:
             datastr = '%d trials, %d channels, %d samples' % self.data_.shape

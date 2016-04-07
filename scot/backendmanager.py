@@ -9,6 +9,10 @@ class BackendManager:
     def __init__(self):
         self.backends = {}
         self.current = None
+        self.current_name = None
+
+    def __repr__(self):
+        return self.current_name
 
     def register(self, name, activation_function):
         if config.getboolean('scot', 'verbose'):
@@ -19,6 +23,7 @@ class BackendManager:
         if config.getboolean('scot', 'verbose'):
             print('Activating backend:', name)
         self.current = self.backends[name]()
+        self.current_name = name
 
     def names(self):
         return self.backends.keys()
