@@ -92,5 +92,9 @@ def generate():
     backend.update({'ica': wrapper_fastica, 'pca': wrapper_pca, 'var': VAR})
     return backend
 
-
-backend.register('sklearn', generate)
+try:
+    import sklearn
+except ImportError:
+    pass
+else:
+    backend.register('sklearn', generate)

@@ -35,5 +35,9 @@ def generate():
     backend.update({'ica': wrapper_infomax, 'csp': wrapper_csp})
     return backend
 
-
-backend.register('mne', generate)
+try:
+    import mne
+except ImportError:
+    pass
+else:
+    backend.register('mne', generate)
