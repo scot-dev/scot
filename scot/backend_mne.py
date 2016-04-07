@@ -25,7 +25,7 @@ def generate():
     def wrapper_csp(x, cl, reducedim):
         """Call MNE CSP algorithm."""
         from mne.decoding import CSP
-        csp = CSP(n_components=reducedim, cov_est="epoch")
+        csp = CSP(n_components=reducedim, cov_est="epoch", reg="ledoit_wolf")
         csp.fit(x, cl)
         c, d = csp.filters_.T[:, :reducedim], csp.patterns_[:reducedim, :]
         y = datatools.dot_special(c.T, x)
