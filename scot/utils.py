@@ -6,7 +6,7 @@
 
 from __future__ import division
 
-from functools import partial
+from functools import partial, wraps
 
 import numpy as np
 
@@ -178,3 +178,34 @@ def cartesian(arrays, out=None):
         for j in range(1, arrays[0].size):
             out[j * m: (j + 1) * m, 1:] = out[0:m, 1:]
     return out
+
+def require_sklearn(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            import sklearn
+        except ImportError:
+            raise AssertionError("sklearn is required but could not be found.")
+        return f(*args, **kwargs)
+    return wrapper
+
+def require_matplotlib(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            import matplotlib
+        except ImportError:
+            raise AssertionError("matplotlib is required but could not be "
+                                 "found.")
+        return f(*args, **kwargs)
+    return wrapper
+
+def require_mne(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            import sklearn
+        except ImportError:
+            raise AssertionError("mne is required but could not be found.")
+        return f(*args, **kwargs)
+    return wrapper
