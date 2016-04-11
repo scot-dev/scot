@@ -5,9 +5,13 @@
 import unittest
 
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.image import AxesImage
-from matplotlib.figure import Figure
+
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.image import AxesImage
+    from matplotlib.figure import Figure
+except ImportError:
+    matplotlib_failed = True
 
 from scot.eegtopo.topoplot import Topoplot
 from scot import plotting as sp
@@ -16,6 +20,8 @@ from scot.varbase import VARBase
 
 class TestFunctionality(unittest.TestCase):
     def setUp(self):
+        if matplotlib_failed:
+            self.skipTest("matplotlib not found.")
         self.locs = [[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]]
         self.vals = [[1, 0, 0, 0, 0], [0, 0, 0, 0, 0], [1, 1, 1, 1, 1] ]
 
