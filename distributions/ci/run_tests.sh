@@ -11,8 +11,15 @@ echo "Testing Environment:"
 python --version
 python -c "import numpy; print('numpy %s' % numpy.__version__)"
 python -c "import scipy; print('scipy %s' % scipy.__version__)"
-python -c "import sklearn; print('sklearn %s' % sklearn.__version__)"
-python -c "import matplotlib; print('matplotlib %s' % matplotlib.__version__)"
+if [[ $SKLEARN_VERSION != "none" ]]; then
+    python -c "import sklearn; print('sklearn %s' % sklearn.__version__)"
+fi
+if [[ $MATPLOTLIB_VERSION != "none" ]]; then
+    python -c "import matplotlib; print('matplotlib %s' % matplotlib.__version__)"
+fi
+if [[ $MNE_VERSION != "none" ]]; then
+    python -c "import mne; print('mne %s' % mne.__version__)"
+fi
 echo "============================"
 echo "============================"
 
