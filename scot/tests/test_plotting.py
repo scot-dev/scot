@@ -10,6 +10,7 @@ try:
     import matplotlib.pyplot as plt
     from matplotlib.image import AxesImage
     from matplotlib.figure import Figure
+    matplotlib_failed = False
 except ImportError:
     matplotlib_failed = True
 
