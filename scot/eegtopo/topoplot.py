@@ -146,12 +146,12 @@ class Topoplot(object):
                            extent=(offset[0]-self.interprange, offset[0]+self.interprange,
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
-    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=1.0):
+    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=1.0, markersize=0.5):
         if axes is None:
             import matplotlib.pyplot as plot
             axes = plot.gca()
         p2 = array_project_radial_to2d(self.locations) * self.electrodescale + offset
-        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha=alpha)
+        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha=alpha, markersize=markersize)
 
     def plot_head(self, axes=None, offset=(0,0)):
         import matplotlib.patches as patches
