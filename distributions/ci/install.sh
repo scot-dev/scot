@@ -18,17 +18,8 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda update --yes conda
 
     # configure and activate the conda environment
-    if [[ "$USE_MKL" == "true" ]]; then
-        conda create -n testenv --yes python=$PYTHON_VERSION pip nose \
-            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
-            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
-    else
-        conda create -n testenv --yes python=$PYTHON_VERSION nomkl pip nose \
-            numpy=$NUMPY_VERSION scipy=$SCIPY_VERSION numpy scipy \
-            scikit-learn=$SKLEARN_VERSION matplotlib=$MATPLOTLIB_VERSION
-    fi
+    conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy scikit-learn matplotlib mne
     source activate testenv
-    pip install mne==$MNE_VERSION
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
