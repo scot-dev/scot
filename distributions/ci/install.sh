@@ -18,8 +18,9 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda update --yes conda
 
     # configure and activate the conda environment
-    conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy scikit-learn matplotlib mne
+    conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy scikit-learn matplotlib
     source activate testenv
+    pip install mne
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
