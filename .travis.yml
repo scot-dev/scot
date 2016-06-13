@@ -10,27 +10,18 @@ virtualenv:
   
 env:
   matrix:
-    # oldest supported package versions on Python 2
-    - DISTRIB="conda" PYTHON="2.7"
-      NUMPY="1.8.2" SCIPY="0.13.3"
-      SKLEARN="0.15.0" MATPLOTLIB="1.4.0"
-      INSTALL_SCOT="true" RUN_EXAMPLES="false"
-      COVERAGE="false"
-
-    # oldest supported package versions on Python 3
-    - DISTRIB="conda" PYTHON="3.5"
-      NUMPY="1.8.2" SCIPY="0.13.3"
-      SKLEARN="0.15.0" MATPLOTLIB="1.4.0"
+    # Python 2, oldest supported packages
+    - DISTRIB="conda" PYTHON="2.7" PACKAGES="oldest"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
 
     # Python 2
-    - DISTRIB="conda" PYTHON="2.7"
+    - DISTRIB="conda" PYTHON="2.7" PACKAGES="current"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="false"
 
     # Python 3
-    - DISTRIB="conda" PYTHON="3.5"
+    - DISTRIB="conda" PYTHON="3.5" PACKAGES="current"
       INSTALL_SCOT="true" RUN_EXAMPLES="false"
       COVERAGE="true"
       

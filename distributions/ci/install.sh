@@ -21,31 +21,13 @@ if [[ "$DISTRIB" == "conda" ]]; then
     conda create -n testenv --yes python=$PYTHON pip nose
     source activate testenv
 
-    if [ -n $NUMPY ]; then
-        conda install numpy=$NUMPY
-    else
-        conda install numpy
+    if [[ "$PACKAGES" == "current" ]]; then
+        conda install --yes numpy scipy scikit-learn matplotlib
+    elif [[ "$PACKAGES" == "oldest" ]]; then
+        conda install --yes numpy=1.8.2 scipy=0.13.3 scikit-learn=0.15.0 \
+            matplotlib=1.4.0
     fi
 
-    if [ -n $SCIPY ]; then
-        conda install scipy=$SCIPY
-    else
-        conda install scipy
-    fi
-
-    if [ -n $SKLEARN ]; then
-        conda install scikit-learn=$SKLEARN
-    else
-        conda install scikit-learn
-    fi
-
-    if [ -n $MATPLOTLIB ]; then
-        conda install matplotlib=$MATPLOTLIB
-    else
-        conda install numpy
-    fi
-
-    numpy scipy scikit-learn matplotlib
     pip install mne
 fi
 
