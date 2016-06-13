@@ -162,8 +162,8 @@ class Topoplot(object):
         nose = self.path_nose.deepcopy()
         head.vertices += offset
         nose.vertices += offset
-        axes.add_patch(patches.PathPatch(head, facecolor='none', edgecolor=self.headcolor, lw=2))
-        axes.add_patch(patches.PathPatch(nose, facecolor='none', edgecolor=self.headcolor, lw=2))
+        axes.add_patch(patches.PathPatch(head, facecolor='none', edgecolor=self.headcolor))
+        axes.add_patch(patches.PathPatch(nose, facecolor='none', edgecolor=self.headcolor))
 
     def plot_circles(self, radius, axes=None, offset=(0,0)):
         import matplotlib.pyplot as plot
