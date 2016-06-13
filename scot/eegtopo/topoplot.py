@@ -184,7 +184,8 @@ class Topoplot(object):
         return self.channel_fence
 
 
-def topoplot(values, locations, axes=None, offset=(0, 0), **kwargs):
+def topoplot(values, locations, axes=None, offset=(0, 0), plot_locations=True,
+             plot_head=True, **kwargs):
     """Wrapper function for :class:`Topoplot.
     """
     topo = Topoplot(**kwargs)
@@ -192,6 +193,8 @@ def topoplot(values, locations, axes=None, offset=(0, 0), **kwargs):
     topo.set_values(values)
     topo.create_map()
     topo.plot_map(axes=axes, offset=offset)
-    topo.plot_locations(axes=axes, offset=offset)
-    topo.plot_head(axes=axes, offset=offset)
+    if plot_locations:
+        topo.plot_locations(axes=axes, offset=offset)
+    if plot_head:
+        topo.plot_head(axes=axes, offset=offset)
     return topo
