@@ -146,7 +146,7 @@ class Topoplot(object):
                            extent=(offset[0]-self.interprange, offset[0]+self.interprange,
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
-    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=1.0):
+    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=0.5):
         if axes is None:
             import matplotlib.pyplot as plot
             axes = plot.gca()
