@@ -18,12 +18,11 @@ def pca_svd(x):
         
     Returns
     -------
-    w : ndarray
+    w : ndarray, shape (channels, channels)
         Eigenvectors (principal components) (in columns).
-    s : ndarray
+    s : ndarray, shape (channels,)
         Eigenvalues.
     """
-
     w, s, _ = np.linalg.svd(x, full_matrices=False)
     return w, s ** 2
 
@@ -38,12 +37,11 @@ def pca_eig(x):
 
     Returns
     -------
-    w : ndarray
+    w : ndarray, shape (channels, channels)
         Eigenvectors (principal components) (in columns).
-    s : ndarray
+    s : ndarray, shape (channels,)
         Eigenvalues.
     """
-
     s, w = np.linalg.eigh(x.dot(x.T))
     return w, s
 
@@ -77,7 +75,7 @@ def pca(x, subtract_mean=False, normalize=False, sort_components=True,
     -------
     w : ndarray, shape (channels, components)
         PCA transformation matrix.
-    v : ndarray, shape (n_components, n_channels)
+    v : ndarray, shape (components, channels)
         Inverse PCA transformation matrix.
     """
 
