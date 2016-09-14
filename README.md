@@ -36,12 +36,11 @@ Documentation is available online at http://scot-dev.github.io/scot-doc/index.ht
 
 Dependencies
 ------------
-Required: numpy, scipy
+Required: numpy >= 1.8.2, scipy >= 0.13.3
 
-Optional: matplotlib, scikit-learn
+Optional: matplotlib >= 1.4.0, scikit-learn >= 0.15.0, mne >= 0.11.0
 
-The lowest supported versions of these libraries are numpy 1.8.2, scipy 0.13.3, scikit-learn 0.15.0, and
-matplotlib 1.4.0. Lower versions may work but are not tested.
+Lower versions of these packages may work but are not tested.
 
 
 Examples

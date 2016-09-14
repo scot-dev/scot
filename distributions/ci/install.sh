@@ -23,12 +23,12 @@ if [[ "$DISTRIB" == "conda" ]]; then
 
     if [[ "$PACKAGES" == "current" ]]; then
         conda install --yes numpy scipy scikit-learn matplotlib
+        pip install mne
     elif [[ "$PACKAGES" == "oldest" ]]; then
         conda install --yes numpy=1.8.2 scipy=0.13.3 scikit-learn=0.15.0 \
             matplotlib=1.4.0
+        pip install mne==0.11.0
     fi
-
-    pip install mne
 fi
 
 if [[ "$COVERAGE" == "true" ]]; then
