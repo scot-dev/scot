@@ -146,12 +146,12 @@ class Topoplot(object):
                            extent=(offset[0]-self.interprange, offset[0]+self.interprange,
                                    offset[1]-self.interprange, offset[1]+self.interprange))
 
-    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=1.0):
+    def plot_locations(self, axes=None, offset=(0,0), fmt='k.', alpha=0.5):
         if axes is None:
             import matplotlib.pyplot as plot
             axes = plot.gca()
         p2 = array_project_radial_to2d(self.locations) * self.electrodescale + offset
-        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha=alpha)
+        axes.plot(p2[:, 0], p2[:, 1], fmt, alpha=alpha, markersize=2)
 
     def plot_head(self, axes=None, offset=(0,0)):
         import matplotlib.patches as patches
@@ -162,8 +162,8 @@ class Topoplot(object):
         nose = self.path_nose.deepcopy()
         head.vertices += offset
         nose.vertices += offset
-        axes.add_patch(patches.PathPatch(head, facecolor='none', edgecolor=self.headcolor, lw=2))
-        axes.add_patch(patches.PathPatch(nose, facecolor='none', edgecolor=self.headcolor, lw=2))
+        axes.add_patch(patches.PathPatch(head, facecolor='none', edgecolor=self.headcolor))
+        axes.add_patch(patches.PathPatch(nose, facecolor='none', edgecolor=self.headcolor))
 
     def plot_circles(self, radius, axes=None, offset=(0,0)):
         import matplotlib.pyplot as plot
@@ -184,7 +184,8 @@ class Topoplot(object):
         return self.channel_fence
 
 
-def topoplot(values, locations, axes=None, offset=(0, 0), **kwargs):
+def topoplot(values, locations, axes=None, offset=(0, 0), plot_locations=True,
+             plot_head=True, **kwargs):
     """Wrapper function for :class:`Topoplot.
     """
     topo = Topoplot(**kwargs)
@@ -192,6 +193,8 @@ def topoplot(values, locations, axes=None, offset=(0, 0), **kwargs):
     topo.set_values(values)
     topo.create_map()
     topo.plot_map(axes=axes, offset=offset)
-    topo.plot_locations(axes=axes, offset=offset)
-    topo.plot_head(axes=axes, offset=offset)
+    if plot_locations:
+        topo.plot_locations(axes=axes, offset=offset)
+    if plot_head:
+        topo.plot_head(axes=axes, offset=offset)
     return topo
