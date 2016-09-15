@@ -61,8 +61,7 @@ def prepare_topoplots(topo, values):
     return topomaps
 
 
-def plot_topo(axis, topo, topomap, crange=None, offset=(0,0),
-              plot_locations=True, plot_head=True):
+def plot_topo(axis, topo, topomap, crange=None, offset=(0,0)):
     """Draw a topoplot in given axis.
 
     .. note:: Parameter `topo` is modified by the function by calling :func:`~eegtopo.topoplot.Topoplot.set_map`.
@@ -80,10 +79,6 @@ def plot_topo(axis, topo, topomap, crange=None, offset=(0,0),
         If set to None, [-max(abs(topomap)), max(abs(topomap))] is substituted.
     offset : [float, float], optional
         Shift the topo plot by [x,y] in axis units.
-    plot_locations : bool, optional
-        Plot electrode locations.
-    plot_head : bool, optional
-        Plot head cartoon.
 
     Returns
     -------
@@ -92,10 +87,8 @@ def plot_topo(axis, topo, topomap, crange=None, offset=(0,0),
     """
     topo.set_map(topomap)
     h = topo.plot_map(axis, crange=crange, offset=offset)
-    if plot_locations:
-        topo.plot_locations(axis, offset=offset)
-    if plot_head:
-        topo.plot_head(axis, offset=offset)
+    topo.plot_locations(axis, offset=offset)
+    topo.plot_head(axis, offset=offset)
     return h
 
 
