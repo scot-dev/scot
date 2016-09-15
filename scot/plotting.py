@@ -251,7 +251,7 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0
         [l, _, m, f] = a.shape
     freq = np.linspace(0, fs / 2, f)
 
-    lowest, highest = np.inf, -np.inf
+    lowest, highest = np.inf, 0
     left = max(freq_range[0], freq[0])
     right = min(freq_range[1], freq[-1])
 
@@ -287,30 +287,24 @@ def plot_connectivity_spectrum(a, fs=2, freq_range=(-np.inf, np.inf), diagonal=0
                 highest = max(highest, np.max(a[:, i, j, :]))
 
     for i, j, ax in axes:
-        ax.xaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
-        ax.yaxis.set_major_locator(MaxNLocator(max(1, 7 - m)))
-        al = ax.get_ylim()
-        ax.set_ylim(min(al[0], lowest), max(al[1], highest))
+        ax.xaxis.set_major_locator(MaxNLocator(max(4, 10 - m)))
+        ax.yaxis.set_major_locator(MaxNLocator(max(4, 10 - m)))
+        ax.set_ylim(0, highest)
         ax.set_xlim(left, right)
 
         if 0 < i < m - 1:
-            ax.set_xticks([])
-        if 0 < j < m - 1:
-            ax.set_yticks([])
+            ax.set_xticklabels([])
+        ax.set_yticklabels([])
 
         if i == 0:
-            ax.xaxis.tick_top()
-        if i == m-1:
-            ax.xaxis.tick_bottom()
-
-        if j == 0:
-            ax.yaxis.tick_left()
+            ax.xaxis.set_tick_params(labeltop="on", labelbottom="off")
         if j == m-1:
-            ax.yaxis.tick_right()
+            ax.yaxis.set_tick_params(labelright="on", labelleft="off")
 
-    _plot_labels(fig,
-                 {'x': 0.5, 'y': 0.025, 's': 'frequency (Hz)', 'horizontalalignment': 'center'},
-                 {'x': 0.05, 'y': 0.5, 's': 'magnitude', 'horizontalalignment': 'center', 'rotation': 'vertical'})
+        ax.tick_params(labelsize=10)
+
+    _plot_labels(fig, {'x': 0.5, 'y': 0.025, 's': 'f (Hz)',
+                       'horizontalalignment': 'center'})
 
     return fig
 
