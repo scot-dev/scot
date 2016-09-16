@@ -15,13 +15,16 @@ import numpy as np
 # trigger time points of the cues are stored in 'triggers', and 'classes'
 # contains the class labels. Duration of the motor imagery period was
 # approximately six seconds.
-import scotdata.motorimagery as midata
+from scot.exampledata import load
 
-raweeg = midata.eeg.T
-triggers = np.asarray(midata.triggers, dtype=int)
-classes = midata.classes
-fs = midata.samplerate
-locs = midata.locations
+
+midata = load("mi")[0]
+
+raweeg = midata["eeg"]
+triggers = midata["triggers"]
+classes = midata["labels"]
+fs = midata["fs"]
+locs = midata["locations"]
 
 
 # Set random seed for repeatable results
