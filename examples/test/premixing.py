@@ -20,10 +20,10 @@ import scot
 # motor imagery. The the trigger time points of the cues are stored in 'tr', and
 # 'cl' contains the class labels (hand: 1, foot: -1). Duration of the motor
 # imagery period was approximately 6 seconds.
-from scot.exampledata import load
+from scot.datasets import fetch
 
 
-midata = load("mi")[0]
+midata = fetch("mi")[0]
 
 raweeg = midata["eeg"]
 triggers = midata["triggers"]
