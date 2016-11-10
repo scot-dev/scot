@@ -13,8 +13,7 @@ from . import config
 
 
 datadir = expanduser(config.get("scot", "data"))
-files = {"mi": ["motorimagery.mat"]}
-url = {"mi": "https://github.com/scot-dev/scot-data/raw/master/scotdata/"}
+datasets = {"mi": {"files": ["motorimagery.mat"], "url": "https://github.com/scot-dev/scot-data/raw/master/scotdata/"}}
 
 
 def fetch(dataset="mi", datadir=datadir):
@@ -44,18 +43,21 @@ def fetch(dataset="mi", datadir=datadir):
               "fs" ... Sample rate
               "locations" ... Channel locations
     """
-    if dataset not in files:
+    if dataset not in datasets:
         raise ValueError("Example data '{}' not available.".format(dataset))
+    else:
+        files = datasets[dataset]["files"]
+        url = datasets[dataset]["url"]
     if not isdir(datadir):
         makedirs(datadir)
 
     data = []
 
-    for filename in files[dataset]:
+    for filename in files:
         fullfile = join(datadir, filename)
         if not isfile(fullfile):
             with open(fullfile, "wb") as f:
-                response = get(join(url[dataset], filename))
+                response = get(join(url, filename))
                 f.write(response.content)
         data.append(convert(dataset, loadmat(fullfile)))
 
