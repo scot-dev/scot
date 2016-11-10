@@ -87,7 +87,7 @@ class VAR(VARBase):
 
         Parameters
         ----------
-        data : array, shape (n_trials, n_samples, n_channels)
+        data : array, shape (n_trials, n_channels, n_samples)
             Epoched data set on which to optimize the model order. At least two
             trials are required.
         min_p : int
@@ -135,7 +135,7 @@ class VAR(VARBase):
         
         Parameters
         ----------
-        data : array, shape (n_trials, n_samples, n_channels)
+        data : array, shape (n_trials, n_channels, n_samples)
             Epoched data set. At least two trials are required.
         skipstep : int, optional
             Speed up calculation by skipping samples during cost function
