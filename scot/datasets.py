@@ -6,6 +6,7 @@ from os import makedirs
 from os.path import expanduser, isfile, isdir, join
 from requests import get
 import numpy as np
+import hashlib
 
 from .matfiles import loadmat
 from .eegtopo.eegpos3d import positions
@@ -13,7 +14,8 @@ from . import config
 
 
 datadir = expanduser(config.get("scot", "data"))
-datasets = {"mi": {"files": ["motorimagery.mat"], "url": "https://github.com/scot-dev/scot-data/raw/master/scotdata/"}}
+datasets = {"mi": {"files": ["motorimagery.mat"], "md5": ["239a20a672f9f312e9d762daf3adf214"],
+                   "url": "https://github.com/scot-dev/scot-data/raw/master/scotdata/"}}
 
 
 def fetch(dataset="mi", datadir=datadir):
@@ -48,17 +50,24 @@ def fetch(dataset="mi", datadir=datadir):
     else:
         files = datasets[dataset]["files"]
         url = datasets[dataset]["url"]
+        md5 = datasets[dataset]["md5"]
     if not isdir(datadir):
         makedirs(datadir)
 
     data = []
 
-    for filename in files:
+    for n, filename in enumerate(files):
         fullfile = join(datadir, filename)
         if not isfile(fullfile):
             with open(fullfile, "wb") as f:
                 response = get(join(url, filename))
                 f.write(response.content)
+        with open(fullfile, "rb") as f:  # check if MD5 of downloaded file matches original hash
+            hash = hashlib.md5(f.read()).hexdigest()
+        if hash != md5[n]:
+            raise MD5MismatchError("MD5 hash of {} does not match {}.".format(fullfile, md5[n]))
+        else:
+            print("MD5 computed: {}\nMD5 expected: {}".format(hash, md5[n]))
         data.append(convert(dataset, loadmat(fullfile)))
 
     return data
@@ -84,3 +93,7 @@ def convert(dataset, mat):
                   "O1", "Oz", "O2", "O9", "Iz", "O10"]
         data["locations"] = [[v for v in positions[l].vector] for l in labels]
     return data
+
+
+class MD5MismatchError(Exception):
+    pass
