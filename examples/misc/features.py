@@ -14,7 +14,6 @@ except ImportError:
 from sklearn.cross_validation import KFold
 from sklearn.metrics import confusion_matrix
 
-import scot
 import scot.xvschema
 
 # The data set contains a continuous 45 channel EEG recording of a motor
@@ -24,13 +23,16 @@ import scot.xvschema
 # trigger time points of the cues are stored in 'triggers', and 'classes'
 # contains the class labels. Duration of the motor imagery period was
 # approximately six seconds.
-import scotdata.motorimagery as midata
+from scot.datasets import fetch
 
-raweeg = midata.eeg.T
-triggers = np.asarray(midata.triggers, dtype=int)
-classes = midata.classes
-fs = midata.samplerate
-locs = midata.locations
+
+midata = fetch("mi")[0]
+
+raweeg = midata["eeg"]
+triggers = midata["triggers"]
+classes = midata["labels"]
+fs = midata["fs"]
+locs = midata["locations"]
 
 
 # Set random seed for repeatable results
@@ -59,8 +61,8 @@ nfolds = 10
 kf = KFold(len(triggers), n_folds=nfolds)
 
 # LDA requires numeric class labels
-cl = np.unique(midata.classes)
-classids = np.array([dict(zip(cl, range(len(cl))))[c] for c in midata.classes])
+cl = np.unique(classes)
+classids = np.array([dict(zip(cl, range(len(cl))))[c] for c in classes])
 
 # Perform cross-validation
 lda = LDA()

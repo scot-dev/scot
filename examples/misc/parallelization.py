@@ -9,13 +9,8 @@ This example shows how to parallelize certain computations in SCoT.
 import numpy as np
 import time
 
-import matplotlib.pyplot as plt
-
-import scot
-from scot.varica import cspvarica
 from scot.datatools import cut_segments
 from scot.var import VAR
-import scot.plotting as splot
 
 
 # The data set contains a continuous 45 channel EEG recording of a motor
@@ -25,17 +20,19 @@ import scot.plotting as splot
 # trigger time points of the cues are stored in 'triggers', and 'classes'
 # contains the class labels. Duration of the motor imagery period was
 # approximately six seconds.
-import scotdata.motorimagery as midata
+from scot.datasets import fetch
 
 
 # Prevent execution of the main script in worker threads
 if __name__ == "__main__":
 
-    raweeg = midata.eeg.T
-    triggers = midata.triggers
-    classes = midata.classes
-    fs = midata.samplerate
-    locs = midata.locations
+    midata = fetch("mi")[0]
+
+    raweeg = midata["eeg"]
+    triggers = midata["triggers"]
+    classes = midata["labels"]
+    fs = midata["fs"]
+    locs = midata["locations"]
 
     # Prepare data
     #

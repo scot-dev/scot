@@ -22,7 +22,7 @@ from .ooapi import Workspace
 
 from .connectivity import Connectivity
 
-from . import datatools
+from . import datasets
 
 __all__ = ['Workspace', 'Connectivity', 'datatools']
 
