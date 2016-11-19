@@ -66,8 +66,6 @@ def fetch(dataset="mi", datadir=datadir):
             hash = hashlib.md5(f.read()).hexdigest()
         if hash != md5[n]:
             raise MD5MismatchError("MD5 hash of {} does not match {}.".format(fullfile, md5[n]))
-        else:
-            print("MD5 computed: {}\nMD5 expected: {}".format(hash, md5[n]))
         data.append(convert(dataset, loadmat(fullfile)))
 
     return data
