@@ -491,7 +491,7 @@ class Workspace(object):
         --------
         :func:`scot.connectivity_statistics.surrogate_connectivity` : Calculates surrogate connectivity
         """
-        cs = surrogate_connectivity(measure_name, self.activations_[:, :, self.trial_mask_],
+        cs = surrogate_connectivity(measure_name, self.activations_[self.trial_mask_, :, :],
                                     self.var_, self.nfft_, repeats, random_state=random_state)
 
         if plot is None or plot:
