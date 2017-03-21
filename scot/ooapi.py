@@ -364,7 +364,7 @@ class Workspace(object):
         self.mixing_ = np.delete(self.mixing_, sources, 0)
         self.unmixing_ = np.delete(self.unmixing_, sources, 1)
         if self.activations_ is not None:
-            self.activations_ = np.delete(self.activations_, sources, 1)
+            self.activations_ = np.delete(self.activations_, sources, 0)
         self.var_model_ = None
         self.var_cov_ = None
         self.connectivity_ = None
