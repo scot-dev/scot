@@ -38,7 +38,7 @@ class TestDataMangling(unittest.TestCase):
                           rawdata, triggers, -10.1, 50)
 
         for it in range(len(triggers)):
-            a = rawdata[:, triggers[it] + start: triggers[it] + stop]
+            a = rawdata[:, triggers[it] + int(start): triggers[it] + int(stop)]
             b = x[it, :, :]
             self.assertTrue(np.all(a == b))
 
