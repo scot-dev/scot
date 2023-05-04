@@ -1,28 +1,28 @@
-![Python 3.5](https://img.shields.io/badge/python-3.5-green.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-[![Build Status](https://travis-ci.org/scot-dev/scot.svg?branch=master)](https://travis-ci.org/scot-dev/scot)
-[![Coverage Status](https://codecov.io/gh/scot-dev/scot/branch/master/graphs/badge.svg)](https://codecov.io/gh/scot-dev/scot/branch/master)
+![Python](https://img.shields.io/pypi/pyversions/scot.svg?logo=python&logoColor=white)
+[![PyPI](https://img.shields.io/pypi/v/scot)](https://pypi.org/project/scot/)
+[![Docs](https://img.shields.io/badge/docs-passing-brightgreen)](https://scot-dev.github.io/scot-doc/index.html)
+[![License](https://img.shields.io/github/license/scot-dev/scot)](LICENSE)
 
 ## SCoT
 
-SCoT is a Python package for EEG/MEG source connectivity estimation.
+SCoT is a Python package for EEG/MEG source connectivity estimation. In particular, it includes measures of directed connectivity based on vector autoregressive modeling.
 
 
 ### Obtaining SCoT
 
-Use the following command to install the latest release from PyPI:
+Use the following command to install the latest release:
 
     pip install scot
 
 
 ### Documentation
 
-Documentation is available online at http://scot-dev.github.io/scot-doc/index.html.
+Documentation is available at http://scot-dev.github.io/scot-doc/index.html.
 
 
 ### Dependencies
 
-SCoT requires [numpy](http://www.numpy.org/) ≥ 1.8.2 and [scipy](https://scipy.org/) ≥ 0.13.3. Optionally, matplotlib ≥ 1.4.0, scikit-learn ≥ 0.15.0, and mne ≥ 0.11.0 can be installed for additional functionality.
+SCoT requires [numpy](http://www.numpy.org/) ≥ 1.8.2 and [scipy](https://scipy.org/) ≥ 0.13.3. Optionally, [matplotlib](https://matplotlib.org/) ≥ 1.4.0, [scikit-learn](https://scikit-learn.org/stable/) ≥ 0.15.0, and [mne](https://mne.tools/) ≥ 0.11.0 can be installed for additional functionality.
 
 
 ### Examples
