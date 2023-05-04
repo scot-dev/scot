@@ -647,7 +647,7 @@ def plot_whiteness(var, h, repeats=1000, axis=None):
     if axis is None:
         axis = current_axis()
 
-    pdf, _, _ = axis.hist(q0, 30, normed=True, label='surrogate distribution')
+    pdf, _, _ = axis.hist(q0, 30, density=True, label='surrogate distribution')
     axis.plot([q,q], [0,np.max(pdf)], 'r-', label='fitted model')
 
     #df = m*m*(h-p)
