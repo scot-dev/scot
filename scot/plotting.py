@@ -140,8 +140,8 @@ def plot_sources(topo, mixmaps, unmixmaps, global_scale=None, fig=None):
         mmin = -mmax
         mrange = [mmin, mmax]
 
-    y = np.floor(np.sqrt(m * 3 / 4))
-    x = np.ceil(m / y)
+    y = int(np.floor(np.sqrt(m * 3 / 4)))
+    x = int(np.ceil(m / y))
 
     if fig is None:
         fig = new_figure()
