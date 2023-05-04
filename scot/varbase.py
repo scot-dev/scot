@@ -205,7 +205,7 @@ class VARBase(object):
                     y[i, :, s] += self.coef[:, (k - 1)::p].dot(y[i - k, :, s])
 
         self.residuals = res[10 * p:, :, :].T
-        self.rescov = sp.cov(cat_trials(self.residuals).T, rowvar=False)
+        self.rescov = np.cov(cat_trials(self.residuals).T, rowvar=False)
 
         return y[10 * p:, :, :].transpose([2, 1, 0])
 

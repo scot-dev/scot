@@ -77,7 +77,7 @@ class VAR(VARBase):
         self.coef = b.transpose()
 
         self.residuals = data - self.predict(data)
-        self.rescov = sp.cov(cat_trials(self.residuals[:, :, self.p:]))
+        self.rescov = np.cov(cat_trials(self.residuals[:, :, self.p:]))
 
         return self
 

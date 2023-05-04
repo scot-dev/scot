@@ -5,7 +5,7 @@
 import unittest
 import numpy as np
 
-from numpy.testing.utils import assert_allclose
+from numpy.testing import assert_allclose
 
 from scot.eegtopo.warp_layout import warp_locations
 from scot.eegtopo.eegpos3d import positions as _eeglocs

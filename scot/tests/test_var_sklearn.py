@@ -4,8 +4,7 @@
 
 import unittest
 
-from numpy.testing.utils import assert_array_almost_equal
-from numpy.testing.utils import assert_equal
+from numpy.testing import assert_array_almost_equal, assert_equal
 
 import numpy as np
 from sklearn.linear_model import Ridge, RidgeCV, Lasso, LassoLars, ElasticNet
