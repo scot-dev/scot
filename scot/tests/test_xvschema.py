@@ -75,29 +75,29 @@ class TestSklearn(unittest.TestCase):
         pass
 
     def test_leave1out(self):
-        from sklearn.cross_validation import LeaveOneOut
+        from sklearn.model_selection import LeaveOneOut
         n_trials = 10
         xv1 = scot.xvschema.multitrial(n_trials)
-        xv2 = LeaveOneOut(n_trials)
+        xv2 = LeaveOneOut().split(np.arange(n_trials))
         self._comparexv(xv1, xv2)
 
     def test_kfold(self):
-        from sklearn.cross_validation import KFold
+        from sklearn.model_selection import KFold
         n_trials = 15
         n_blocks = 5
         xv1 = scot.xvschema.make_nfold(n_blocks)(n_trials)
-        xv2 = KFold(n_trials, n_folds=n_blocks, shuffle=False)
+        xv2 = KFold(n_splits=n_blocks, shuffle=False).split(np.arange(n_trials))
         self._comparexv(xv1, xv2)
 
     def test_application(self):
         from scot.var import VAR
-        from sklearn.cross_validation import LeaveOneOut, KFold
+        from sklearn.model_selection import LeaveOneOut, KFold
         np.random.seed(42)
         x = np.random.randn(10, 3, 15)
 
-        var = VAR(3, xvschema=lambda n, _: LeaveOneOut(n)).optimize_delta_bisection(x)
+        var = VAR(3, xvschema=lambda n, _: LeaveOneOut().split(range(n))).optimize_delta_bisection(x)
         self.assertGreater(var.delta, 0)
-        var = VAR(3, xvschema=lambda n, _: KFold(n, 5)).optimize_delta_bisection(x)
+        var = VAR(3, xvschema=lambda n, _: KFold(5).split(range(n))).optimize_delta_bisection(x)
         self.assertGreater(var.delta, 0)
 
     def _comparexv(self, xv1, xv2):
