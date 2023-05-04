@@ -707,7 +707,7 @@ class Workspace(object):
                 diagonal = -1
             elif self.plot_diagonal == 'fill':
                 diagonal = 0
-            elif self.plot_diagonal is 'S':
+            elif self.plot_diagonal == 'S':
                 diagonal = -1
                 self.set_used_labels(labels1)
                 sa = self.get_bootstrap_connectivity('absS', repeats, num_samples)
