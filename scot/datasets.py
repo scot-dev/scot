@@ -15,7 +15,7 @@ from . import config
 
 datadir = expanduser(config.get("scot", "data"))
 datasets = {"mi": {"files": ["motorimagery.mat"], "md5": ["239a20a672f9f312e9d762daf3adf214"],
-                   "url": "https://github.com/scot-dev/scot-data/raw/master/scotdata/"}}
+                   "url": "https://github.com/scot-dev/scot-data/raw/main/scotdata/"}}
 
 
 def fetch(dataset="mi", datadir=datadir):
