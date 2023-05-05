@@ -29,7 +29,7 @@ class TestFunctionality(unittest.TestCase):
     def test_topoplots(self):
         locs, vals, topo, maps = self.locs, self.vals, self.topo, self.maps
 
-        self.assertEquals(len(maps), len(vals))     # should get two topo maps
+        self.assertEqual(len(maps), len(vals))     # should get two topo maps
 
         self.assertTrue(np.allclose(maps[0], maps[0].T))    # first map: should be rotationally identical (blob in the middle)
         self.assertTrue(np.alltrue(maps[1] == 0))           # second map: should be all zeros

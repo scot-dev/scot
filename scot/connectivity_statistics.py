@@ -180,7 +180,7 @@ def bootstrap_connectivity(measures, data, var, nfft=512, repeats=100,
     if num_samples is None:
         num_samples = t
 
-    mask = lambda r: rng.random_integers(0, data.shape[0]-1, num_samples)
+    mask = lambda r: rng.randint(0, data.shape[0], num_samples)
 
     par, func = parallel_loop(_calc_bootstrap, n_jobs=n_jobs, verbose=verbose)
     output = par(func(data[mask(r), :, :], var, measures, nfft)

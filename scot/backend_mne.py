@@ -11,6 +11,11 @@ from . import datatools
 from . import backend
 from . import backend_builtin as builtin
 
+try:
+    import mne
+except ImportError:
+    mne = None
+
 
 def generate():
     from mne.preprocessing.infomax_ import infomax
@@ -36,4 +41,5 @@ def generate():
     return backend
 
 
-backend.register('mne', generate)
+if mne is not None:
+    backend.register('mne', generate)

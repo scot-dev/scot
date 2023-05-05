@@ -5,7 +5,7 @@
 """Use scikit-learn routines as backend."""
 
 from __future__ import absolute_import
-import scipy as sp
+import numpy as np
 
 from .datatools import atleast_3d, cat_trials, dot_special
 from . import backend
@@ -19,7 +19,7 @@ def generate():
 
     def wrapper_fastica(data, random_state=None):
         """Call FastICA implementation from scikit-learn."""
-        ica = FastICA(random_state=random_state)
+        ica = FastICA(random_state=random_state, whiten="arbitrary-variance")
         ica.fit(cat_trials(data).T)
         u = ica.components_.T
         m = ica.mixing_.T
@@ -84,7 +84,7 @@ def generate():
             self.coef = self.fitting_model.coef_
 
             self.residuals = data - self.predict(data)
-            self.rescov = sp.cov(cat_trials(self.residuals[:, :, self.p:]))
+            self.rescov = np.cov(cat_trials(self.residuals[:, :, self.p:]))
 
             return self
 

@@ -154,7 +154,7 @@ class Connectivity(object):
 
     @memoize
     def A(self):
-        """Spectral VAR coefficients.
+        r"""Spectral VAR coefficients.
 
         .. math:: \mathbf{A}(f) = \mathbf{I} - \sum_{k=1}^{p} \mathbf{a}^{(k)}
                   \mathrm{e}^{-2\pi f}
@@ -164,7 +164,7 @@ class Connectivity(object):
 
     @memoize
     def H(self):
-        """VAR transfer function.
+        r"""VAR transfer function.
 
         .. math:: \mathbf{H}(f) = \mathbf{A}(f)^{-1}
         """
@@ -172,7 +172,7 @@ class Connectivity(object):
 
     @memoize
     def S(self):
-        """Cross-spectral density.
+        r"""Cross-spectral density.
 
         .. math:: \mathbf{S}(f) = \mathbf{H}(f) \mathbf{C} \mathbf{H}'(f)
         """
@@ -188,7 +188,7 @@ class Connectivity(object):
 
     @memoize
     def logS(self):
-        """Logarithmic cross-spectral density.
+        r"""Logarithmic cross-spectral density.
 
         .. math:: \mathrm{logS}(f) = \log | \mathbf{S}(f) |
         """
@@ -196,7 +196,7 @@ class Connectivity(object):
 
     @memoize
     def absS(self):
-        """Absolute cross-spectral density.
+        r"""Absolute cross-spectral density.
 
         .. math:: \mathrm{absS}(f) = | \mathbf{S}(f) |
         """
@@ -204,7 +204,7 @@ class Connectivity(object):
 
     @memoize
     def G(self):
-        """Inverse cross-spectral density.
+        r"""Inverse cross-spectral density.
 
         .. math:: \mathbf{G}(f) = \mathbf{A}(f) \mathbf{C}^{-1} \mathbf{A}'(f)
         """
@@ -219,7 +219,7 @@ class Connectivity(object):
 
     @memoize
     def logG(self):
-        """Logarithmic inverse cross-spectral density.
+        r"""Logarithmic inverse cross-spectral density.
 
         .. math:: \mathrm{logG}(f) = \log | \mathbf{G}(f) |
         """
@@ -227,7 +227,7 @@ class Connectivity(object):
 
     @memoize
     def COH(self):
-        """Coherence.
+        r"""Coherence.
 
         .. math:: \mathrm{COH}_{ij}(f) = \\frac{S_{ij}(f)}
                                                {\sqrt{S_{ii}(f) S_{jj}(f)}}
@@ -254,7 +254,7 @@ class Connectivity(object):
 
     @memoize
     def pCOH(self):
-        """Partial coherence.
+        r"""Partial coherence.
 
         .. math:: \mathrm{pCOH}_{ij}(f) = \\frac{G_{ij}(f)}
                                                 {\sqrt{G_{ii}(f) G_{jj}(f)}}
@@ -271,7 +271,7 @@ class Connectivity(object):
 
     @memoize
     def PDC(self):
-        """Partial directed coherence.
+        r"""Partial directed coherence.
 
         .. math:: \mathrm{PDC}_{ij}(f) = \\frac{A_{ij}(f)}
                                                {\sqrt{A_{:j}'(f) A_{:j}(f)}}
@@ -287,7 +287,7 @@ class Connectivity(object):
 
     @memoize
     def sPDC(self):
-        """Squared partial directed coherence.
+        r"""Squared partial directed coherence.
 
         .. math:: \mathrm{sPDC}_{ij}(f) = \\frac{|A_{ij}(f)|^2}
                                                 {\mathbf{1}^T | A_{:j}(f) |^2}
@@ -303,7 +303,7 @@ class Connectivity(object):
 
     @memoize
     def ffPDC(self):
-        """Full frequency partial directed coherence.
+        r"""Full frequency partial directed coherence.
 
         .. math:: \mathrm{ffPDC}_{ij}(f) =
            \\frac{A_{ij}(f)}{\sqrt{\sum_f A_{:j}'(f) A_{:j}(f)}}
@@ -314,7 +314,7 @@ class Connectivity(object):
 
     @memoize
     def PDCF(self):
-        """Partial directed coherence factor.
+        r"""Partial directed coherence factor.
 
         .. math:: \mathrm{PDCF}_{ij}(f) =
         \\frac{A_{ij}(f)}{\sqrt{A_{:j}'(f) \mathbf{C}^{-1} A_{:j}(f)}}
@@ -332,7 +332,7 @@ class Connectivity(object):
 
     @memoize
     def GPDC(self):
-        """Generalized partial directed coherence.
+        r"""Generalized partial directed coherence.
 
         .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{|A_{ij}(f)|}
         {\sigma_i \sqrt{A_{:j}'(f) \mathrm{diag}(\mathbf{C})^{-1} A_{:j}(f)}}
@@ -350,7 +350,7 @@ class Connectivity(object):
 
     @memoize
     def DTF(self):
-        """Directed transfer function.
+        r"""Directed transfer function.
 
         .. math:: \mathrm{DTF}_{ij}(f) = \\frac{H_{ij}(f)}
                                                {\sqrt{H_{i:}(f) H_{i:}'(f)}}
@@ -366,7 +366,7 @@ class Connectivity(object):
 
     @memoize
     def ffDTF(self):
-        """Full frequency directed transfer function.
+        r"""Full frequency directed transfer function.
 
         .. math:: \mathrm{ffDTF}_{ij}(f) =
                   \\frac{H_{ij}(f)}{\sqrt{\sum_f H_{i:}(f) H_{i:}'(f)}}
@@ -384,7 +384,7 @@ class Connectivity(object):
 
     @memoize
     def dDTF(self):
-        """Direct directed transfer function.
+        r"""Direct directed transfer function.
 
         .. math:: \mathrm{dDTF}_{ij}(f) = |\mathrm{pCOH}_{ij}(f)|
                   \mathrm{ffDTF}_{ij}(f)
@@ -400,7 +400,7 @@ class Connectivity(object):
 
     @memoize
     def GDTF(self):
-        """Generalized directed transfer function.
+        r"""Generalized directed transfer function.
 
         .. math:: \mathrm{GPDC}_{ij}(f) = \\frac{\sigma_j |H_{ij}(f)|}
             {\sqrt{H_{i:}(f) \mathrm{diag}(\mathbf{C}) H_{i:}'(f)}}
