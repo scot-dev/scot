@@ -1,6 +1,7 @@
 ![Python](https://img.shields.io/pypi/pyversions/scot.svg?logo=python&logoColor=white)
 [![PyPI](https://img.shields.io/pypi/v/scot)](https://pypi.org/project/scot/)
 [![Docs](https://img.shields.io/badge/docs-passing-brightgreen)](https://scot-dev.github.io/scot-doc/index.html)
+[![DOI](https://img.shields.io/badge/doi-10.3389%2Ffninf.2014.00022-4c1)](https://doi.org/10.3389/fninf.2014.00022)
 [![License](https://img.shields.io/github/license/scot-dev/scot)](LICENSE)
 
 ## SCoT
