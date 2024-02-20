@@ -49,8 +49,7 @@ def infomax(data, weights=None, l_rate=None, block=None, w_change=1e-12,
         Defaults to 60.0
     anneal_step : float
         The factor by which the learning rate will be reduced once
-        ``anneal_deg`` is exceeded:
-            l_rate *= anneal_step
+        anneal_deg is exceeded: l_rate *= anneal_step
         Defaults to 0.9
     extended : bool
         Wheather to use the extended infomax algorithm or not. Defaults to

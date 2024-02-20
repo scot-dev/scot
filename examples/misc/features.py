@@ -11,7 +11,7 @@ try:  # new in sklearn 0.19
     from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 except ImportError:
     from sklearn.lda import LDA
-from sklearn.cross_validation import KFold
+from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
 
 import scot.xvschema
@@ -58,7 +58,7 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 
 # Initialize cross-validation
 nfolds = 10
-kf = KFold(len(triggers), n_folds=nfolds)
+kf = KFold(n_splits=nfolds)
 
 # LDA requires numeric class labels
 cl = np.unique(classes)
@@ -68,7 +68,7 @@ classids = np.array([dict(zip(cl, range(len(cl))))[c] for c in classes])
 lda = LDA()
 cm = np.zeros((2, 2))
 fold = 0
-for train, test in kf:
+for train, test in kf.split(data):
     fold += 1
 
     # Perform CSPVARICA

@@ -37,3 +37,21 @@ To run the examples on Linux, invoke the following commands inside the SCoT dire
 etc.
 
 Note that the example data from https://github.com/SCoT-dev/scot-data needs to be available. The `scot-data` package must be on Python's search path.
+
+
+### Building the docs
+
+In February 2024 we managed to build the docs with the following package versions:
+
+```
+[tool.poetry.dependencies]
+python = "^3.11"
+sphinx = "^7.2.6"
+matplotlib = "^3.8.3"
+scipy = "^1.12.0"
+scikit-learn = "^1.4.1.post1"
+```
+
+Note that these are the most recent versions at the moment, so it is likely that future versions will just work.
+When using a newer version of sphinx, it may be necessary to update the subrepository in doc/sphinxext/numpydoc.
+

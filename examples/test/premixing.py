@@ -42,7 +42,7 @@ data = scot.datatools.cut_segments(raweeg, triggers, 3 * fs, 4 * fs)
 data -= np.mean(data, axis=1, keepdims=True)
 
 # pre-transform data with a PCA
-myunmix, mymix, data = scot.config.backend['pca'](data, 0.99)
+myunmix, mymix, data = scot.backend['pca'](data, 0.99)
 
 print('Remaining data components:', data.shape[1])
 print('Note that the Topoplots still map to all 45 EEG channels.')

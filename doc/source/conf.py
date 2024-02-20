@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # SCoT documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan 23 12:52:18 2014.
@@ -31,7 +30,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
 #    'matplotlib.sphinxext.mathmpl',
-    'matplotlib.sphinxext.only_directives',
+#    'matplotlib.sphinxext.only_directives',  # requires matplotlib <2.2.x
     'matplotlib.sphinxext.plot_directive',
 #    'matplotlib.sphinxext.ipython_directive',
     'sphinx.ext.autosummary',
@@ -211,7 +210,7 @@ latex_elements = {
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-'preamble': '\usepackage{amssymb}',
+'preamble': r'\usepackage{amssymb}',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
