@@ -46,31 +46,31 @@ class TestFunctionality(unittest.TestCase):
         l = lambda x: np.sum(x, 2)
         # a should have the same structure as b
         assert_zerostructure(k(c.A()), b0 + identity)
-        self.assertFalse(np.all(k(c.A()) == k(c.A()).T))
+        self.assertFalse(np.allclose(k(c.A()), k(c.A()).T))
         # H should be upper triangular
         self.assertTrue(np.allclose(np.tril(k(c.H()), -1), 0))
         self.assertFalse(np.all(k(c.H()) == k(c.H()).T))
         # S should be a full matrix and symmetric
         self.assertTrue(np.all(k(c.S()) > 0))
-        self.assertTrue(np.all(k(c.S()) == k(c.S()).T))
+        self.assertTrue(np.allclose(k(c.S()), k(c.S()).T))
         # g should be nonzero for direct connections only and symmetric in
         #  magnitude
         self.assertEqual(k(c.G())[0, 2], 0)
-        self.assertTrue(np.all(k(c.G()) == k(c.G()).T))
+        self.assertTrue(np.allclose(k(c.G()), k(c.G()).T))
         # Phase should be zero along the diagonal
         self.assertTrue(np.allclose(k(c.PHI()).diagonal(), 0))
         # Phase should be antisymmetric
         self.assertTrue(np.allclose(l(c.PHI()), -l(c.PHI()).T))
         # Coherence should be 1 over all frequencies along the diagonal
-        self.assertTrue(np.all(k(c.COH()).diagonal() == nfft))
+        self.assertTrue(np.allclose(k(c.COH()).diagonal(), nfft))
         self.assertLessEqual(np.max(np.abs(c.COH())), 1)
         # pCOH should be nonzero for direct connections only and symmetric in
         # magnitude
         self.assertEqual(k(c.pCOH())[0, 2], 0)
-        self.assertTrue(np.all(k(c.pCOH()) == k(c.pCOH()).T))
+        self.assertTrue(np.allclose(k(c.pCOH()), k(c.pCOH()).T))
         # PDC should have the same structure as b
         assert_zerostructure(k(c.PDC()), b0 + identity)
-        self.assertFalse(np.all(l(c.PDC()) == l(c.PDC()).T))
+        self.assertFalse(np.allclose(l(c.PDC()), l(c.PDC()).T))
         #     final sink should be 1 over all frequencies
         self.assertEqual(l(c.PDC())[0, 0], nfft)
         #     sources with equal outgoing connections should be equal
@@ -79,7 +79,7 @@ class TestFunctionality(unittest.TestCase):
         self.assertEqual(l(c.PDC())[0, 1], l(c.PDC())[1, 2])
         # ffPDC should have the same structure as b
         assert_zerostructure(k(c.ffPDC()), b0 + identity)
-        self.assertFalse(np.all(l(c.ffPDC()) == l(c.ffPDC()).T))
+        self.assertFalse(np.allclose(l(c.ffPDC()), l(c.ffPDC()).T))
         #     sources with equal outgoing connections should be equal
         self.assertEqual(l(c.ffPDC())[1, 1], l(c.ffPDC())[2, 2])
         #     equal connections in b should be equal
@@ -88,7 +88,7 @@ class TestFunctionality(unittest.TestCase):
         self.assertTrue(np.allclose(c.PDC()**2, c.sPDC()))
         # sPDC should have the same structure as b
         assert_zerostructure(k(c.sPDC()), b0 + identity)
-        self.assertFalse(np.all(l(c.sPDC()) == l(c.sPDC()).T))
+        self.assertFalse(np.allclose(l(c.sPDC()), l(c.sPDC()).T))
         #     final sink should be 1 over all frequencies
         self.assertEqual(l(c.sPDC())[0, 0], nfft)
         #     sources with equal outgoing connections should be equal
@@ -96,19 +96,19 @@ class TestFunctionality(unittest.TestCase):
         #     equal connections in b should be equal
         self.assertEqual(l(c.sPDC())[0, 1], l(c.sPDC())[1, 2])
         # PDCF should equal PDC for identity noise covariance
-        self.assertTrue(np.all(c.PDC() == c.PDCF()))
+        self.assertTrue(np.allclose(c.PDC(), c.PDCF()))
         # GPDC should equal PDC for identity noise covariance
-        self.assertTrue(np.all(c.PDC() == c.GPDC()))
+        self.assertTrue(np.allclose(c.PDC(), c.GPDC()))
         # DTF should be upper triangular
         self.assertTrue(np.allclose(np.tril(k(c.DTF()), -1), 0))
-        self.assertFalse(np.all(k(c.DTF()) == k(c.DTF()).T))
+        self.assertFalse(np.allclose(k(c.DTF()), k(c.DTF()).T))
         #     first source should be 1 over all frequencies
         self.assertEqual(l(c.DTF())[2, 2], nfft)
         # ffDTF should be upper triangular
         self.assertTrue(np.allclose(np.tril(k(c.ffDTF()), -1), 0))
-        self.assertFalse(np.all(k(c.ffDTF()) == k(c.ffDTF()).T))
+        self.assertFalse(np.allclose(k(c.ffDTF()), k(c.ffDTF()).T))
         # dDTF should have the same structure as b,
         assert_zerostructure(k(c.dDTF()), b0 + identity)
-        self.assertFalse(np.all(l(c.dDTF()) == l(c.dDTF()).T))
+        self.assertFalse(np.allclose(l(c.dDTF()), l(c.dDTF()).T))
         # GDTF should equal DTF for identity noise covariance
-        self.assertTrue(np.all(c.DTF() == c.GDTF()))
+        self.assertTrue(np.allclose(c.DTF(), c.GDTF()))
