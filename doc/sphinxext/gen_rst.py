@@ -64,7 +64,6 @@ def generate_example_rst(app):
 SCoT Examples
 ####################
 
-.. htmlonly::
 
     :Release: |version|
     :Date: |today|
@@ -98,7 +97,6 @@ SCoT Examples
 %s Examples
 ##############################################
 
-.. htmlonly::
 
     :Release: |version|
     :Date: |today|

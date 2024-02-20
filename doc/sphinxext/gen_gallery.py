@@ -151,9 +151,7 @@ def gen_gallery(app, doctree):
         fh.write(content)
         fh.close()
 
-    for key in app.builder.status_iterator(
-            iter(thumbnails.keys()), "generating thumbnails... ",
-            length=len(thumbnails)):
+    for key in thumbnails.keys():
         if out_of_date(key, thumbnails[key]):
             image.thumbnail(key, thumbnails[key], 0.3)
 

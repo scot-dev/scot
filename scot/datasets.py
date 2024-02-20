@@ -35,15 +35,15 @@ def fetch(dataset="mi", datadir=datadir):
 
     Returns
     -------
-        data : list of dicts
-            The data set is stored in a list, where each list element
-            corresponds to data from one subject. Each list element is a
-            dictionary with the following keys:
-              "eeg" ... EEG signals
-              "triggers" ... Trigger latencies
-              "labels" ... Class labels
-              "fs" ... Sample rate
-              "locations" ... Channel locations
+    data : list of dicts
+        The data set is stored in a list, where each list element
+        corresponds to data from one subject. Each list element is a
+        dictionary with the following keys:
+        - "eeg" ... EEG signals
+        - "triggers" ... Trigger latencies
+        - "labels" ... Class labels
+        - "fs" ... Sample rate
+        - "locations" ... Channel locations
     """
     if dataset not in datasets:
         raise ValueError("Example data '{}' not available.".format(dataset))
@@ -65,7 +65,7 @@ def fetch(dataset="mi", datadir=datadir):
         with open(fullfile, "rb") as f:  # check if MD5 of downloaded file matches original hash
             hash = hashlib.md5(f.read()).hexdigest()
         if hash != md5[n]:
-            raise MD5MismatchError("MD5 hash of {} does not match {}.".format(fullfile, md5[n]))
+            raise MD5MismatchError("MD5 hash of {} {} does not match {}.".format(fullfile, hash, md5[n]))
         data.append(convert(dataset, loadmat(fullfile)))
 
     return data
